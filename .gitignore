@@ -76,5 +76,7 @@ $RECYCLE.BIN/
 # -----------------------------------------------------------------------
 composer.phar
 
+/.opencode/
 yp_budget_system.sql
 package-lock.json
+PRD_Budget_Planning_System_CI4.md

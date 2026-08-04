@@ -6,6 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   <title><?= $title ?? 'eCommerce Dashboard | TailAdmin - Tailwind CSS Admin Dashboard Template' ?></title>
   <link rel="icon" href="<?= base_url('favicon.ico') ?>">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link href="<?= base_url('assets/css/style.css') ?>" rel="stylesheet">
 </head>
 <body
