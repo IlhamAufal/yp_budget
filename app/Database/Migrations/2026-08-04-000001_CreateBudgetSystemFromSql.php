@@ -31,6 +31,9 @@ class CreateBudgetSystemFromSql extends Migration
         $db->query('CREATE DATABASE IF NOT EXISTS `' . self::DB_NAME . '` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci');
         $db->query('USE `' . self::DB_NAME . '`');
 
+        // Matikan strict mode untuk kompatibilitas dengan dump lama
+        $db->query('SET SESSION sql_mode = \'NO_ENGINE_SUBSTITUTION\'');
+
         foreach ($this->parseStatements(file_get_contents($sqlFile)) as $statement) {
             $db->query($statement);
         }
@@ -88,6 +91,13 @@ class CreateBudgetSystemFromSql extends Migration
                 || preg_match('/^USE /i', $statement)) {
                 continue;
             }
+
+            // Konversi CREATE TABLE menjadi CREATE TABLE IF NOT EXISTS
+            $statement = preg_replace(
+                '/^CREATE TABLE\s+`([^`]+)`/i',
+                'CREATE TABLE IF NOT EXISTS `$1`',
+                $statement
+            );
 
             $statements[] = $statement;
         }
