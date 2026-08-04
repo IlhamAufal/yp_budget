@@ -75,3 +75,6 @@ $RECYCLE.BIN/
 # Composer
 # -----------------------------------------------------------------------
 composer.phar
+
+yp_budget_system.sql
+package-lock.json
