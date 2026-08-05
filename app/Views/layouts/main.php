@@ -4,10 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-  <title><?= $title ?? 'eCommerce Dashboard | TailAdmin - Tailwind CSS Admin Dashboard Template' ?></title>
+  <title><?= $title ?? 'Budget Planning & Monitoring System - CI4' ?></title>
   <link rel="icon" href="<?= base_url('favicon.ico') ?>">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link href="<?= base_url('assets/css/style.css') ?>" rel="stylesheet">
+  <style>
+    [x-cloak] { display: none !important; }
+  </style>
 </head>
 <body
     x-data="{ page: 'ecommerce', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
@@ -16,7 +19,16 @@
          $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
     :class="{'dark bg-gray-900': darkMode === true}"
   >
+
+  <!-- ============================================================ -->
+  <!-- GENERAL COMPONENTS — harus selalu di luar wrapper layout     -->
+  <!-- agar fixed positioning & z-index tidak terpengaruh overflow  -->
+  <!-- ============================================================ -->
   <?= $this->include('partials/preloader') ?>
+  <?= $this->include('partials/toast') ?>
+  <?= $this->include('partials/modal_select_year') ?>
+  <?= $this->renderSection('modals') ?>
+  <!-- ============================================================ -->
 
   <div class="flex h-screen overflow-hidden">
     <?= $this->include('partials/sidebar') ?>

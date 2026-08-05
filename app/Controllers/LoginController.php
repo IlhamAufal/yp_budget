@@ -14,11 +14,11 @@ class LoginController extends BaseController
     }
 
     /**
-     * Halaman login
+     * Halaman Login
      */
     public function index()
     {
-        // Jika sudah login, redirect ke dashboard
+        // Jika sudah login, langsung lempar ke dashboard
         if (session()->get('user_logged_in')) {
             return redirect()->to('/dashboard');
         }
@@ -27,75 +27,112 @@ class LoginController extends BaseController
     }
 
     /**
-     * Proses login
+     * Proses Login
      */
-    public function process()
-    {
-        $username = $this->request->getPost('username');
-        $password = $this->request->getPost('password');
+     public function process()
+     {
+         // 1. Ambil input username/email & password (dari form input field 'username' atau 'email')
+         $login    = trim($this->request->getPost('username') ?? $this->request->getPost('email') ?? '');
+         $password = $this->request->getPost('password') ?? '';
+     
+         // 2. Validasi Kelengkapan Input
+         if (empty($login) || empty($password)) {
+             return redirect()->back()
+                 ->withInput()
+                 ->with('error', 'Username / Email dan password wajib diisi.');
+         }
+     
+         // 3. Cari User Berdasarkan Username atau Email (Tabel gw_sm__user)
+         $user = $this->userModel->getByUsernameOrEmail($login);
+     
+         if (! $user) {
+             return redirect()->back()
+                 ->withInput()
+                 ->with('error', 'Username / Email atau password salah.');
+         }
+     
+         // 4. Cek Status Akun (Aktif / Tidak Aktif / Diblokir)
+         if (! $this->userModel->isActive($user)) {
+             return redirect()->back()
+                 ->withInput()
+                 ->with('error', 'Akun tidak aktif. Silakan hubungi Administrator.');
+         }
 
-        // Validasi input
-        if (empty($username) || empty($password)) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Username dan password harus diisi.');
-        }
+         if ($this->userModel->isBlocked($user)) {
+             return redirect()->back()
+                 ->withInput()
+                 ->with('error', 'Akun Anda diblokir. Silakan hubungi Administrator.');
+         }
+     
+         // 5. Verifikasi Password (Password Hash modern & Fallback Legacy MD5/SHA1 + Salt)
+         $storedPassword = $user['user_password'] ?? $user['password'] ?? '';
+         $userSalt       = $user['user_salt'] ?? '';
 
-        // Cari user berdasarkan username
-        $user = $this->userModel->getByUsername($username);
+         $isPasswordValid = false;
 
-        if (! $user) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Username atau password salah.');
-        }
+         if (! empty($storedPassword) && password_verify($password, $storedPassword)) {
+             $isPasswordValid = true;
+         } elseif (! empty($storedPassword)) {
+             $lowerStored = strtolower($storedPassword);
+             $md5Plain    = md5($password);
+             $md5Salt1    = md5($password . $userSalt);
+             $md5Salt2    = md5($userSalt . $password);
+             $md5Salt3    = md5($userSalt . md5($password));
+             $md5Salt4    = md5(md5($password) . $userSalt);
 
-        // Cek apakah user aktif
-        if (! $this->userModel->isActive($user)) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Akun tidak aktif. Hubungi administrator.');
-        }
+             $sha1Plain   = sha1($password);
+             $sha1Salt1   = sha1($password . $userSalt);
+             $sha1Salt2   = sha1($userSalt . $password);
 
-        // Cek apakah user diblokir
-        if ($this->userModel->isBlocked($user)) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Akun diblokir. Hubungi administrator.');
-        }
+             $validHashes = [
+                 $md5Plain, $md5Salt1, $md5Salt2, $md5Salt3, $md5Salt4,
+                 $sha1Plain, $sha1Salt1, $sha1Salt2
+             ];
 
-        // Verifikasi password
-        if (! $this->userModel->verifyPassword($password, $user['user_password'])) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Username atau password salah.');
-        }
+             if (in_array($lowerStored, $validHashes, true)) {
+                 $isPasswordValid = true;
+             }
+         }
 
-        // Set session data
-        $sessionData = [
-            'user_logged_in' => true,
-            'user_id'        => $user['user_id'],
-            'username'       => $user['user_username'],
-            'user_name'      => $user['user_name'],
-            'user_admin'     => $user['user_admin'],
-            'user_email'     => $user['user_email'] ?? '',
-        ];
-
-        session()->set($sessionData);
-        session()->regenerate();
-
-        return redirect()->to('/dashboard');
-    }
+         if (! $isPasswordValid) {
+             return redirect()->back()
+                 ->withInput()
+                 ->with('error', 'Username / Email atau password salah.');
+         }
+     
+         // 6. Regenerate Session ID (Keamanan dari Session Fixation Attack)
+         session()->regenerate();
+     
+         // 7. Simpan Session Data User
+         $sessionData = [
+             'user_logged_in' => true,
+             'user_id'        => $user['user_id'] ?? $user['id'] ?? null,
+             'user_username'  => $user['user_username'] ?? $user['username'] ?? '',
+             'user_email'     => $user['user_email'] ?? $user['email'] ?? '',
+             'user_name'      => $user['user_name'] ?? $user['name'] ?? $user['user_username'] ?? $user['user_email'] ?? '',
+             'role_id'        => $user['role_id'] ?? null,
+             'is_admin'       => ($user['user_admin'] ?? 'N') === 'Y',
+         ];
+     
+         session()->set($sessionData);
+     
+         // 8. Redirect ke Dashboard
+         return redirect()->to('/dashboard');
+     }
 
     /**
-     * Logout
+     * Proses Logout
      */
     public function logout()
     {
-        // Hapus semua session data
+        // Opsional: Release lock akses concurrent jika ada di Library AccessRestrict
+        // if (session()->has('user_id')) {
+        //     service('accessRestrict')->release(session()->get('user_id'));
+        // }
+
+        // Hapus seluruh session
         session()->destroy();
 
-        // Redirect ke halaman login
-        return redirect()->to('/login');
+        return redirect()->to('/login')->with('success', 'Anda telah berhasil keluar.');
     }
 }

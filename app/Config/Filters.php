@@ -9,6 +9,7 @@ use CodeIgniter\Filters\Honeypot;
 use CodeIgniter\Filters\InvalidChars;
 use CodeIgniter\Filters\SecureHeaders;
 use App\Filters\AuthFilter;
+use App\Filters\EnsureContextFilter;
 
 class Filters extends BaseConfig
 {
@@ -25,6 +26,7 @@ class Filters extends BaseConfig
         'invalidchars'  => InvalidChars::class,
         'secureheaders' => SecureHeaders::class,
         'auth'          => AuthFilter::class,
+        'ensureContext' => EnsureContextFilter::class,
     ];
 
     /**
@@ -35,23 +37,16 @@ class Filters extends BaseConfig
      */
     public $globals = [
         'before' => [
-            // 'honeypot',
-            // 'csrf',
-            // 'invalidchars',
+            'ensureContext',
         ],
         'after' => [
             'toolbar',
-            // 'honeypot',
-            // 'secureheaders',
         ],
     ];
 
     /**
      * List of filter aliases that works on a
      * particular HTTP method (GET, POST, etc.).
-     *
-     * Example:
-     * 'post' => ['csrf', 'throttle']
      *
      * @var array
      */
@@ -60,9 +55,6 @@ class Filters extends BaseConfig
     /**
      * List of filter aliases that should run on any
      * before or after URI patterns.
-     *
-     * Example:
-     * 'isLoggedIn' => ['before' => ['account/*', 'profiles/*']]
      *
      * @var array
      */

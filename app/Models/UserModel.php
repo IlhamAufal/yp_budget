@@ -25,11 +25,37 @@ class UserModel extends Model
     ];
 
     /**
-     * Cari user berdasarkan username
+     * Cari user berdasarkan email
      */
-    public function getByUsername(string $username): ?array
+    public function getByEmail(string $email)
     {
-        return $this->where('user_username', $username)->first();
+        return $this->where('user_email', $email)
+                    ->orWhere('user_username', $email)
+                    ->first();
+    }
+
+    /**
+     * Cari user berdasarkan username atau email
+     */
+    public function getByUsernameOrEmail(string $login)
+    {
+        $login = trim($login);
+
+        if (empty($login)) {
+            return null;
+        }
+
+        $user = $this->groupStart()
+                    ->where('user_username', $login)
+                    ->orWhere('user_email', $login)
+                ->groupEnd()
+                ->first();
+
+        if (! $user && ! str_contains($login, '@')) {
+            $user = $this->like('user_email', $login . '@', 'after')->first();
+        }
+
+        return $user;
     }
 
     /**
@@ -45,7 +71,8 @@ class UserModel extends Model
      */
     public function isActive(array $user): bool
     {
-        return ($user['user_active'] ?? 'N') === 'Y';
+        $active = $user['user_active'] ?? $user['status'] ?? 'Y';
+        return in_array(strtoupper((string)$active), ['Y', '1', 'A', 'ACTIVE'], true);
     }
 
     /**
@@ -53,7 +80,8 @@ class UserModel extends Model
      */
     public function isBlocked(array $user): bool
     {
-        return ($user['user_block'] ?? 'N') === 'Y';
+        $blocked = $user['user_block'] ?? 'N';
+        return strtoupper((string)$blocked) === 'Y' || $blocked == 1;
     }
 
     /**

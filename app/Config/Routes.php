@@ -29,8 +29,9 @@ $routes->setAutoRoute(true);
  * --------------------------------------------------------------------
  */
 
-// We get a performance increase by specifying the default
-// route since we don't have to scan directories.
+// Working Year Context Route
+$routes->post('set-year', 'PeriodController::setYear');
+$routes->get('api/active-years', 'PeriodController::getActiveYears');
 
 // Login routes (public)
 $routes->get('login', 'LoginController::index');
@@ -41,19 +42,30 @@ $routes->get('logout', 'LoginController::logout');
 $routes->get('/', 'Dashboard::index', ['filter' => 'auth']);
 $routes->get('dashboard', 'Dashboard::index', ['filter' => 'auth']);
 
-/*
- * --------------------------------------------------------------------
- * Additional Routing
- * --------------------------------------------------------------------
- *
- * There will often be times that you need additional routing and you
- * need it to be able to override any defaults in this file. Environment
- * based routes is one such time. require() additional route files here
- * to make that happen.
- *
- * You will have access to the $routes object within that file without
- * needing to reload it.
- */
+// Master Data (COA, Cost Center, Departemen, Periode)
+$routes->group('master', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/', 'Master::index');
+    $routes->get('coa', 'Master::coa');
+    $routes->get('cost-center', 'Master::costCenter');
+    $routes->get('department', 'Master::department');
+    $routes->get('period', 'Master::period');
+
+    $routes->post('api/coa/save', 'Master::coaSave');
+    $routes->post('api/coa/toggle', 'Master::coaToggle');
+    $routes->post('api/coa/copy-year', 'Master::coaCopyYear');
+
+    $routes->post('api/cost-center/save', 'Master::costCenterSave');
+    $routes->post('api/cost-center/toggle', 'Master::costCenterToggle');
+
+    $routes->post('api/department/save', 'Master::departmentSave');
+    $routes->post('api/department/toggle', 'Master::departmentToggle');
+
+    $routes->post('api/period/save', 'Master::periodSave');
+    $routes->post('api/period/set-active', 'Master::periodSetActive');
+    $routes->post('api/period/set-locked', 'Master::periodSetLocked');
+    $routes->post('api/period/delete', 'Master::periodDelete');
+});
+
 if (file_exists(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php')) {
     require APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php';
 }
