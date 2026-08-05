@@ -71,7 +71,9 @@ class CoaModel extends Model
     {
         try {
             $rows = $this->builder()->select('year')->distinct()->orderBy('year', 'DESC')->get()->getResultArray();
-            return array_map('intval', array_filter(array_column($rows, 'year')));
+            // array_values: buang tahun falsy (0/null) sekaligus rapikan ulang
+            // index agar tahun terbaru selalu aman diakses via $years[0].
+            return array_values(array_map('intval', array_filter(array_column($rows, 'year'))));
         } catch (\Throwable $e) {
             return [];
         }

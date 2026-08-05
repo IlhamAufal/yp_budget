@@ -80,6 +80,16 @@ $routes->group('master', ['filter' => 'auth'], function ($routes) {
     $routes->post('api/period/delete', 'Master::periodDelete');
 });
 
+$routes->group('mpp', ['filter' => ['auth', 'context']], function($routes) {
+    // 7.1 Entry MPP
+    $routes->get('entry', 'NewHeadcountController::entry');
+    $routes->post('save-entry', 'NewHeadcountController::saveEntry');
+    
+    // Summary Headcount
+    $routes->get('summary', 'NewHeadcountController::summary');
+    $routes->post('process-opex', 'NewHeadcountController::processToOpex');
+});
+
 if (file_exists(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php')) {
     require APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php';
 }

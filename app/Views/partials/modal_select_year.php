@@ -60,7 +60,7 @@
     @click.self="if (!forced) open = false"
     x-cloak
   >
-    <!-- Modal Card — tanpa x-show sendiri, cukup kontrol dari backdrop -->
+    <!-- Modal Card -->
     <div
       x-transition:enter="transition ease-out duration-300"
       x-transition:enter-start="opacity-0 scale-95 translate-y-3"
@@ -68,20 +68,20 @@
       x-transition:leave="transition ease-in duration-150"
       x-transition:leave-start="opacity-100 scale-100 translate-y-0"
       x-transition:leave-end="opacity-0 scale-95 translate-y-3"
-      class="relative w-full max-w-md rounded-2xl bg-white shadow-2xl dark:bg-gray-900 border border-gray-100 dark:border-gray-800"
+      class="relative w-full max-w-md rounded-2xl bg-white shadow-2xl dark:bg-gray-900 border border-gray-100 dark:border-gray-800 overflow-hidden"
       style="z-index: 9999999;"
     >
       <!-- Header -->
-      <div class="flex items-start justify-between p-6 pb-5 border-b border-gray-100 dark:border-gray-800">
-        <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-400 shrink-0">
-            <i class="fa-solid fa-calendar-check text-lg"></i>
+      <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
+        <div class="flex items-center gap-4">
+          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-400 shrink-0">
+            <i class="fa-solid fa-calendar-check text-xl"></i>
           </div>
           <div>
-            <h3 class="text-base font-bold text-gray-900 dark:text-white leading-tight">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight">
               Pilih Tahun Anggaran
             </h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
               <?= $mustForce
                 ? 'Anda wajib memilih <strong>Working Year</strong> untuk melanjutkan.'
                 : 'Ganti Tahun Anggaran (Working Year) aktif.' ?>
@@ -94,19 +94,19 @@
           <button
             type="button"
             @click="open = false"
-            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 p-1.5 rounded-lg transition-colors shrink-0 ml-2"
+            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-lg transition-colors shrink-0 ml-2"
           >
-            <i class="fa-solid fa-xmark text-base"></i>
+            <i class="fa-solid fa-xmark text-lg"></i>
           </button>
         </template>
       </div>
 
       <!-- Form Body -->
-      <form action="<?= base_url('set-year') ?>" method="POST" class="p-6 space-y-4">
+      <form action="<?= base_url('set-year') ?>" method="POST" class="p-6 space-y-6">
         <?= csrf_field() ?>
 
         <div>
-          <label for="year_code_select" class="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+          <label for="year_code_select" class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
             Tahun Anggaran <span class="text-red-500">*</span>
           </label>
           <select
@@ -126,26 +126,26 @@
 
         <!-- Info saat forced -->
         <?php if ($mustForce): ?>
-          <div class="flex items-start gap-2.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 p-3.5 text-xs text-amber-800 dark:text-amber-300">
+          <div class="flex items-start gap-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 p-4 text-sm text-amber-800 dark:text-amber-300">
             <i class="fa-solid fa-circle-info text-amber-500 dark:text-amber-400 mt-0.5 shrink-0"></i>
             <span>Modal ini <strong>wajib diisi</strong>. Anda tidak dapat menutupnya sebelum memilih tahun dan menekan <strong>GO!</strong></span>
           </div>
         <?php endif; ?>
 
         <!-- Actions -->
-        <div class="pt-1 flex items-center gap-3">
+        <div class="pt-2 flex items-center gap-4">
           <template x-if="!forced">
             <button
               type="button"
               @click="open = false"
-              class="flex-1 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none transition-colors"
+              class="flex-1 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-5 py-3 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none transition-colors"
             >
               Batal
             </button>
           </template>
           <button
             type="submit"
-            class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-bold text-white shadow-md hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/40 transition-colors dark:bg-brand-500 dark:hover:bg-brand-600"
+            class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-brand-500 px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/40 transition-colors dark:bg-brand-500 dark:hover:bg-brand-600"
           >
             <span>GO!</span>
             <i class="fa-solid fa-arrow-right text-xs"></i>

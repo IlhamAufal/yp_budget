@@ -53,7 +53,7 @@
     <nav x-data="{ selected: '<?= $currentGroup ?>' }">
       <!-- Menu Group: MENU UTAMA -->
       <div class="mb-6">
-        <h3 class="mb-4 text-xs font-semibold uppercase leading-[20px] text-gray-400">
+        <h3 class="mb-4 text-xs font-semibold leading-[20px] text-gray-400">
           <span class="menu-group-title" :class="sidebarToggle ? 'lg:hidden' : ''">
             MENU UTAMA
           </span>
@@ -77,7 +77,7 @@
 
       <!-- Menu Group: BUDGET & PLANNING -->
       <div class="mb-6">
-        <h3 class="mb-4 text-xs font-semibold uppercase leading-[20px] text-gray-400">
+        <h3 class="mb-4 text-xs font-semibold leading-[20px] text-gray-400">
           <span class="menu-group-title" :class="sidebarToggle ? 'lg:hidden' : ''">
             BUDGET & PLANNING
           </span>
@@ -94,7 +94,7 @@
             >
               <i class="fa-solid fa-industry text-lg min-w-[24px] text-center <?= url_is('foh*') ? 'text-brand-500 dark:text-brand-400' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300' ?>" :class="selected === 'FOH' ? 'text-brand-500 dark:text-brand-400' : ''"></i>
               <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                FOH (Factory Overhead)
+                FOH
               </span>
               <i
                 class="fa-solid fa-chevron-down menu-item-arrow text-xs transition-transform duration-200"
@@ -157,7 +157,7 @@
             >
               <i class="fa-solid fa-building text-lg min-w-[24px] text-center <?= url_is('opex-ga*') ? 'text-brand-500 dark:text-brand-400' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300' ?>" :class="selected === 'OPEX_GA' ? 'text-brand-500 dark:text-brand-400' : ''"></i>
               <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                OPEX GA
+                Opex GA
               </span>
               <i
                 class="fa-solid fa-chevron-down menu-item-arrow text-xs transition-transform duration-200"
@@ -220,7 +220,7 @@
             >
               <i class="fa-solid fa-store text-lg min-w-[24px] text-center <?= url_is('opex-selling*') ? 'text-brand-500 dark:text-brand-400' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300' ?>" :class="selected === 'OPEX_Selling' ? 'text-brand-500 dark:text-brand-400' : ''"></i>
               <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                OPEX Selling
+                Opex Selling
               </span>
               <i
                 class="fa-solid fa-chevron-down menu-item-arrow text-xs transition-transform duration-200"
@@ -275,7 +275,7 @@
             >
               <i class="fa-solid fa-coins text-lg min-w-[24px] text-center <?= url_is('capex*') ? 'text-brand-500 dark:text-brand-400' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300' ?>" :class="selected === 'CAPEX' ? 'text-brand-500 dark:text-brand-400' : ''"></i>
               <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                CAPEX
+                Capex
               </span>
               <i
                 class="fa-solid fa-chevron-down menu-item-arrow text-xs transition-transform duration-200"
@@ -330,7 +330,7 @@
             >
               <i class="fa-solid fa-chart-line text-lg min-w-[24px] text-center <?= url_is('sales*') ? 'text-brand-500 dark:text-brand-400' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300' ?>" :class="selected === 'Sales' ? 'text-brand-500 dark:text-brand-400' : ''"></i>
               <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                Sales% Planning
+                Sales
               </span>
               <i
                 class="fa-solid fa-chevron-down menu-item-arrow text-xs transition-transform duration-200"
@@ -411,7 +411,7 @@
 
       <!-- Menu Group: MASTER & PENGATURAN -->
       <div class="mb-6">
-        <h3 class="mb-4 text-xs font-semibold uppercase leading-[20px] text-gray-400">
+        <h3 class="mb-4 text-xs font-semibold leading-[20px] text-gray-400">
           <span class="menu-group-title" :class="sidebarToggle ? 'lg:hidden' : ''">
             MASTER & PENGATURAN
           </span>

@@ -47,17 +47,18 @@ class Master extends BaseController
 
     public function coa()
     {
+        $years = $this->coa->getYears();
         $filters = [
             'search' => $this->request->getGet('search') ?? '',
             'type'   => $this->request->getGet('type') ?? '',
-            'year'   => $this->request->getGet('year') ?: session()->get('year_code'),
+            'year'   => $this->resolveYearFilter($years),
             'status' => $this->request->getGet('status') ?? 'A',
         ];
 
         return view('master-data/chart-of-account', [
             'title'   => 'Master Data - Chart of Account (COA)',
             'rows'    => $this->coa->getAll($filters),
-            'years'   => $this->coa->getYears(),
+            'years'   => $years,
             'types'   => $this->coa->getTypes(),
             'filters' => $filters,
             'flash'   => $this->consumeFlash(),
@@ -161,7 +162,7 @@ class Master extends BaseController
         $filters = [
             'search' => $this->request->getGet('search') ?? '',
             'type'   => $this->request->getGet('type') ?? '',
-            'year'   => $this->request->getGet('year') ?: session()->get('year_code'),
+            'year'   => $this->resolveYearFilter($this->coa->getYears()),
             'status' => $this->request->getGet('status') ?? '',
         ];
 
@@ -478,6 +479,26 @@ class Master extends BaseController
     /* ------------------------------------------------------------------
      * Helper
      * ------------------------------------------------------------------ */
+
+    /**
+     * Resolusi tahun filter:
+     * - Parameter GET ?year= diprioritaskan ('' artinya Semua Tahun).
+     * - Tanpa param, pakai Working Year di session, TAPI hanya jika tahun itu
+     *   benar-benar punya data (ada di daftar $years). Jika tidak, jatuh ke
+     *   tahun terbaru yang punya data supaya tabel tidak tampil kosong.
+     */
+    private function resolveYearFilter(array $years): ?int
+    {
+        $yearParam = $this->request->getGet('year');
+        if ($yearParam === null) {
+            $sessionYear = session()->get('year_code');
+            return ($sessionYear && in_array((int) $sessionYear, $years, true))
+                ? (int) $sessionYear
+                : ($years[0] ?? null);
+        }
+
+        return $yearParam === '' ? null : (int) $yearParam;
+    }
 
     private function jsonResult(array $result): ResponseInterface
     {
