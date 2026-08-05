@@ -6,6 +6,9 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   <title><?= $title ?? 'Budget Planning & Monitoring System - CI4' ?></title>
   <link rel="icon" href="<?= base_url('favicon.ico') ?>">
+  <meta name="csrf-token-name" content="<?= csrf_token() ?>" />
+  <meta name="csrf-hash" content="<?= csrf_hash() ?>" />
+  <?= csrf_meta() ?>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link href="<?= base_url('assets/css/style.css') ?>" rel="stylesheet">
   <style>
@@ -43,6 +46,7 @@
     </div>
   </div>
 
+  <?= $this->include('partials/master_scripts') ?>
   <?= $this->include('partials/footer_scripts') ?>
 </body>
 </html>

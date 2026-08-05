@@ -8,22 +8,37 @@
 
   /**
    * ypFetch(url, data)
-   * Helper fetch dengan method POST, mengembalikan JSON response.
+   * Helper fetch dengan method POST, auto attach CSRF token dan mengembalikan JSON.
    */
-  window.ypFetch = async function (url, data) {
-    const body = new URLSearchParams(data);
+  window.ypFetch = async function (url, data = {}) {
+    const body = (data instanceof FormData) ? data : new URLSearchParams(data);
+
+    // Auto attach CSRF jika URLSearchParams
+    if (body instanceof URLSearchParams) {
+      const csrfName = document.querySelector('meta[name="csrf-token-name"]')?.content || 'csrf_test_name';
+      const csrfHash = document.querySelector('meta[name="csrf-hash"]')?.content || (document.cookie.match(/csrf_cookie_name=([^;]+)/)?.[1] || '');
+      if (csrfHash && !body.has(csrfName)) {
+        body.append(csrfName, decodeURIComponent(csrfHash));
+      }
+    }
+
     try {
+      const isFormData = (body instanceof FormData);
       const res = await fetch(url, {
         method: 'POST',
-        headers: {
+        headers: isFormData ? {
+          'X-Requested-With': 'XMLHttpRequest',
+        } : {
           'X-Requested-With': 'XMLHttpRequest',
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body,
       });
-      return await res.json();
+      const json = await res.json();
+      return json;
     } catch (e) {
-      return { success: false, message: 'Koneksi gagal, silakan coba lagi.' };
+      console.error('ypFetch error:', e);
+      return { success: false, message: 'Koneksi gagal atau terjadi kesalahan server.' };
     }
   };
 

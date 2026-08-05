@@ -6,11 +6,13 @@ use App\Models\CoaModel;
 use App\Models\CostCenterModel;
 use App\Models\DepartmentModel;
 use App\Models\PeriodModel;
+use App\Models\ProductModel;
+use App\Models\SalaryMppModel;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\ResponseInterface;
 
 /**
- * Master Data — COA, Cost Center, Departemen, dan Periode (Tahun Anggaran).
+ * Master Data — COA, Cost Center, Departemen, Product, Salary MPP, dan Configure Period.
  *
  * Halaman di-render server-side dengan filter via GET.
  * Mutasi (save / toggle / copy / lock) via POST AJAX → JSON.
@@ -21,6 +23,8 @@ class Master extends BaseController
     protected $costCenter;
     protected $department;
     protected $period;
+    protected $product;
+    protected $salaryMpp;
 
     public function __construct()
     {
@@ -28,6 +32,8 @@ class Master extends BaseController
         $this->costCenter = new CostCenterModel();
         $this->department = new DepartmentModel();
         $this->period     = new PeriodModel();
+        $this->product    = new ProductModel();
+        $this->salaryMpp  = new SalaryMppModel();
     }
 
     public function index(): RedirectResponse
@@ -48,7 +54,7 @@ class Master extends BaseController
             'status' => $this->request->getGet('status') ?? 'A',
         ];
 
-        return view('master/coa', [
+        return view('master-data/chart-of-account', [
             'title'   => 'Master Data - Chart of Account (COA)',
             'rows'    => $this->coa->getAll($filters),
             'years'   => $this->coa->getYears(),
@@ -67,7 +73,7 @@ class Master extends BaseController
             'status' => $this->request->getGet('status') ?? 'A',
         ];
 
-        return view('master/cost_center', [
+        return view('master-data/cost-center', [
             'title'   => 'Master Data - Cost Center',
             'rows'    => $this->costCenter->getAll($filters),
             'years'   => $this->costCenter->getYears(),
@@ -84,7 +90,7 @@ class Master extends BaseController
             'status' => $this->request->getGet('status') ?? 'A',
         ];
 
-        return view('master/department', [
+        return view('master-data/departemen', [
             'title'   => 'Master Data - Departemen',
             'rows'    => $this->department->getAll($filters),
             'filters' => $filters,
@@ -92,17 +98,234 @@ class Master extends BaseController
         ]);
     }
 
-    public function period()
+    public function product()
     {
-        return view('master/period', [
-            'title' => 'Master Data - Periode (Tahun Anggaran)',
+        $filters = [
+            'search'  => $this->request->getGet('search') ?? '',
+            'channel' => $this->request->getGet('channel') ?? '',
+            'year'    => $this->request->getGet('year') ?: session()->get('year_code'),
+            'status'  => $this->request->getGet('status') ?? 'A',
+        ];
+
+        return view('master-data/product', [
+            'title'    => 'Master Data - Produk',
+            'rows'     => $this->product->getAll($filters),
+            'channels' => $this->product->getChannels(),
+            'years'    => $this->product->getYears(),
+            'filters'  => $filters,
+            'flash'    => $this->consumeFlash(),
+        ]);
+    }
+
+    public function salaryMpp()
+    {
+        $filters = [
+            'search'  => $this->request->getGet('search') ?? '',
+            'dept_id' => $this->request->getGet('dept_id') ?? '',
+            'type'    => $this->request->getGet('type') ?? '',
+            'year'    => $this->request->getGet('year') ?: session()->get('year_code'),
+            'status'  => $this->request->getGet('status') ?? 'A',
+        ];
+
+        return view('master-data/salary-mpp', [
+            'title'       => 'Master Data - Salary & MPP',
+            'rows'        => $this->salaryMpp->getAll($filters),
+            'departments' => $this->department->getAll(['status' => 'A']),
+            'mppTypes'    => $this->salaryMpp->getMppTypes(),
+            'years'       => $this->salaryMpp->getYears(),
+            'filters'     => $filters,
+            'flash'       => $this->consumeFlash(),
+        ]);
+    }
+
+    public function configurePeriod()
+    {
+        return view('master-data/configure-period', [
+            'title' => 'Master Data - Configure Period (Tahun Anggaran)',
             'rows'  => $this->period->getAllYears(),
             'flash' => $this->consumeFlash(),
         ]);
     }
 
+    public function period()
+    {
+        return $this->configurePeriod();
+    }
+
     /* ------------------------------------------------------------------
-     * COA
+     * Export CSV Support
+     * ------------------------------------------------------------------ */
+
+    public function coaExport()
+    {
+        $filters = [
+            'search' => $this->request->getGet('search') ?? '',
+            'type'   => $this->request->getGet('type') ?? '',
+            'year'   => $this->request->getGet('year') ?: session()->get('year_code'),
+            'status' => $this->request->getGet('status') ?? '',
+        ];
+
+        $rows = $this->coa->getAll($filters);
+        $filename = 'COA_Export_' . date('Ymd_His') . '.csv';
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $out = fopen('php://output', 'w');
+        fputcsv($out, ['ID', 'Main Account', 'SAP Code', 'Header', 'Sub Account', 'Description', 'Year', 'Type', 'Category', 'Status']);
+
+        foreach ($rows as $r) {
+            fputcsv($out, [
+                $r['id_cost_center'] ?? '',
+                $r['main_account'] ?? '',
+                $r['id_acct_ext'] ?? '',
+                $r['cost_center_header'] ?? '',
+                $r['cost_center_sub'] ?? '',
+                $r['cost_center_desc'] ?? '',
+                $r['year'] ?? '',
+                $r['type'] ?? '',
+                $r['category'] ?? '',
+                ($r['status'] === 'A') ? 'Active' : 'Inactive',
+            ]);
+        }
+        fclose($out);
+        exit;
+    }
+
+    public function costCenterExport()
+    {
+        $filters = [
+            'search' => $this->request->getGet('search') ?? '',
+            'type'   => $this->request->getGet('type') ?? '',
+            'year'   => $this->request->getGet('year') ?: session()->get('year_code'),
+            'status' => $this->request->getGet('status') ?? '',
+        ];
+
+        $rows = $this->costCenter->getAll($filters);
+        $filename = 'CostCenter_Export_' . date('Ymd_His') . '.csv';
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $out = fopen('php://output', 'w');
+        fputcsv($out, ['ID', 'Cost Center Code', 'SAP Code', 'Description', 'Location', 'Year', 'Type', 'Status']);
+
+        foreach ($rows as $r) {
+            fputcsv($out, [
+                $r['id_cost_center'] ?? '',
+                $r['cost_center'] ?? '',
+                $r['cost_center_sap'] ?? '',
+                $r['cost_desc'] ?? '',
+                $r['location'] ?? '',
+                $r['year'] ?? '',
+                $r['type'] ?? '',
+                ($r['status'] === 'A') ? 'Active' : 'Inactive',
+            ]);
+        }
+        fclose($out);
+        exit;
+    }
+
+    public function departmentExport()
+    {
+        $filters = [
+            'search' => $this->request->getGet('search') ?? '',
+            'status' => $this->request->getGet('status') ?? '',
+        ];
+
+        $rows = $this->department->getAll($filters);
+        $filename = 'Department_Export_' . date('Ymd_His') . '.csv';
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $out = fopen('php://output', 'w');
+        fputcsv($out, ['ID', 'Department Code', 'Department Name', 'Status']);
+
+        foreach ($rows as $r) {
+            fputcsv($out, [
+                $r['id_dept'] ?? '',
+                $r['dept_code'] ?? '',
+                $r['dept_desc'] ?? '',
+                ($r['status'] === 'A') ? 'Active' : 'Inactive',
+            ]);
+        }
+        fclose($out);
+        exit;
+    }
+
+    public function productExport()
+    {
+        $filters = [
+            'search'  => $this->request->getGet('search') ?? '',
+            'channel' => $this->request->getGet('channel') ?? '',
+            'year'    => $this->request->getGet('year') ?: session()->get('year_code'),
+            'status'  => $this->request->getGet('status') ?? '',
+        ];
+
+        $rows = $this->product->getAll($filters);
+        $filename = 'Product_Export_' . date('Ymd_His') . '.csv';
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $out = fopen('php://output', 'w');
+        fputcsv($out, ['ID', 'Product Name', 'Channel', 'Key Product', 'MID Product', 'Default Box (DB)', 'Pcs / Box', 'Gramasi (Gr)', 'Year', 'Status']);
+
+        foreach ($rows as $r) {
+            fputcsv($out, [
+                $r['id_product'] ?? '',
+                $r['product_name'] ?? '',
+                $r['id_channel'] ?? '',
+                $r['key_product'] ?? '',
+                $r['mid_product'] ?? '',
+                $r['db'] ?? '',
+                $r['pcs'] ?? '',
+                $r['gr'] ?? '',
+                $r['year'] ?? '',
+                ($r['status'] === 'A') ? 'Active' : 'Inactive',
+            ]);
+        }
+        fclose($out);
+        exit;
+    }
+
+    public function salaryMppExport()
+    {
+        $filters = [
+            'search'  => $this->request->getGet('search') ?? '',
+            'dept_id' => $this->request->getGet('dept_id') ?? '',
+            'type'    => $this->request->getGet('type') ?? '',
+            'year'    => $this->request->getGet('year') ?: session()->get('year_code'),
+            'status'  => $this->request->getGet('status') ?? '',
+        ];
+
+        $rows = $this->salaryMpp->getAll($filters);
+        $filename = 'SalaryMPP_Export_' . date('Ymd_His') . '.csv';
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $out = fopen('php://output', 'w');
+        fputcsv($out, ['ID', 'Position Description', 'Department', 'Type', 'Salary Rate (Rp)', 'Year', 'Status']);
+
+        foreach ($rows as $r) {
+            fputcsv($out, [
+                $r['id'] ?? '',
+                $r['desc'] ?? '',
+                $r['dept_desc'] ?? ($r['dept_code'] ?? ''),
+                $r['type_name'] ?? $r['type'],
+                $r['salary'] ?? 0,
+                $r['year_code'] ?? '',
+                ($r['status'] === 'A') ? 'Active' : 'Inactive',
+            ]);
+        }
+        fclose($out);
+        exit;
+    }
+
+    /* ------------------------------------------------------------------
+     * COA AJAX
      * ------------------------------------------------------------------ */
 
     public function coaSave(): ResponseInterface
@@ -132,7 +355,7 @@ class Master extends BaseController
     }
 
     /* ------------------------------------------------------------------
-     * Cost Center
+     * Cost Center AJAX
      * ------------------------------------------------------------------ */
 
     public function costCenterSave(): ResponseInterface
@@ -153,7 +376,7 @@ class Master extends BaseController
     }
 
     /* ------------------------------------------------------------------
-     * Departemen
+     * Departemen AJAX
      * ------------------------------------------------------------------ */
 
     public function departmentSave(): ResponseInterface
@@ -174,7 +397,49 @@ class Master extends BaseController
     }
 
     /* ------------------------------------------------------------------
-     * Periode
+     * Product AJAX
+     * ------------------------------------------------------------------ */
+
+    public function productSave(): ResponseInterface
+    {
+        $data = $this->request->getPost();
+        $id   = ! empty($data['id']) ? (int) $data['id'] : null;
+        $result = $this->product->saveProduct($data, $id);
+
+        return $this->jsonResult($result);
+    }
+
+    public function productToggle(): ResponseInterface
+    {
+        $id     = (int) $this->request->getPost('id');
+        $result = $this->product->toggleStatus($id);
+
+        return $this->jsonResult($result);
+    }
+
+    /* ------------------------------------------------------------------
+     * Salary MPP AJAX
+     * ------------------------------------------------------------------ */
+
+    public function salaryMppSave(): ResponseInterface
+    {
+        $data = $this->request->getPost();
+        $id   = ! empty($data['id']) ? (int) $data['id'] : null;
+        $result = $this->salaryMpp->saveSalaryMpp($data, $id);
+
+        return $this->jsonResult($result);
+    }
+
+    public function salaryMppToggle(): ResponseInterface
+    {
+        $id     = (int) $this->request->getPost('id');
+        $result = $this->salaryMpp->toggleStatus($id);
+
+        return $this->jsonResult($result);
+    }
+
+    /* ------------------------------------------------------------------
+     * Periode AJAX
      * ------------------------------------------------------------------ */
 
     public function periodSave(): ResponseInterface
@@ -214,10 +479,6 @@ class Master extends BaseController
      * Helper
      * ------------------------------------------------------------------ */
 
-    /**
-     * Bungkus hasil menjadi JSON. Simpan pesan ke flashdata agar tampil
-     * setelah halaman di-reload oleh JS.
-     */
     private function jsonResult(array $result): ResponseInterface
     {
         if ($result['success']) {

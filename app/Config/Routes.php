@@ -46,8 +46,16 @@ $routes->get('dashboard', 'Dashboard::index', ['filter' => 'auth']);
 $routes->group('master', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'Master::index');
     $routes->get('coa', 'Master::coa');
+    $routes->get('coa/export', 'Master::coaExport');
     $routes->get('cost-center', 'Master::costCenter');
+    $routes->get('cost-center/export', 'Master::costCenterExport');
     $routes->get('department', 'Master::department');
+    $routes->get('department/export', 'Master::departmentExport');
+    $routes->get('product', 'Master::product');
+    $routes->get('product/export', 'Master::productExport');
+    $routes->get('salary-mpp', 'Master::salaryMpp');
+    $routes->get('salary-mpp/export', 'Master::salaryMppExport');
+    $routes->get('configure-period', 'Master::configurePeriod');
     $routes->get('period', 'Master::period');
 
     $routes->post('api/coa/save', 'Master::coaSave');
@@ -59,6 +67,12 @@ $routes->group('master', ['filter' => 'auth'], function ($routes) {
 
     $routes->post('api/department/save', 'Master::departmentSave');
     $routes->post('api/department/toggle', 'Master::departmentToggle');
+
+    $routes->post('api/product/save', 'Master::productSave');
+    $routes->post('api/product/toggle', 'Master::productToggle');
+
+    $routes->post('api/salary-mpp/save', 'Master::salaryMppSave');
+    $routes->post('api/salary-mpp/toggle', 'Master::salaryMppToggle');
 
     $routes->post('api/period/save', 'Master::periodSave');
     $routes->post('api/period/set-active', 'Master::periodSetActive');

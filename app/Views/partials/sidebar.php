@@ -501,7 +501,7 @@
                     href="<?= base_url('master/coa') ?>"
                     class="menu-dropdown-item group <?= url_is('master/coa*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
                   >
-                    Chart of Account (COA)
+                    Master COA
                   </a>
                 </li>
                 <li>
@@ -509,7 +509,7 @@
                     href="<?= base_url('master/cost-center') ?>"
                     class="menu-dropdown-item group <?= url_is('master/cost-center*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
                   >
-                    Cost Center
+                    Master Cost Center
                   </a>
                 </li>
                 <li>
@@ -517,15 +517,31 @@
                     href="<?= base_url('master/department') ?>"
                     class="menu-dropdown-item group <?= url_is('master/department*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
                   >
-                    Departemen
+                    Master Departemen
                   </a>
                 </li>
                 <li>
                   <a
-                    href="<?= base_url('master/period') ?>"
-                    class="menu-dropdown-item group <?= url_is('master/period*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
+                    href="<?= base_url('master/product') ?>"
+                    class="menu-dropdown-item group <?= url_is('master/product*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
                   >
-                    Periode
+                    Master Product
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="<?= base_url('master/salary-mpp') ?>"
+                    class="menu-dropdown-item group <?= url_is('master/salary-mpp*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
+                  >
+                    Master Salary MPP
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="<?= base_url('master/configure-period') ?>"
+                    class="menu-dropdown-item group <?= (url_is('master/configure-period*') || url_is('master/period*')) ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
+                  >
+                    Configure Period
                   </a>
                 </li>
               </ul>
