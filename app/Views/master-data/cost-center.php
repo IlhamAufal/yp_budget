@@ -122,9 +122,9 @@
             <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
               <td class="px-5 py-3.5 text-center font-medium text-gray-400" x-text="(currentPage - 1) * perPage + index + 1"></td>
               
-              <td class="px-5 py-3.5 font-mono font-bold text-brand-600 dark:text-brand-400" x-text="row.cost_center_code"></td>
+              <td class="px-5 py-3.5 font-mono font-bold text-brand-600 dark:text-brand-400" x-text="row.cost_center_sap"></td>
               
-              <td class="px-5 py-3.5 font-semibold text-gray-900 dark:text-white" x-text="row.cost_center_name"></td>
+              <td class="px-5 py-3.5 font-semibold text-gray-900 dark:text-white" x-text="row.cost_desc"></td>
 
               <td class="px-5 py-3.5 text-center">
                 <div class="flex items-center justify-center gap-1.5">
@@ -260,7 +260,7 @@
           </label>
           <input
             type="text"
-            x-model="form.cost_center_code"
+            x-model="form.cost_center_sap"
             required
             placeholder="Contoh: CC-101"
             class="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3.5 py-2.5 text-xs text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-all font-mono"
@@ -273,7 +273,7 @@
           </label>
           <input
             type="text"
-            x-model="form.cost_center_name"
+            x-model="form.cost_desc"
             required
             placeholder="Contoh: Operational General & Admin"
             class="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3.5 py-2.5 text-xs text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-all"
@@ -353,8 +353,8 @@
       saving: false,
       form: {
         id: null,
-        cost_center_code: '',
-        cost_center_name: '',
+        cost_center_sap: '',
+        cost_desc: '',
         department_id: '',
         status: 'A'
       },
@@ -363,8 +363,8 @@
         return this.rawCostCenters.filter(item => {
           const q = (this.searchQuery || '').toLowerCase();
           const matchesSearch = !q || 
-            (item.cost_center_code && item.cost_center_code.toLowerCase().includes(q)) ||
-            (item.cost_center_name && item.cost_center_name.toLowerCase().includes(q));
+            (item.cost_center_sap && item.cost_center_sap.toLowerCase().includes(q)) ||
+            (item.cost_desc && item.cost_desc.toLowerCase().includes(q));
 
           const matchesDept = !this.selectedDepartment || 
             String(item.department_id) === String(this.selectedDepartment);
@@ -426,8 +426,8 @@
         this.isEdit = false;
         this.form = {
           id: null,
-          cost_center_code: '',
-          cost_center_name: '',
+          cost_center_sap: '',
+          cost_desc: '',
           department_id: '',
           status: 'A'
         };
@@ -438,8 +438,8 @@
         this.isEdit = true;
         this.form = {
           id: row.id || row.cost_center_id || null,
-          cost_center_code: row.cost_center_code || '',
-          cost_center_name: row.cost_center_name || '',
+          cost_center_sap: row.cost_center_sap || '',
+          cost_desc: row.cost_desc || '',
           department_id: row.department_id || '',
           status: row.status || 'A'
         };

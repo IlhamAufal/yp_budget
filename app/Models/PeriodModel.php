@@ -24,6 +24,8 @@ class PeriodModel extends Model
         'year_code',
         'period_start',
         'period_end',
+        'form_budget',
+        'cost_center',
         'status',
         'locked',
     ];
@@ -88,6 +90,8 @@ class PeriodModel extends Model
             'year_code'    => $yearCode,
             'period_start' => ! empty($data['period_start']) ? $data['period_start'] : null,
             'period_end'   => ! empty($data['period_end']) ? $data['period_end'] : null,
+            'form_budget'  => ! empty($data['form_budget']) ? $data['form_budget'] : null,
+            'cost_center'  => ! empty($data['cost_center']) ? $data['cost_center'] : '*',
             'status'       => ($data['status'] ?? 'A') === 'D' ? 'D' : 'A',
             'locked'       => ! empty($data['locked']) ? 1 : 0,
             'updated_date' => date('Y-m-d H:i:s'),

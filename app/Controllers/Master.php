@@ -75,12 +75,13 @@ class Master extends BaseController
         ];
 
         return view('master-data/cost-center', [
-            'title'   => 'Master Data - Cost Center',
-            'rows'    => $this->costCenter->getAll($filters),
-            'years'   => $this->costCenter->getYears(),
-            'types'   => $this->costCenter->getTypes(),
-            'filters' => $filters,
-            'flash'   => $this->consumeFlash(),
+            'title'       => 'Master Data - Cost Center',
+            'costCenters' => $this->costCenter->getAll($filters),
+            'departments' => $this->department->getAll(['status' => 'A']),
+            'years'       => $this->costCenter->getYears(),
+            'types'       => $this->costCenter->getTypes(),
+            'filters'     => $filters,
+            'flash'       => $this->consumeFlash(),
         ]);
     }
 
@@ -144,6 +145,7 @@ class Master extends BaseController
         return view('master-data/configure-period', [
             'title' => 'Master Data - Configure Period (Tahun Anggaran)',
             'rows'  => $this->period->getAllYears(),
+            'cc'    => $this->costCenter->getAll(['status' => 'A']),
             'flash' => $this->consumeFlash(),
         ]);
     }
