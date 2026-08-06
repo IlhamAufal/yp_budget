@@ -444,26 +444,28 @@ class CapexModel extends Model
 
         $this->db->table('yp_plan__trans_budget_entry_data')
             ->where('year_code', $year)
+            ->where('source', 'CAPEX')
             ->whereIn('id_coa', $coas)
             ->delete();
 
-        foreach ($rows as $r) {
-            $row = [
-                'id_coa'      => (int) $r['id_coa'],
-                'id_dept'     => (int) ($r['dept_id'] ?: 0),
-                'total'       => (float) $r['total'],
-                'year_code'   => $year,
-                'created_by'  => $userId,
-                'created_date'=> date('Y-m-d H:i:s'),
-            ];
-            for ($m = 1; $m <= 12; $m++) {
-                $row[(string) $m] = (float) $r[(string) $m];
-            }
-            $batch[] = $row;
-        }
+        $sql = 'INSERT INTO yp_plan__trans_budget_entry_data
+                (id_coa, id_dept, total, year_code, created_by, created_date, source, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`, `11`, `12`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
-        if (! empty($batch)) {
-            $this->db->table('yp_plan__trans_budget_entry_data')->insertBatch($batch);
+        foreach ($rows as $r) {
+            $vals = [];
+            for ($m = 1; $m <= 12; $m++) {
+                $vals[] = (float) $r[(string) $m];
+            }
+            $this->db->query($sql, array_merge([
+                (int) $r['id_coa'],
+                (int) ($r['dept_id'] ?: 0),
+                (float) $r['total'],
+                $year,
+                $userId,
+                date('Y-m-d H:i:s'),
+                'CAPEX',
+            ], $vals));
         }
 
         $this->db->transComplete();

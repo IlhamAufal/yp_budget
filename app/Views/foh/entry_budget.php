@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
 
-<div x-data="opexGaEntryPage()" class="p-4 md:p-8 mx-auto max-w-(--breakpoint-2xl) space-y-6 md:space-y-8">
+<div x-data="fohEntryPage()" class="p-4 md:p-8 mx-auto max-w-(--breakpoint-2xl) space-y-6 md:space-y-8">
 
   <!-- ============================================================ -->
   <!-- HEADER & ACTIONS                                             -->
@@ -12,18 +12,18 @@
       <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-3">
         <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
         <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-        <span>OPEX GA</span>
+        <span>FOH</span>
         <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
         <span class="text-brand-500 font-bold">Entry Budget</span>
       </div>
       <h1 class="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-4">
         <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-400">
-          <i class="fa-solid fa-building text-xl"></i>
+          <i class="fa-solid fa-industry text-xl"></i>
         </span>
-        Entry Budget OPEX GA
+        Entry Budget FOH
       </h1>
       <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-        General & Administrative — Tahun Anggaran <span class="font-bold text-brand-500"><?= esc($workingYear) ?></span>
+        Factory Overhead — Tahun Anggaran <span class="font-bold text-brand-500"><?= esc($workingYear) ?></span>
       </p>
     </div>
 
@@ -64,7 +64,7 @@
     <div class="flex flex-wrap items-end gap-4">
       <div class="flex-1 min-w-[260px]">
         <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
-          Cost Center (OPEX) <span class="text-red-500">*</span>
+          Cost Center (FOH) <span class="text-red-500">*</span>
         </label>
         <select
           x-model="dept"
@@ -117,7 +117,7 @@
             <tr>
               <td colspan="16" class="py-16 text-center text-gray-400 dark:text-gray-500">
                 <p class="font-semibold text-gray-600 dark:text-gray-300 mb-1">Belum ada data untuk cost center ini</p>
-                <p class="text-sm">Gunakan <strong>+ Tambah Baris</strong> untuk memulai entry budget OPEX GA.</p>
+                <p class="text-sm">Gunakan <strong>+ Tambah Baris</strong> untuk memulai entry budget FOH.</p>
               </td>
             </tr>
           </template>
@@ -203,20 +203,20 @@
   <!-- MODAL BREAKDOWN SUB-DETAIL (reusable partial)                -->
   <!-- ============================================================ -->
   <?= $this->include('partials/breakdown_modal', [
-      'bmListUrl'   => base_url('opex-ga/getDetailItems'),
-      'bmSaveUrl'   => base_url('opex-ga/saveDetail'),
-      'bmDeleteUrl' => base_url('opex-ga/deleteDetail'),
+      'bmListUrl'   => base_url('foh/getDetailItems'),
+      'bmSaveUrl'   => base_url('foh/saveDetail'),
+      'bmDeleteUrl' => base_url('foh/deleteDetail'),
   ]) ?>
 
 </div>
 
 <script>
-  function opexGaEntryPage() {
+  function fohEntryPage() {
     return {
       ...breakdownModalComponent({
-        list: '<?= base_url('opex-ga/getDetailItems') ?>',
-        save: '<?= base_url('opex-ga/saveDetail') ?>',
-        delete: '<?= base_url('opex-ga/deleteDetail') ?>',
+        list: '<?= base_url('foh/getDetailItems') ?>',
+        save: '<?= base_url('foh/saveDetail') ?>',
+        delete: '<?= base_url('foh/deleteDetail') ?>',
       }),
 
       MONTH_LABELS: ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'],
@@ -233,7 +233,7 @@
           return;
         }
         this.loading = true;
-        const res = await window.ypFetch('<?= base_url('opex-ga/getEntryData') ?>?dept=' + encodeURIComponent(this.dept));
+        const res = await window.ypFetch('<?= base_url('foh/getEntryData') ?>?dept=' + encodeURIComponent(this.dept));
         this.loading = false;
 
         if (res.status !== 'success') {
@@ -312,7 +312,7 @@
         fd.append('dept', this.dept);
         fd.append('rows', JSON.stringify(payload));
 
-        const res = await window.ypFetch('<?= base_url('opex-ga/save_budget') ?>', fd);
+        const res = await window.ypFetch('<?= base_url('foh/saveBudget') ?>', fd);
         this.saving = false;
 
         if (res.status === 'success') {
@@ -328,10 +328,10 @@
           window.showToast('error', 'Cost Center wajib dipilih.');
           return;
         }
-        if (!window.ypConfirm('Submit budget OPEX GA untuk cost center ini? Status akan menjadi SUBMITTED.')) return;
+        if (!window.ypConfirm('Submit budget FOH untuk cost center ini? Status akan menjadi SUBMITTED.')) return;
 
         this.submitting = true;
-        const res = await window.ypFetch('<?= base_url('opex-ga/submit_budget') ?>', { dept: this.dept });
+        const res = await window.ypFetch('<?= base_url('foh/submit') ?>', { dept: this.dept });
         this.submitting = false;
 
         if (res.status === 'success') {

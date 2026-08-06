@@ -139,9 +139,30 @@ $routes->group('opex-ga', ['filter' => 'auth'], function ($routes) {
     $routes->get('report/combine', 'OpexGaController::index');
     $routes->post('cari_actual_table', 'OpexGaController::cariActualTable');
     $routes->get('export_template_opex_ga/(:num)', 'OpexGaController::exportTemplateOpexGa/$1');
-    $routes->post('saveBudgetDetail', 'OpexGaController::saveBudgetDetail');
+    $routes->get('getEntryData', 'OpexGaController::getEntryData');
+    $routes->post('save_budget', 'OpexGaController::saveBudget');
+    $routes->post('submit_budget', 'OpexGaController::submitBudget');
+    $routes->post('getActualData', 'OpexGaController::getActualData');
+    $routes->get('getDetailItems', 'OpexGaController::getDetailItems');
+    $routes->post('saveDetail', 'OpexGaController::saveDetail');
+    $routes->post('deleteDetail', 'OpexGaController::deleteDetail');
     $routes->post('processUpload', 'OpexGaController::processUpload');
     $routes->get('exportExcel', 'OpexGaController::exportExcel');
+});
+
+// FOH — Factory Overhead (Phase 2.1)
+$routes->group('foh', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/', 'Foh::entry');
+    $routes->get('entry', 'Foh::entry');
+    $routes->get('getEntryData', 'Foh::getEntryData');
+    $routes->post('saveBudget', 'Foh::saveBudget');
+    $routes->post('submit', 'Foh::submit');
+    $routes->get('actual', 'Foh::actual');
+    $routes->post('cariActualTable', 'Foh::cariActualTable');
+    $routes->get('summary', 'Foh::summary');
+    $routes->get('getDetailItems', 'Foh::getDetailItems');
+    $routes->post('saveDetail', 'Foh::saveDetail');
+    $routes->post('deleteDetail', 'Foh::deleteDetail');
 });
 // Alias tanpa dash (beberapa view memakai base_url('opexga/...'))
 $routes->group('opexga', ['filter' => 'auth'], function ($routes) {

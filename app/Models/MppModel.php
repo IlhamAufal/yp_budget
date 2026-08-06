@@ -163,24 +163,40 @@ class MppModel extends Model
                 $total += $val;
             }
 
-            $opexBatch[] = array_merge([
+            $opexBatch[] = [
                 'id_coa'      => $defaultCoa,
                 'id_dept'     => (int) $row['id_dept'],
                 'total'       => $total,
                 'year_code'   => $yearCode,
                 'created_by'  => $userId,
                 'created_date'=> date('Y-m-d H:i:s'),
-            ], $months);
+                'months'      => $months,
+            ];
         }
 
         if (! empty($opexBatch)) {
             $usedCoas = array_values(array_unique(array_column($opexBatch, 'id_coa')));
             $this->db->table('yp_plan__trans_budget_entry_data')
                 ->where('year_code', $yearCode)
+                ->where('source', 'MPP')
                 ->whereIn('id_coa', $usedCoas)
                 ->delete();
 
-            $this->db->table('yp_plan__trans_budget_entry_data')->insertBatch($opexBatch);
+            // Kolom bulan bernomor 1..12 harus di-escape backtick (numeric identifier)
+            $cols = '(`id_coa`, `id_dept`, `total`, `year_code`, `created_by`, `created_date`, `source`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`, `11`, `12`)';
+            $vals = 'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+            $stmt = 'INSERT INTO yp_plan__trans_budget_entry_data ' . $cols . ' ' . $vals;
+            foreach ($opexBatch as $row) {
+                $this->db->query($stmt, array_merge([
+                    (int) $row['id_coa'],
+                    (int) $row['id_dept'],
+                    (float) $row['total'],
+                    $row['year_code'],
+                    (int) $row['created_by'],
+                    $row['created_date'],
+                    'MPP',
+                ], array_map('floatval', $row['months'] ?? [])));
+            }
         }
 
         $this->db->transComplete();

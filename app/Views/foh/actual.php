@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
 
-<div x-data="opexGaActualPage()" class="p-4 md:p-8 mx-auto max-w-(--breakpoint-2xl) space-y-6 md:space-y-8">
+<div x-data="fohActualPage()" class="p-4 md:p-8 mx-auto max-w-(--breakpoint-2xl) space-y-6 md:space-y-8">
 
   <!-- HEADER -->
   <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -10,7 +10,7 @@
       <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-3">
         <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
         <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-        <span>OPEX GA</span>
+        <span>FOH</span>
         <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
         <span class="text-brand-500 font-bold">Actual (Realisasi)</span>
       </div>
@@ -18,28 +18,19 @@
         <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10 dark:text-emerald-400">
           <i class="fa-solid fa-chart-column text-xl"></i>
         </span>
-        Actual OPEX GA
+        Actual FOH
       </h1>
       <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-        Realisasi General & Administrative — Tahun Anggaran <span class="font-bold text-brand-500"><?= esc($workingYear) ?></span>
+        Realisasi Factory Overhead — Tahun Anggaran <span class="font-bold text-brand-500"><?= esc($workingYear) ?></span>
       </p>
     </div>
-
-    <button
-      type="button"
-      @click="$dispatch('open-upload-modal', { type: 'opex_actual' })"
-      class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-md hover:bg-emerald-700 transition-all"
-    >
-      <i class="fa-solid fa-cloud-arrow-up"></i>
-      <span>Upload Actual Excel</span>
-    </button>
   </div>
 
   <!-- FILTER -->
   <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs p-5">
     <div class="flex flex-wrap items-end gap-4">
       <div class="flex-1 min-w-[260px]">
-        <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">Cost Center (OPEX)</label>
+        <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">Cost Center (FOH)</label>
         <select
           x-model="dept"
           @change="loadData()"
@@ -82,16 +73,15 @@
             <th class="py-4 px-2 text-right">Nov</th>
             <th class="py-4 px-2 text-right">Dec</th>
             <th class="py-4 px-4 text-right bg-gray-100/70 dark:bg-gray-800">Total</th>
-            <th class="py-4 px-4">Notes</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
           <template x-if="rows.length === 0 && !loading">
             <tr>
-              <td colspan="16" class="py-16 text-center text-gray-400 dark:text-gray-500">
+              <td colspan="15" class="py-16 text-center text-gray-400 dark:text-gray-500">
                 <i class="fa-solid fa-file-circle-question text-2xl mb-3"></i>
                 <p class="font-semibold text-gray-600 dark:text-gray-300">Belum ada data actual</p>
-                <p class="text-sm">Gunakan tombol <strong>Upload Actual Excel</strong> untuk meng-import data realisasi.</p>
+                <p class="text-sm">Pilih cost center atau upload data actual melalui modul terkait.</p>
               </td>
             </tr>
           </template>
@@ -112,7 +102,6 @@
               <td class="py-2.5 px-2 text-right" x-text="fmt(row.nov)"></td>
               <td class="py-2.5 px-2 text-right" x-text="fmt(row.dec)"></td>
               <td class="py-2.5 px-4 text-right font-bold text-brand-500 dark:text-brand-400 bg-gray-50/70 dark:bg-gray-800/50" x-text="fmt(row.total)"></td>
-              <td class="py-2.5 px-4 text-gray-400 dark:text-gray-500" x-text="row.notes || '-'"></td>
             </tr>
           </template>
         </tbody>
@@ -120,12 +109,10 @@
     </div>
   </div>
 
-  <?= $this->include('opex_ga/upload_modal') ?>
-
 </div>
 
 <script>
-  function opexGaActualPage() {
+  function fohActualPage() {
     return {
       dept: '',
       rows: [],
@@ -137,7 +124,7 @@
 
       async loadData() {
         this.loading = true;
-        const res = await window.ypFetch('<?= base_url('opex-ga/getActualData') ?>', { dept: this.dept });
+        const res = await window.ypFetch('<?= base_url('foh/cariActualTable') ?>', { dept: this.dept });
         this.loading = false;
         this.rows = res.rows || [];
       },

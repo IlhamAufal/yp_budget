@@ -37,6 +37,7 @@
           class="hidden dark:block"
           src="<?= base_url('assets/images/logo/logo-sidebar-dark.svg') ?>"
           alt="Logo"
+          
         />
       </span>
 
