@@ -113,7 +113,17 @@ class RoleFilter implements FilterInterface
         }
 
         $session->setFlashdata('error', 'Anda tidak memiliki hak akses ke halaman ini.');
-        return redirect()->to('/dashboard');
+
+        // Target aman: hindari redirect loop bila role user tidak mengizinkan 'dashboard'.
+        // Prioritas: dashboard → segmen modul pertama yang diizinkan → halaman login.
+        $target = '/login';
+        if (in_array('dashboard', $allowedSegments, true)) {
+            $target = '/dashboard';
+        } elseif (! empty($allowedSegments)) {
+            $target = '/' . reset($allowedSegments);
+        }
+
+        return redirect()->to($target);
     }
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)

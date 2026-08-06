@@ -58,6 +58,12 @@ $routes->group('master', ['filter' => 'auth'], function ($routes) {
     $routes->get('configure-period', 'Master::configurePeriod');
     $routes->get('period', 'Master::period');
 
+    // Master Assumption (Phase 3)
+    $routes->get('assumption', 'Master::assumption');
+    $routes->get('assumption/export/(:any)', 'Master::assumptionExport/$1');
+    $routes->post('assumption/upload', 'Master::assumptionUpload');
+    $routes->post('api/assumption/save', 'Master::assumptionSave');
+
     $routes->post('api/coa/save', 'Master::coaSave');
     $routes->post('api/coa/toggle', 'Master::coaToggle');
     $routes->post('api/coa/copy-year', 'Master::coaCopyYear');

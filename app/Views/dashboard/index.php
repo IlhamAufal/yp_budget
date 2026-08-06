@@ -4,6 +4,27 @@
 
 <div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6" x-data="{ period: '<?= esc(session('working_year') ?? date('Y')) ?>' }">
 
+    <?php if (! empty($rolelessUsers)): ?>
+    <div class="flex items-start gap-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-2xl p-4" x-data="{ show: true }" x-show="show" x-transition>
+        <div class="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86l-8.07 14.03A2 2 0 003.93 21h16.14a2 2 0 001.73-3.11L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+        </div>
+        <div class="flex-1">
+            <h3 class="text-sm font-semibold text-amber-800 dark:text-amber-300"><?= (int) $rolelessUsers ?> user aktif belum memiliki role</h3>
+            <p class="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                User tanpa role saat ini dapat mengakses seluruh modul (mode fail-open).
+                Segera assign role agar hak akses terkunci sesuai kebijakan RBAC.
+            </p>
+        </div>
+        <div class="flex items-center gap-3 shrink-0 mt-0.5">
+            <a href="<?= base_url('sys-admin/user') ?>" class="text-xs font-medium text-amber-700 dark:text-amber-300 hover:underline">Kelola User &rarr;</a>
+            <button @click="show = false" class="text-amber-500 hover:text-amber-700 dark:hover:text-amber-300" aria-label="Tutup">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700/60 shadow-xs">
         <div>
             <div class="flex items-center gap-2">

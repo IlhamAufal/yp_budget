@@ -568,6 +568,14 @@
                 </li>
                 <li>
                   <a
+                    href="<?= base_url('master/assumption') ?>"
+                    class="menu-dropdown-item group <?= url_is('master/assumption*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
+                  >
+                    Master Assumption
+                  </a>
+                </li>
+                <li>
+                  <a
                     href="<?= base_url('master/configure-period') ?>"
                     class="menu-dropdown-item group <?= (url_is('master/configure-period*') || url_is('master/period*')) ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
                   >

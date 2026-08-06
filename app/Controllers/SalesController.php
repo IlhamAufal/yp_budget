@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Libraries\ExcelExporter;
 use App\Libraries\ExcelImporter;
+use App\Models\AssumptionModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
 /**
@@ -65,16 +66,24 @@ class SalesController extends BaseController
 
     /**
      * 4. Sales Simulation Page (Revenue & Volume)
+     *
+     * Basis data berasal dari Master Assumption (Phase 3):
+     *   - KURS (USD/EUR) dari yp_plan__master_assumption
+     *   - Volume & ASP dari yp_plan__master_assumption_sales_domestic / _export
+     * Simulasi (what-if) dihitung client-side via Alpine.js.
      */
     public function simulation(): string
     {
         $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $assumption  = new AssumptionModel();
+        $yearInt     = (int) $workingYear;
 
         return view('sales/simulation', [
-            'title'       => 'Sales Simulation',
-            'workingYear' => $workingYear,
-            'revData'     => [],
-            'volData'     => [],
+            'title'          => 'Sales Simulation',
+            'workingYear'    => $workingYear,
+            'kurs'           => $assumption->getKurs($yearInt),
+            'domesticAssump' => $assumption->getSalesDomestic($yearInt),
+            'exportAssump'   => $assumption->getSalesExport($yearInt),
         ]);
     }
 

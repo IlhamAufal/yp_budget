@@ -2,6 +2,9 @@
 
 namespace App\Controllers;
 
+use App\Libraries\ExcelExporter;
+use App\Libraries\ExcelImporter;
+use App\Models\AssumptionModel;
 use App\Models\CoaModel;
 use App\Models\CostCenterModel;
 use App\Models\DepartmentModel;
@@ -25,6 +28,7 @@ class Master extends BaseController
     protected $period;
     protected $product;
     protected $salaryMpp;
+    protected $assumption;
 
     public function __construct()
     {
@@ -34,6 +38,7 @@ class Master extends BaseController
         $this->period     = new PeriodModel();
         $this->product    = new ProductModel();
         $this->salaryMpp  = new SalaryMppModel();
+        $this->assumption = new AssumptionModel();
     }
 
     public function index(): RedirectResponse
@@ -153,6 +158,23 @@ class Master extends BaseController
     public function period()
     {
         return $this->configurePeriod();
+    }
+
+    public function assumption()
+    {
+        $year = (int) ($this->request->getGet('year') ?: session()->get('year_code') ?: date('Y'));
+
+        return view('master-data/assumption', [
+            'title'    => 'Master Data - Assumption',
+            'year'     => $year,
+            'years'    => $this->assumption->getYears(),
+            'types'    => $this->assumption->getTypes(),
+            'economic' => $this->assumption->getEconomic($year),
+            'domestic' => $this->assumption->getSalesDomestic($year),
+            'export'   => $this->assumption->getSalesExport($year),
+            'other'    => $this->assumption->getOther($year),
+            'flash'    => $this->consumeFlash(),
+        ]);
     }
 
     /* ------------------------------------------------------------------
@@ -439,6 +461,171 @@ class Master extends BaseController
         $result = $this->salaryMpp->toggleStatus($id);
 
         return $this->jsonResult($result);
+    }
+
+    /* ------------------------------------------------------------------
+     * Assumption AJAX / Upload / Export
+     * ------------------------------------------------------------------ */
+
+    public function assumptionSave(): ResponseInterface
+    {
+        $category = (string) $this->request->getPost('category');
+        $year     = (int) ($this->request->getPost('year') ?: session()->get('year_code') ?: date('Y'));
+        $userId   = (int) (session()->get('user_id') ?? 0);
+
+        // Guard: payload baris wajib JSON array yang valid. Payload rusak JANGAN
+        // diteruskan — save bersifat replace-per-year (bisa menghapus data lama).
+        $rows = json_decode((string) $this->request->getPost('rows'), true);
+        if (! is_array($rows)) {
+            return $this->jsonResult(['success' => false, 'message' => 'Format data baris tidak valid. Perubahan tidak disimpan.']);
+        }
+
+        $result = match ($category) {
+            'ekonomi'  => ['success' => $this->assumption->saveEconomic($year, $rows, $userId), 'message' => "Asumsi ekonomi tahun {$year} berhasil disimpan."],
+            'domestic' => ['success' => $this->assumption->saveSalesDomestic($year, $rows, $userId), 'message' => "Asumsi sales domestic tahun {$year} berhasil disimpan."],
+            'export'   => ['success' => $this->assumption->saveSalesExport($year, $rows, $userId), 'message' => "Asumsi sales export tahun {$year} berhasil disimpan."],
+            'other'    => ['success' => $this->assumption->saveOther($year, $rows, $userId), 'message' => "Asumsi lain (FOH) tahun {$year} berhasil disimpan."],
+            default    => ['success' => false, 'message' => 'Kategori asumsi tidak dikenal.'],
+        };
+
+        return $this->jsonResult($result);
+    }
+
+    public function assumptionUpload()
+    {
+        $category = (string) $this->request->getPost('category');
+        $year     = (int) ($this->request->getPost('year') ?: session()->get('year_code') ?: date('Y'));
+        $file     = $this->request->getFile('excel_file');
+
+        if (! $file || ! $file->isValid() || $file->hasMoved()) {
+            session()->setFlashdata('master_err', 'File tidak valid atau gagal diunggah.');
+
+            return redirect()->back();
+        }
+
+        $userId = (int) (session()->get('user_id') ?? 0);
+
+        try {
+            $rows  = ExcelImporter::import($file, true);
+            $saved = 0;
+
+            if (empty($rows)) {
+                session()->setFlashdata('master_err', 'File Excel kosong atau header tidak dikenali.');
+
+                return redirect()->back();
+            }
+
+            switch ($category) {
+                case 'ekonomi':
+                    $clean = [];
+                    foreach ($rows as $row) {
+                        $typeId = $this->assumption->resolveTypeId(ExcelImporter::column($row, ['type', 'type_id', 'tipe']));
+                        $desc   = trim((string) ExcelImporter::column($row, ['description', 'desc', 'deskripsi'], ''));
+                        if ($typeId === null || $desc === '') {
+                            continue;
+                        }
+                        $clean[] = [
+                            'desc'    => $desc,
+                            'type_id' => $typeId,
+                            'value'   => ExcelImporter::toFloat(ExcelImporter::column($row, ['value', 'nilai'], 0)),
+                        ];
+                        $saved++;
+                    }
+                    $ok = $this->assumption->saveEconomic($year, $clean, $userId);
+                    break;
+
+                case 'domestic':
+                case 'export':
+                    $clean = [];
+                    foreach ($rows as $row) {
+                        $clean[] = [
+                            'key_channel'     => trim((string) ExcelImporter::column($row, ['channel', 'key_channel'], '')),
+                            'key_description' => trim((string) ExcelImporter::column($row, ['description', 'key_description'], '')),
+                            'key_indicator'   => trim((string) ExcelImporter::column($row, ['indicator', 'key_indicator'], '')),
+                            'key_value'       => ExcelImporter::toFloat(ExcelImporter::column($row, ['value', 'key_value'], 0)),
+                        ];
+                        $saved++;
+                    }
+                    $ok = $category === 'domestic'
+                        ? $this->assumption->saveSalesDomestic($year, $clean, $userId)
+                        : $this->assumption->saveSalesExport($year, $clean, $userId);
+                    break;
+
+                case 'other':
+                    $clean = [];
+                    foreach ($rows as $row) {
+                        $clean[] = [
+                            'id_assp'       => trim((string) ExcelImporter::column($row, ['id_assp', 'kode'], '')),
+                            'tipe_group'    => trim((string) ExcelImporter::column($row, ['tipe_group', 'group', 'grouping'], '')),
+                            'variable_text' => trim((string) ExcelImporter::column($row, ['variable', 'variable_text', 'description'], '')),
+                            'value_text'    => ExcelImporter::toFloat(ExcelImporter::column($row, ['value', 'value_text'], 0)),
+                        ];
+                        $saved++;
+                    }
+                    $ok = $this->assumption->saveOther($year, $clean, $userId);
+                    break;
+
+                default:
+                    session()->setFlashdata('master_err', 'Kategori asumsi tidak dikenal.');
+
+                    return redirect()->back();
+            }
+
+            if (! $ok) {
+                session()->setFlashdata('master_err', 'Gagal menyimpan data upload asumsi.');
+
+                return redirect()->back();
+            }
+
+            session()->setFlashdata('master_msg', "Data asumsi {$category} tahun {$year} berhasil diimport ({$saved} baris).");
+
+            return redirect()->back();
+        } catch (\Throwable $e) {
+            log_message('error', 'Assumption upload: ' . $e->getMessage());
+
+            session()->setFlashdata('master_err', 'Gagal membaca file Excel: ' . $e->getMessage());
+
+            return redirect()->back();
+        }
+    }
+
+    public function assumptionExport($category): ResponseInterface
+    {
+        $year  = (int) ($this->request->getGet('year') ?: session()->get('year_code') ?: date('Y'));
+        $rows  = [];
+        $headers = ['KATEGORI', 'DESKRIPSI', 'NILAI'];
+
+        switch ($category) {
+            case 'ekonomi':
+                $headers = ['TYPE', 'DESCRIPTION', 'VALUE'];
+                foreach ($this->assumption->getEconomic($year) as $r) {
+                    $rows[] = [$r['type_desc'] ?? '', $r['desc'] ?? '', (float) ($r['value'] ?? 0)];
+                }
+                break;
+
+            case 'domestic':
+            case 'export':
+                $headers = ['CHANNEL', 'DESCRIPTION', 'INDICATOR', 'VALUE'];
+                $data = $category === 'domestic'
+                    ? $this->assumption->getSalesDomestic($year)
+                    : $this->assumption->getSalesExport($year);
+                foreach ($data as $r) {
+                    $rows[] = [$r['key_channel'] ?? '', $r['key_description'] ?? '', $r['key_indicator'] ?? '', (float) ($r['key_value'] ?? 0)];
+                }
+                break;
+
+            case 'other':
+                $headers = ['ID_ASSP', 'TIPE_GROUP', 'VARIABLE', 'VALUE'];
+                foreach ($this->assumption->getOther($year) as $r) {
+                    $rows[] = [$r['id_assp'] ?? '', $r['tipe_group'] ?? '', $r['variable_text'] ?? '', (float) ($r['value_text'] ?? 0)];
+                }
+                break;
+
+            default:
+                return $this->response->setStatusCode(404);
+        }
+
+        return ExcelExporter::export($headers, $rows, 'Assumption_' . $category . '_' . $year, 'Assumption');
     }
 
     /* ------------------------------------------------------------------
