@@ -34,7 +34,7 @@ class FohModel extends Model
     public function getCostCenters(): array
     {
         return $this->db->table('gw_plan__master_cost_center')
-            ->select('cost_center, cost_desc, cost_center_sap')
+            ->select("cost_center, COALESCE(NULLIF(cost_center_sap,''), CAST(cost_center AS CHAR)) AS cc_code, cost_desc, cost_center_sap")
             ->where('status', 'A')
             ->where('type', 'FOH')
             ->orderBy('cost_center', 'ASC')
@@ -48,7 +48,7 @@ class FohModel extends Model
     public function getCoas(): array
     {
         return $this->db->table('gw_plan__master_coa')
-            ->select('main_account, cost_center_desc')
+            ->select("main_account, COALESCE(NULLIF(id_acct_ext,''), CAST(main_account AS CHAR)) AS acct_code, cost_center_desc")
             ->groupStart()
                 ->where('category', 'FOHEXP')
                 ->orWhere('type', 'FOH')
@@ -70,6 +70,7 @@ class FohModel extends Model
     {
         $builder = $this->db->table('yp_plan__trans_budget_entry_data t')
             ->select('t.id, t.id_coa, t.id_dept')
+            ->select("COALESCE(NULLIF(c.id_acct_ext,''), c.main_account, 0) AS acct_code")
             ->select("COALESCE(c.cost_center_desc, '') AS coa_desc")
             ->select('IFNULL(t.total,0) AS total, COALESCE(t.submit_status, \'DRAFT\') AS submit_status')
             ->select("IFNULL(t.`1`,0) AS jan, IFNULL(t.`2`,0) AS feb, IFNULL(t.`3`,0) AS mar, IFNULL(t.`4`,0) AS apr, IFNULL(t.`5`,0) AS may, IFNULL(t.`6`,0) AS jun")

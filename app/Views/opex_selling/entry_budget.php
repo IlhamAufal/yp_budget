@@ -12,7 +12,7 @@
                     class="w-full sm:w-80 px-3.5 py-2 text-xs md:text-sm bg-gray-50 dark:bg-meta-4/40 border border-stroke dark:border-strokedark rounded-xl text-gray-900 dark:text-white focus:border-primary focus:outline-none">
                 <option value="">-- Pilih Cost Center Selling --</option>
                 <?php foreach ($dept as $d) : ?>
-                    <option value="<?= esc($d['cost_center']); ?>"><?= esc($d['cost_center']); ?> - <?= esc($d['cost_desc']); ?></option>
+                    <option value="<?= esc($d['cost_center']); ?>"><?= esc($d['cc_code']); ?> - <?= esc($d['cost_desc']); ?></option>
                 <?php endforeach; ?>
             </select>
         </div>

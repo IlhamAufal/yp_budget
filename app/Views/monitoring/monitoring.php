@@ -131,7 +131,7 @@
                                         <td class="px-4 py-2.5 font-medium border-r border-gray-200 dark:border-gray-800">
                                             <button @click="openDetail('<?= $files['id_dept']; ?>', '<?= esc($files['cost_desc'] ?? ''); ?>', 'OPEX GA')" 
                                                     class="text-brand-600 hover:text-brand-700 dark:text-brand-400 font-semibold hover:underline text-left">
-                                                <?= esc($files['id_dept']); ?> - <?= esc($files['cost_desc']); ?>
+                                                <?= esc($files['cc_sap'] ?? $files['id_dept']); ?> - <?= esc($files['cost_desc']); ?>
                                             </button>
                                         </td>
                                         <td class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-800"><?= esc($files['tags'] ?? '-'); ?></td>
@@ -192,7 +192,7 @@
                                         <td class="px-4 py-2.5 font-medium border-r border-gray-200 dark:border-gray-800">
                                             <button @click="openDetail('<?= $files2['id_dept']; ?>', '<?= esc($files2['cost_desc'] ?? ''); ?>', 'FOH')" 
                                                     class="text-brand-600 hover:text-brand-700 dark:text-brand-400 font-semibold hover:underline text-left">
-                                                <?= esc($files2['id_dept']); ?> - <?= esc($files2['cost_desc']); ?>
+                                                <?= esc($files2['cc_sap'] ?? $files2['id_dept']); ?> - <?= esc($files2['cost_desc']); ?>
                                             </button>
                                         </td>
                                         <td class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-800"><?= esc($files2['tags'] ?? '-'); ?></td>
@@ -270,7 +270,7 @@
                                         <td class="px-4 py-2.5 font-medium border-r border-gray-200 dark:border-gray-800">
                                             <button @click="openDetail('<?= $files1['cost_center']; ?>', '<?= esc($files1['cost_desc'] ?? ''); ?>', 'MPP OPEX')" 
                                                     class="text-brand-600 hover:text-brand-700 dark:text-brand-400 font-semibold hover:underline text-left">
-                                                <?= esc($files1['cost_center']); ?> - <?= esc($files1['cost_desc']); ?>
+                                                <?= esc($files1['cc_sap'] ?? $files1['cost_center']); ?> - <?= esc($files1['cost_desc']); ?>
                                             </button>
                                         </td>
                                         <td class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-800"><?= esc($files1['desc_mpp'] ?? '-'); ?></td>
@@ -364,7 +364,7 @@
                                         <td class="px-4 py-2.5 font-medium border-r border-gray-200 dark:border-gray-800">
                                             <button @click="openDetail('<?= $files_foh['cost_center']; ?>', '<?= esc($files_foh['cost_desc'] ?? ''); ?>', 'MPP FOH')" 
                                                     class="text-brand-600 hover:text-brand-700 dark:text-brand-400 font-semibold hover:underline text-left">
-                                                <?= esc($files_foh['cost_center']); ?> - <?= esc($files_foh['cost_desc']); ?>
+                                                <?= esc($files_foh['cc_sap'] ?? $files_foh['cost_center']); ?> - <?= esc($files_foh['cost_desc']); ?>
                                             </button>
                                         </td>
                                         <td class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-800"><?= esc($files_foh['desc_mpp'] ?? '-'); ?></td>
@@ -445,7 +445,7 @@
                                     <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
                                         <td class="px-4 py-2.5 font-medium border-r border-gray-200 dark:border-gray-800"><?= esc($row['cost_center_desc'] ?? ''); ?></td>
                                         <td class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-800"><?= esc($row['item_desc'] ?? ''); ?></td>
-                                        <td class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-800"><?= esc(str_replace('7710000', '', $row['main_account'] ?? '')); ?></td>
+                                        <td class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-800"><?= esc($row['main_account'] ?? ''); ?></td>
                                         <td class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-800"><?= esc($row['cost_center'] ?? ''); ?></td>
                                         <td class="px-3 py-2.5 text-right border-r border-gray-200 dark:border-gray-800"><?= number_format($row['unit'] ?? 0, 0); ?></td>
                                         <td class="px-3 py-2.5 text-right border-r border-gray-200 dark:border-gray-800"><?= number_format($row['unit_price'] ?? 0, 2); ?></td>

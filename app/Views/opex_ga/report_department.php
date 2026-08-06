@@ -15,7 +15,7 @@
                 <option value="1">[All Cost Center] Only New Lines</option>
                 <option value="2">[All Cost Center] Exclude New Lines</option>
                 <?php $no = 1; foreach ($dept as $depts) : ?>
-                    <option value="<?= esc($depts['cost_center']); ?>"><?= $no; ?>. <?= esc($depts['cost_desc']); ?></option>
+                    <option value="<?= esc($depts['cost_center']); ?>"><?= $no; ?>. <?= esc($depts['cc_code']); ?> - <?= esc($depts['cost_desc']); ?></option>
                 <?php $no++; endforeach; ?>
             </select>
         </div>

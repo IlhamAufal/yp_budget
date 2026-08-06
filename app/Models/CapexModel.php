@@ -243,9 +243,10 @@ class CapexModel extends Model
     public function getDepreciationMasters(): array
     {
         try {
-            return $this->db->table('yp_plan__master_amount_depreciation')
-                ->select('id, main_account, amount')
-                ->orderBy('main_account', 'ASC')
+            return $this->db->table('yp_plan__master_amount_depreciation a')
+                ->select("a.id, a.main_account, COALESCE(NULLIF(c.id_acct_ext,''), c.main_account, 0) AS acct_code, a.amount")
+                ->join('gw_plan__master_coa c', 'c.main_account = a.main_account', 'left')
+                ->orderBy('a.main_account', 'ASC')
                 ->get()->getResultArray();
         } catch (\Throwable $e) {
             return [];
@@ -261,11 +262,12 @@ class CapexModel extends Model
         $sql = "SELECT h.id,
                        h.item_desc AS asset_description,
                        COALESCE(c.cost_center_desc, CONCAT('MA ', h.main_account)) AS category_name,
+                       COALESCE(NULLIF(c.id_acct_ext,''), h.main_account, 0) AS main_account,
                        h.unit AS acquisition_month,
                        COALESCE(CAST(h.remarks AS UNSIGNED), 0) AS useful_life_years,
                        h.unit_price AS acquisition_cost,
                        IFNULL(d.total, 0) AS monthly_depreciation,
-                       h.dept_id, h.main_account, h.cost_center
+                       h.dept_id, h.cost_center
                 FROM yp_plan__trans_capex_entry_header h
                 LEFT JOIN yp_plan__trans_capex_entry_depreciation d ON d.id_header = h.id
                 LEFT JOIN gw_plan__master_coa c ON c.main_account = h.main_account

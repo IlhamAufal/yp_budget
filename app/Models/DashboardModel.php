@@ -187,13 +187,14 @@ class DashboardModel extends Model
         // 1) Budget (OPEX/Selling/FOH + push) per cost center
         $sql = "SELECT t.id_dept AS dept,
                        COALESCE(cc.cost_desc, '') AS cost_desc,
+                       COALESCE(NULLIF(cc.cost_center_sap,''), CAST(cc.cost_center AS CHAR)) AS cc_sap,
                        IFNULL(SUM(t.`1`+t.`2`+t.`3`+t.`4`+t.`5`+t.`6`+t.`7`+t.`8`+t.`9`+t.`10`+t.`11`+t.`12`),0) AS opex,
                        COUNT(*) AS entries,
                        SUM(CASE WHEN t.submit_status IN ('SUBMITTED','APPROVED') THEN 1 ELSE 0 END) AS submitted
                 FROM yp_plan__trans_budget_entry_data t
                 LEFT JOIN gw_plan__master_cost_center cc ON cc.cost_center = t.id_dept
                 WHERE t.year_code = ?
-                GROUP BY t.id_dept, cc.cost_desc";
+                GROUP BY t.id_dept, cc.cost_desc, cc.cost_center_sap";
 
         try {
             $budget = $this->db->query($sql, [$year])->getResultArray();
@@ -242,6 +243,7 @@ class DashboardModel extends Model
             $merged[$dept] = [
                 'cost_center' => $dept,
                 'cost_desc'   => (string) ($row['cost_desc'] ?? ''),
+                'cc_sap'      => (string) ($row['cc_sap'] ?? ''),
                 'opex'        => (float) ($row['opex'] ?? 0),
                 'capex'       => (float) ($capexMap[$dept] ?? 0),
                 'mpp'         => (int) ($mppMap[$dept] ?? 0),
@@ -255,10 +257,11 @@ class DashboardModel extends Model
             if (isset($merged[$dept])) {
                 continue;
             }
-            $desc = $this->costDesc($dept);
+            $meta = $this->costMeta($dept);
             $merged[$dept] = [
                 'cost_center' => $dept,
-                'cost_desc'   => $desc,
+                'cost_desc'   => $meta['cost_desc'],
+                'cc_sap'      => $meta['cc_sap'],
                 'opex'        => 0.0,
                 'capex'       => (float) ($capexMap[$dept] ?? 0),
                 'mpp'         => (int) ($mppMap[$dept] ?? 0),
@@ -297,18 +300,21 @@ class DashboardModel extends Model
      * Helper
      * ------------------------------------------------------------------ */
 
-    private function costDesc(string $dept): string
+    private function costMeta(string $dept): array
     {
         try {
             $row = $this->db->table('gw_plan__master_cost_center')
-                ->select('cost_desc')
+                ->select("cost_desc, COALESCE(NULLIF(cost_center_sap,''), CAST(cost_center AS CHAR)) AS cc_sap")
                 ->where('cost_center', $dept)
                 ->get()
                 ->getRowArray();
 
-            return (string) ($row['cost_desc'] ?? '');
+            return [
+                'cost_desc' => (string) ($row['cost_desc'] ?? ''),
+                'cc_sap'    => (string) ($row['cc_sap'] ?? $dept),
+            ];
         } catch (\Throwable $e) {
-            return '';
+            return ['cost_desc' => '', 'cc_sap' => $dept];
         }
     }
 

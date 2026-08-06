@@ -203,7 +203,7 @@ class CapexController extends BaseController
             $cats[] = [
                 'id'            => (int) $r['id'],
                 'main_account'  => (int) $r['main_account'],
-                'category_name' => 'MA ' . $r['main_account'] . ' (' . $r['amount'] . ' th)',
+                'category_name' => ($r['acct_code'] ?? $r['main_account']) . ' (' . $r['amount'] . ' th)',
             ];
         }
         return $cats;

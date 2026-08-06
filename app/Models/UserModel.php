@@ -172,11 +172,16 @@ class UserModel extends Model
                 'user_name'     => $name,
                 'user_email'    => trim($data['user_email'] ?? '') ?: null,
                 'user_active'   => ($data['user_active'] ?? 'Y') === 'Y' ? 'Y' : 'N',
-                'user_admin'    => ($data['user_admin'] ?? 'N') === 'Y' ? 'Y' : 'N',
                 'user_block'    => ($data['user_block'] ?? 'N') === 'Y' ? 'Y' : 'N',
                 'user_change_on' => date('Y-m-d H:i:s'),
                 'user_change_by' => (string) session()->get('user_username'),
             ];
+
+            // Field admin hanya diubah bila dikirim form (mencegah reset ke 'N'
+            // saat field admin dihapus dari UI — admin kini ditandai via role).
+            if (array_key_exists('user_admin', $data)) {
+                $fields['user_admin'] = (($data['user_admin'] ?? 'N') === 'Y') ? 'Y' : 'N';
+            }
 
             if ($password !== '') {
                 $fields['user_password'] = $this->hashPassword($password);

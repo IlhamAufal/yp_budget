@@ -106,17 +106,15 @@
           <tr class="border-b border-gray-200/80 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-800/50 text-xs font-bold capitalize tracking-normal text-gray-500 dark:text-gray-400">
             <th class="py-4 px-5 w-12 text-center">No.</th>
             <th class="py-4 px-5">Nama Menu</th>
-            <th class="py-4 px-5">Grup</th>
-            <th class="py-4 px-5">Tingkat</th>
             <th class="py-4 px-5">Link</th>
             <th class="py-4 px-5 text-center">Status</th>
-            <th class="py-4 px-5 text-right w-24">Action</th>
+            <th class="py-4 px-5 text-right w-28">Action</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-sm">
           <?php if (empty($rows)): ?>
             <tr>
-              <td colspan="7" class="py-20 text-center text-gray-400 dark:text-gray-500">
+              <td colspan="5" class="py-20 text-center text-gray-400 dark:text-gray-500">
                 <div class="flex flex-col items-center justify-center gap-4">
                   <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400">
                     <i class="fa-solid fa-bars-staggered text-2xl"></i>
@@ -152,29 +150,6 @@
                       </div>
                     </div>
                   </div>
-                </td>
-
-                <!-- Grup -->
-                <td class="py-4 px-5">
-                  <span class="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
-                    <i class="fa-solid fa-layer-group text-[10px]"></i>
-                    <?= esc($r['menu_group'] ?: '-') ?>
-                  </span>
-                </td>
-
-                <!-- Tingkat -->
-                <td class="py-4 px-5">
-                  <?php if (($r['menu_level'] ?? '1') === '1'): ?>
-                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-                      <i class="fa-solid fa-diagram-project text-[10px]"></i>
-                      Parent
-                    </span>
-                  <?php else: ?>
-                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-600 dark:bg-sky-500/10 dark:text-sky-400">
-                      <i class="fa-solid fa-indent text-[10px]"></i>
-                      Level 2
-                    </span>
-                  <?php endif; ?>
                 </td>
 
                 <!-- Link -->
@@ -419,6 +394,7 @@
             </label>
             <select
               x-model="form.parent_id"
+              @change="syncLevelFromParent()"
               class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
             >
               <option value="">— Tidak ada (Menu Utama) —</option>
@@ -459,18 +435,18 @@
             </select>
           </div>
 
-          <!-- Level -->
+          <!-- Level (otomatis dari parent) -->
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
               Level
             </label>
-            <select
-              x-model="form.menu_level"
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
-            >
-              <option value="1">Level 1 (Parent)</option>
-              <option value="2">Level 2 (Sub-menu)</option>
-            </select>
+            <input
+              type="text"
+              disabled
+              :value="form.parent_id ? 'Level 2 (Sub-menu)' : 'Level 1 (Parent)'"
+              class="w-full rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 text-sm font-bold text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 cursor-not-allowed"
+            />
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">Dihitung otomatis dari pilihan Parent Menu.</p>
           </div>
         </div>
 
@@ -511,6 +487,9 @@
       });
     </script>
   <?php endif; ?>
+
+  <!-- Confirm Modal Reusable -->
+  <?= $this->include('partials/confirm_modal') ?>
 
 </div>
 
@@ -629,38 +608,57 @@
         }
       },
 
-      async toggleStatus(id, actionText) {
-        if (!window.ypConfirm(`Apakah Anda yakin ingin ${actionText} menu ini?`)) {
-          return;
-        }
-        try {
-          const res = await window.ypFetch('<?= base_url('sys-admin/api/menu/toggle') ?>', { id });
-          if (res.success) {
-            window.showToast('success', res.message || 'Status berhasil diubah');
-            setTimeout(() => window.location.reload(), 600);
-          } else {
-            window.showToast('error', res.message || 'Gagal mengubah status');
-          }
-        } catch (e) {
-          window.showToast('error', 'Terjadi kesalahan saat memproses permintaan');
-        }
+      syncLevelFromParent() {
+        this.form.menu_level = this.form.parent_id ? '2' : '1';
       },
 
-      async deleteMenu(id) {
-        if (!window.ypConfirm('Apakah Anda yakin ingin menghapus menu ini? Tindakan ini tidak dapat dibatalkan.')) {
-          return;
-        }
-        try {
-          const res = await window.ypFetch('<?= base_url('sys-admin/api/menu/delete') ?>', { id });
-          if (res.success) {
-            window.showToast('success', res.message || 'Menu berhasil dihapus');
-            setTimeout(() => window.location.reload(), 600);
-          } else {
-            window.showToast('error', res.message || 'Gagal menghapus menu');
+      toggleStatus(id, actionText) {
+        const active = actionText === 'nonaktifkan';
+        window.openConfirmDialog({
+          title: active ? 'Nonaktifkan Menu' : 'Aktifkan Menu',
+          message: active
+            ? 'Menu ini tidak akan tampil di sidebar hingga diaktifkan kembali. Lanjutkan?'
+            : 'Menu ini akan kembali tampil di sidebar. Lanjutkan?',
+          icon: 'fa-power-off',
+          tone: active ? 'warning' : 'primary',
+          confirmText: active ? 'Ya, Nonaktifkan' : 'Ya, Aktifkan',
+          onConfirm: async () => {
+            try {
+              const res = await window.ypFetch('<?= base_url('sys-admin/api/menu/toggle') ?>', { id });
+              if (res.success) {
+                window.showToast('success', res.message || 'Status berhasil diubah');
+                setTimeout(() => window.location.reload(), 600);
+              } else {
+                window.showToast('error', res.message || 'Gagal mengubah status');
+              }
+            } catch (e) {
+              window.showToast('error', 'Terjadi kesalahan saat memproses permintaan');
+            }
           }
-        } catch (e) {
-          window.showToast('error', 'Terjadi kesalahan saat memproses permintaan');
-        }
+        });
+      },
+
+      deleteMenu(id) {
+        window.openConfirmDialog({
+          title: 'Hapus Menu',
+          message: 'Apakah Anda yakin ingin menghapus menu ini? Tindakan ini tidak dapat dibatalkan.',
+          icon: 'fa-trash',
+          tone: 'danger',
+          confirmText: 'Ya, Hapus',
+          onConfirm: async () => {
+            try {
+              const res = await window.ypFetch('<?= base_url('sys-admin/api/menu/delete') ?>', { id });
+              if (res.success) {
+                window.showToast('success', res.message || 'Menu berhasil dihapus');
+                setTimeout(() => window.location.reload(), 600);
+              } else {
+                window.showToast('error', res.message || 'Gagal menghapus menu');
+              }
+            } catch (e) {
+              window.showToast('error', 'Terjadi kesalahan saat memproses permintaan');
+            }
+          }
+        });
       }
     };
   }

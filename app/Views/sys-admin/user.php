@@ -107,7 +107,6 @@
             <th class="py-4 px-5 w-12 text-center">No.</th>
             <th class="py-4 px-5">User</th>
             <th class="py-4 px-5">Role</th>
-            <th class="py-4 px-5 text-center">Admin</th>
             <th class="py-4 px-5 text-center">Status</th>
             <th class="py-4 px-5 text-right w-44">Action</th>
           </tr>
@@ -115,7 +114,7 @@
         <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-sm">
           <?php if (empty($rows)): ?>
             <tr>
-              <td colspan="6" class="py-20 text-center text-gray-400 dark:text-gray-500">
+              <td colspan="5" class="py-20 text-center text-gray-400 dark:text-gray-500">
                 <div class="flex flex-col items-center justify-center gap-4">
                   <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400">
                     <i class="fa-solid fa-users-gear text-2xl"></i>
@@ -156,13 +155,22 @@
                   </div>
                 </td>
 
-                <!-- Role -->
+                <!-- Role (mahkota bila role admin / user_admin) -->
                 <td class="py-4 px-5">
+                  <?php
+                    $isAdminFlag = (($r['user_admin'] ?? 'N') === 'Y');
+                  ?>
                   <?php if (empty($userRoleIds)): ?>
-                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-500 dark:bg-gray-800 dark:text-gray-400">
-                      <i class="fa-solid fa-user-slash text-[10px]"></i>
-                      Tanpa Role
-                    </span>
+                    <?php if ($isAdminFlag): ?>
+                      <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
+                        <i class="fa-solid fa-crown text-[10px]"></i> Admin
+                      </span>
+                    <?php else: ?>
+                      <span class="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                        <i class="fa-solid fa-user-slash text-[10px]"></i>
+                        Tanpa Role
+                      </span>
+                    <?php endif; ?>
                   <?php else: ?>
                     <div class="flex flex-wrap items-center gap-1.5">
                       <?php foreach ($userRoleIds as $rid): ?>
@@ -174,24 +182,18 @@
                                   break;
                               }
                           }
+                          $isAdminRole = $isAdminFlag || (stripos($roleName, 'admin') !== false);
                         ?>
-                        <span class="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
-                          <i class="fa-solid fa-user-tag text-[10px]"></i>
+                        <span class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold <?= $isAdminRole ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' : 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400' ?>">
+                          <?php if ($isAdminRole): ?>
+                            <i class="fa-solid fa-crown text-[10px]"></i>
+                          <?php else: ?>
+                            <i class="fa-solid fa-user-tag text-[10px]"></i>
+                          <?php endif; ?>
                           <?= esc($roleName ?: 'Role #' . $rid) ?>
                         </span>
                       <?php endforeach; ?>
                     </div>
-                  <?php endif; ?>
-                </td>
-
-                <!-- Admin -->
-                <td class="py-4 px-5 text-center">
-                  <?php if (($r['user_admin'] ?? 'N') === 'Y'): ?>
-                    <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
-                      <i class="fa-solid fa-crown text-[10px]"></i> Admin
-                    </span>
-                  <?php else: ?>
-                    <span class="text-gray-300 dark:text-gray-600"><i class="fa-solid fa-minus"></i></span>
                   <?php endif; ?>
                 </td>
 
@@ -424,30 +426,68 @@
           </div>
         </div>
 
-        <!-- Role Assignment -->
+        <!-- Role Assignment (satu role per user) -->
         <div>
           <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
-            Role Pengguna
+            Role Pengguna <span class="text-red-500">*</span>
           </label>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <template x-for="role in roleOptions" :key="role.role_id">
-              <label class="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/50 p-3 cursor-pointer hover:border-brand-300 dark:hover:border-brand-700 transition-colors">
+          <div class="relative" @click.outside="roleDropdownOpen = false">
+            <!-- Trigger -->
+            <button
+              type="button"
+              @click="roleDropdownOpen = !roleDropdownOpen"
+              class="w-full flex items-center justify-between gap-3 rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-left font-semibold text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+            >
+              <span class="flex items-center gap-2.5">
+                <i class="fa-solid fa-user-tag text-gray-400"></i>
+                <span x-text="roleLabel()" :class="form.role_id ? '' : 'text-gray-400 dark:text-gray-500'"></span>
+              </span>
+              <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform" :class="roleDropdownOpen ? 'rotate-180' : ''"></i>
+            </button>
+
+            <!-- Dropdown + Search (search muncul saat dropdown dibuka) -->
+            <div
+              x-show="roleDropdownOpen"
+              x-transition:enter="transition ease-out duration-150"
+              x-transition:enter-start="opacity-0 scale-95"
+              x-transition:enter-end="opacity-100 scale-100"
+              x-transition:leave="transition ease-in duration-100"
+              x-transition:leave-start="opacity-100 scale-100"
+              x-transition:leave-end="opacity-0 scale-95"
+              class="absolute z-20 mt-2 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl overflow-hidden"
+            >
+              <div class="relative border-b border-gray-100 dark:border-gray-800">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none"></i>
                 <input
-                  type="checkbox"
-                  class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/30"
-                  :value="role.role_id"
-                  x-model="form.role_ids"
+                  type="text"
+                  x-model="roleSearch"
+                  placeholder="Cari role..."
+                  class="w-full bg-transparent py-3 pl-10 pr-4 text-sm text-gray-800 dark:text-white placeholder:text-gray-400 focus:outline-none"
                 />
-                <span class="flex items-center gap-2">
-                  <i class="fa-solid fa-user-tag text-gray-400"></i>
-                  <span class="text-sm font-semibold text-gray-700 dark:text-gray-200" x-text="role.role_name_idn"></span>
-                </span>
-              </label>
-            </template>
+              </div>
+              <div class="max-h-56 overflow-y-auto py-1.5">
+                <template x-for="role in filteredRoles()" :key="role.role_id">
+                  <button
+                    type="button"
+                    @click="pickRole(role.role_id)"
+                    class="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-sm text-left transition-colors"
+                    :class="String(form.role_id) === String(role.role_id) ? 'bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400 font-semibold' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'"
+                  >
+                    <span class="flex items-center gap-2.5">
+                      <i class="fa-solid fa-user-tag text-xs text-gray-400"></i>
+                      <span x-text="role.role_name_idn"></span>
+                    </span>
+                    <i class="fa-solid fa-check text-xs" x-show="String(form.role_id) === String(role.role_id)"></i>
+                  </button>
+                </template>
+                <p x-show="filteredRoles().length === 0" class="px-4 py-6 text-center text-xs text-gray-400">Tidak ada role yang cocok.</p>
+              </div>
+            </div>
           </div>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">Pilih satu role untuk pengguna ini.</p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <!-- Status -->
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
@@ -460,20 +500,6 @@
             >
               <option value="Y">Aktif (Y)</option>
               <option value="N">Non-Aktif (N)</option>
-            </select>
-          </div>
-
-          <!-- Admin -->
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
-              Admin
-            </label>
-            <select
-              x-model="form.user_admin"
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
-            >
-              <option value="N">Tidak (N)</option>
-              <option value="Y">Ya (Y)</option>
             </select>
           </div>
 
@@ -624,6 +650,9 @@
     </script>
   <?php endif; ?>
 
+  <!-- Confirm Modal Reusable -->
+  <?= $this->include('partials/confirm_modal') ?>
+
 </div>
 
 <!-- ============================================================ -->
@@ -686,10 +715,13 @@
         user_email: '',
         user_password: '',
         user_active: 'Y',
-        user_admin: 'N',
         user_block: 'N',
-        role_ids: []
+        role_id: ''
       },
+
+      // Dropdown role (searchable)
+      roleDropdownOpen: false,
+      roleSearch: '',
 
       resetForm: {
         userId: null,
@@ -705,10 +737,10 @@
           user_email: '',
           user_password: '',
           user_active: 'Y',
-          user_admin: 'N',
           user_block: 'N',
-          role_ids: []
+          role_id: ''
         };
+        this.roleSearch = '';
         this.modalOpen = true;
       },
 
@@ -720,28 +752,50 @@
           user_email: row.user_email || '',
           user_password: '',
           user_active: row.user_active || 'Y',
-          user_admin: row.user_admin || 'N',
           user_block: row.user_block || 'N',
-          // Pertahankan tipe number agar x-model checkbox (:value int) cocok
-          role_ids: Array.isArray(row.role_ids) ? row.role_ids.map(Number) : []
+          // Single role: ambil role pertama milik user
+          role_id: Array.isArray(row.role_ids) && row.role_ids.length ? String(row.role_ids[0]) : ''
         };
+        this.roleSearch = '';
         this.modalOpen = true;
+      },
+
+      roleLabel() {
+        if (!this.form.role_id) {
+          return '— Pilih Role —';
+        }
+        const found = this.roleOptions.find(r => String(r.role_id) === String(this.form.role_id));
+        return found ? found.role_name_idn : 'Role #' + this.form.role_id;
+      },
+
+      filteredRoles() {
+        const q = (this.roleSearch || '').toLowerCase().trim();
+        if (!q) {
+          return this.roleOptions;
+        }
+        return this.roleOptions.filter(r =>
+          String(r.role_name_idn || '').toLowerCase().includes(q)
+        );
+      },
+
+      pickRole(id) {
+        this.form.role_id = String(id);
+        this.roleDropdownOpen = false;
+        this.roleSearch = '';
       },
 
       async saveUser() {
         this.saving = true;
         try {
-          // Kirim role_ids per-item (URLSearchParams mengubah array jadi string koma)
           const body = new URLSearchParams();
+          body.append('has_role_ids', '1');
           for (const [key, value] of Object.entries(this.form)) {
-            if (key === 'role_ids') {
-              body.append('has_role_ids', '1');
-              if (Array.isArray(value)) {
-                value.forEach(id => body.append('role_ids[]', id));
-              }
-            } else if (value !== null && value !== undefined && value !== '') {
+            if (value !== null && value !== undefined && value !== '') {
               body.append(key, value);
             }
+          }
+          if (this.form.role_id) {
+            body.append('role_ids[]', this.form.role_id);
           }
           const res = await window.ypFetch('<?= base_url('sys-admin/api/user/save') ?>', body);
           if (res.success) {
@@ -758,38 +812,53 @@
         }
       },
 
-      async toggleStatus(id, actionText) {
-        if (!window.ypConfirm(`Apakah Anda yakin ingin ${actionText} user ini?`)) {
-          return;
-        }
-        try {
-          const res = await window.ypFetch('<?= base_url('sys-admin/api/user/toggle') ?>', { id });
-          if (res.success) {
-            window.showToast('success', res.message || 'Status berhasil diubah');
-            setTimeout(() => window.location.reload(), 600);
-          } else {
-            window.showToast('error', res.message || 'Gagal mengubah status');
+      toggleStatus(id, actionText) {
+        const active = actionText === 'nonaktifkan';
+        window.openConfirmDialog({
+          title: active ? 'Nonaktifkan User' : 'Aktifkan User',
+          message: active
+            ? 'User ini tidak dapat login hingga diaktifkan kembali. Lanjutkan?'
+            : 'User ini kembali dapat login ke sistem. Lanjutkan?',
+          icon: 'fa-power-off',
+          tone: active ? 'warning' : 'primary',
+          confirmText: active ? 'Ya, Nonaktifkan' : 'Ya, Aktifkan',
+          onConfirm: async () => {
+            try {
+              const res = await window.ypFetch('<?= base_url('sys-admin/api/user/toggle') ?>', { id });
+              if (res.success) {
+                window.showToast('success', res.message || 'Status berhasil diubah');
+                setTimeout(() => window.location.reload(), 600);
+              } else {
+                window.showToast('error', res.message || 'Gagal mengubah status');
+              }
+            } catch (e) {
+              window.showToast('error', 'Terjadi kesalahan saat memproses permintaan');
+            }
           }
-        } catch (e) {
-          window.showToast('error', 'Terjadi kesalahan saat memproses permintaan');
-        }
+        });
       },
 
-      async deleteUser(id) {
-        if (!window.ypConfirm('Apakah Anda yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan.')) {
-          return;
-        }
-        try {
-          const res = await window.ypFetch('<?= base_url('sys-admin/api/user/delete') ?>', { id });
-          if (res.success) {
-            window.showToast('success', res.message || 'User berhasil dihapus');
-            setTimeout(() => window.location.reload(), 600);
-          } else {
-            window.showToast('error', res.message || 'Gagal menghapus user');
+      deleteUser(id) {
+        window.openConfirmDialog({
+          title: 'Hapus User',
+          message: 'Apakah Anda yakin ingin menghapus user ini? Seluruh data role-nya akan ikut terhapus. Tindakan ini tidak dapat dibatalkan.',
+          icon: 'fa-trash',
+          tone: 'danger',
+          confirmText: 'Ya, Hapus',
+          onConfirm: async () => {
+            try {
+              const res = await window.ypFetch('<?= base_url('sys-admin/api/user/delete') ?>', { id });
+              if (res.success) {
+                window.showToast('success', res.message || 'User berhasil dihapus');
+                setTimeout(() => window.location.reload(), 600);
+              } else {
+                window.showToast('error', res.message || 'Gagal menghapus user');
+              }
+            } catch (e) {
+              window.showToast('error', 'Terjadi kesalahan saat memproses permintaan');
+            }
           }
-        } catch (e) {
-          window.showToast('error', 'Terjadi kesalahan saat memproses permintaan');
-        }
+        });
       },
 
       openResetModal(userId, userName) {

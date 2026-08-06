@@ -94,16 +94,15 @@
           <tr class="border-b border-gray-200/80 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-800/50 text-xs font-bold capitalize tracking-normal text-gray-500 dark:text-gray-400">
             <th class="py-4 px-5 w-12 text-center">No.</th>
             <th class="py-4 px-5">Nama Role</th>
-            <th class="py-4 px-5 text-center">Menu Permission</th>
             <th class="py-4 px-5 text-center">Jumlah User</th>
             <th class="py-4 px-5 text-center">Status</th>
-            <th class="py-4 px-5 text-right w-40">Action</th>
+            <th class="py-4 px-5 text-right w-44">Action</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-sm">
           <?php if (empty($rows)): ?>
             <tr>
-              <td colspan="6" class="py-20 text-center text-gray-400 dark:text-gray-500">
+              <td colspan="5" class="py-20 text-center text-gray-400 dark:text-gray-500">
                 <div class="flex flex-col items-center justify-center gap-4">
                   <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400">
                     <i class="fa-solid fa-user-shield text-2xl"></i>
@@ -131,18 +130,6 @@
                   </div>
                 </td>
 
-                <!-- Menu Permission -->
-                <td class="py-4 px-5 text-center">
-                  <button
-                    type="button"
-                    @click="openPermissionModal(<?= (int)$r['role_id'] ?>, <?= htmlspecialchars(json_encode($r['role_name_idn']), ENT_QUOTES, 'UTF-8') ?>)"
-                    class="inline-flex items-center gap-2 rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-400 dark:hover:bg-indigo-500/20 transition-colors"
-                  >
-                    <i class="fa-solid fa-list-check text-[10px]"></i>
-                    <span><?= (int)($r['menu_count'] ?? 0) ?> menu</span>
-                  </button>
-                </td>
-
                 <!-- Jumlah User -->
                 <td class="py-4 px-5 text-center">
                   <span class="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300">
@@ -162,6 +149,14 @@
                 <!-- Action -->
                 <td class="py-4 px-5">
                   <div class="flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      @click="openPermissionModal(<?= (int)$r['role_id'] ?>, <?= htmlspecialchars(json_encode($r['role_name_idn']), ENT_QUOTES, 'UTF-8') ?>)"
+                      class="h-9 w-9 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 dark:hover:bg-indigo-500/10 transition-colors flex items-center justify-center shadow-2xs"
+                      title="Atur Permission Menu (<?= (int)($r['menu_count'] ?? 0) ?> menu)"
+                    >
+                      <i class="fa-solid fa-list-check text-sm"></i>
+                    </button>
                     <button
                       type="button"
                       @click="openEditModal(<?= htmlspecialchars(json_encode($r), ENT_QUOTES, 'UTF-8') ?>)"
@@ -566,6 +561,9 @@
     </script>
   <?php endif; ?>
 
+  <!-- Confirm Modal Reusable -->
+  <?= $this->include('partials/confirm_modal') ?>
+
 </div>
 
 <!-- ============================================================ -->
@@ -677,38 +675,53 @@
         }
       },
 
-      async toggleStatus(id, actionText) {
-        if (!window.ypConfirm(`Apakah Anda yakin ingin ${actionText} role ini?`)) {
-          return;
-        }
-        try {
-          const res = await window.ypFetch('<?= base_url('sys-admin/api/role/toggle') ?>', { id });
-          if (res.success) {
-            window.showToast('success', res.message || 'Status berhasil diubah');
-            setTimeout(() => window.location.reload(), 600);
-          } else {
-            window.showToast('error', res.message || 'Gagal mengubah status');
+      toggleStatus(id, actionText) {
+        const active = actionText === 'nonaktifkan';
+        window.openConfirmDialog({
+          title: active ? 'Nonaktifkan Role' : 'Aktifkan Role',
+          message: active
+            ? 'Role ini tidak dapat digunakan oleh user hingga diaktifkan kembali. Lanjutkan?'
+            : 'Role ini kembali dapat digunakan oleh user. Lanjutkan?',
+          icon: 'fa-power-off',
+          tone: active ? 'warning' : 'primary',
+          confirmText: active ? 'Ya, Nonaktifkan' : 'Ya, Aktifkan',
+          onConfirm: async () => {
+            try {
+              const res = await window.ypFetch('<?= base_url('sys-admin/api/role/toggle') ?>', { id });
+              if (res.success) {
+                window.showToast('success', res.message || 'Status berhasil diubah');
+                setTimeout(() => window.location.reload(), 600);
+              } else {
+                window.showToast('error', res.message || 'Gagal mengubah status');
+              }
+            } catch (e) {
+              window.showToast('error', 'Terjadi kesalahan saat memproses permintaan');
+            }
           }
-        } catch (e) {
-          window.showToast('error', 'Terjadi kesalahan saat memproses permintaan');
-        }
+        });
       },
 
-      async deleteRole(id) {
-        if (!window.ypConfirm('Apakah Anda yakin ingin menghapus role ini? Seluruh user dengan role ini akan kehilangan aksesnya.')) {
-          return;
-        }
-        try {
-          const res = await window.ypFetch('<?= base_url('sys-admin/api/role/delete') ?>', { id });
-          if (res.success) {
-            window.showToast('success', res.message || 'Role berhasil dihapus');
-            setTimeout(() => window.location.reload(), 600);
-          } else {
-            window.showToast('error', res.message || 'Gagal menghapus role');
+      deleteRole(id) {
+        window.openConfirmDialog({
+          title: 'Hapus Role',
+          message: 'Apakah Anda yakin ingin menghapus role ini? Seluruh user dengan role ini akan kehilangan aksesnya.',
+          icon: 'fa-trash',
+          tone: 'danger',
+          confirmText: 'Ya, Hapus',
+          onConfirm: async () => {
+            try {
+              const res = await window.ypFetch('<?= base_url('sys-admin/api/role/delete') ?>', { id });
+              if (res.success) {
+                window.showToast('success', res.message || 'Role berhasil dihapus');
+                setTimeout(() => window.location.reload(), 600);
+              } else {
+                window.showToast('error', res.message || 'Gagal menghapus role');
+              }
+            } catch (e) {
+              window.showToast('error', 'Terjadi kesalahan saat memproses permintaan');
+            }
           }
-        } catch (e) {
-          window.showToast('error', 'Terjadi kesalahan saat memproses permintaan');
-        }
+        });
       },
 
       /* ---------------- Permission Menu ---------------- */

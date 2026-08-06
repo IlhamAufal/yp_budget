@@ -27,7 +27,7 @@
                         <tr class="hover:bg-gray-50 dark:hover:bg-meta-4/20 transition-colors">
                             <td class="py-2.5 px-4 font-medium text-gray-900 dark:text-white whitespace-nowrap bg-white dark:bg-boxdark sticky left-0 z-10 shadow-sm">
                                 <input type="hidden" name="nomernya[]" value="<?= $no; ?>">
-                                <input type="hidden" name="main_account[]" value="<?= esc($row['main_account']); ?>">
+                                <input type="hidden" name="main_account[]" value="<?= esc($row['id_coa'] ?? $row['main_account']); ?>">
                                 <input type="hidden" name="dept" value="<?= esc($dept ?? ''); ?>">
                                 
                                 <span class="font-bold text-primary"><?= esc($row['main_account']); ?></span> 

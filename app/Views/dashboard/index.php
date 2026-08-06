@@ -262,7 +262,7 @@
                                 };
                             ?>
                             <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-700/20 transition-colors">
-                                <td class="px-5 py-3.5 font-semibold text-gray-800 dark:text-gray-200"><?= esc($row['cost_center']) ?></td>
+                                <td class="px-5 py-3.5 font-mono font-bold text-brand-600 dark:text-brand-400"><?= esc($row['cc_sap'] ?? $row['cost_center']) ?></td>
                                 <td class="px-5 py-3 text-gray-600 dark:text-gray-300">
                                     <?= esc($row['cost_desc'] !== '' ? $row['cost_desc'] : '-') ?>
                                 </td>

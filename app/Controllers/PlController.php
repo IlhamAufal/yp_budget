@@ -36,7 +36,7 @@ class PlController extends BaseController
             'curr2'        => $this->modelPl->get_curr_summary($workingYear, $idDept, $userLevel, 'FOH'),
             'mpp'          => $this->modelPl->get_mpp_summary($workingYear, $idDept, $userLevel, 'OPEX'),
             'mpp_foh'      => $this->modelPl->get_mpp_summary($workingYear, $idDept, $userLevel, 'FOH'),
-            'capex'        => $this->modelPl->get_capex_summary($workingYear, $idDept, $userLevel),
+            'capex'        => $this->modelPl->get_capex_monitoring($workingYear),
         ];
 
         return view('monitoring/monitoring', $data);

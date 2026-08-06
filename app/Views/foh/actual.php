@@ -38,7 +38,7 @@
         >
           <option value="">— Semua Cost Center —</option>
           <?php foreach ($costCenters as $cc): ?>
-            <option value="<?= esc($cc['cost_center']) ?>"><?= esc($cc['cost_center']) ?> — <?= esc($cc['cost_desc']) ?></option>
+            <option value="<?= esc($cc['cost_center']) ?>"><?= esc($cc['cc_code']) ?> — <?= esc($cc['cost_desc']) ?></option>
           <?php endforeach; ?>
         </select>
       </div>

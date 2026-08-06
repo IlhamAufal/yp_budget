@@ -258,7 +258,7 @@ class OpexGaController extends BaseController
 
         $rows = $this->opexModel->getEntryData($year);
         $data = array_map(function ($r) use ($monthKeys) {
-            $line = [$r['id_coa'], $r['coa_desc'] ?? '', $r['id_dept']];
+            $line = [$r['acct_code'] ?? $r['id_coa'], $r['coa_desc'] ?? '', $r['id_dept']];
             foreach ($monthKeys as $m) {
                 $line[] = (float) ($r[$m] ?? 0);
             }
@@ -345,7 +345,7 @@ class OpexGaController extends BaseController
         $rows = [];
         try {
             $builder = $this->db->table('yp_plan__trans_budget_entry_data t')
-                ->select("COALESCE(c.main_account, 0) AS main_account")
+                ->select("COALESCE(NULLIF(c.id_acct_ext,''), c.main_account, 0) AS main_account")
                 ->select("COALESCE(c.cost_center_desc, '') AS cost_center_desc")
                 ->select("COALESCE(c.cost_center_header, '') AS cost_center_header")
                 ->select("t.`1` AS isi_1, t.`2` AS isi_2, t.`3` AS isi_3, t.`4` AS isi_4, t.`5` AS isi_5, t.`6` AS isi_6")

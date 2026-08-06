@@ -26,6 +26,7 @@ class ModelPl extends Model
     {
         $sql = "SELECT t.id_dept,
                        COALESCE(cc.cost_desc, '') AS cost_desc,
+                       COALESCE(NULLIF(cc.cost_center_sap,''), CAST(cc.cost_center AS CHAR)) AS cc_sap,
                        COALESCE(MAX(t.created_by), '') AS tags,
                        IFNULL(SUM(t.`1`),0) AS JAN, IFNULL(SUM(t.`2`),0) AS FEB,
                        IFNULL(SUM(t.`3`),0) AS MAR, IFNULL(SUM(t.`4`),0) AS APR,
@@ -37,7 +38,7 @@ class ModelPl extends Model
                 FROM yp_plan__trans_budget_entry_data t
                 LEFT JOIN gw_plan__master_cost_center cc ON cc.cost_center = t.id_dept
                 WHERE t.year_code = ? AND cc.type = ?
-                GROUP BY t.id_dept, cc.cost_desc
+                GROUP BY t.id_dept, cc.cost_desc, cc.cost_center_sap
                 ORDER BY t.id_dept";
 
         $params = [$year, $type];
@@ -57,6 +58,7 @@ class ModelPl extends Model
     {
         $sql = "SELECT h.id_dept AS cost_center,
                        COALESCE(cc.cost_desc, '') AS cost_desc,
+                       COALESCE(NULLIF(cc.cost_center_sap,''), CAST(h.id_dept AS CHAR)) AS cc_sap,
                        COALESCE(tm.desc_mpp, '') AS desc_mpp,
                        COALESCE(h.staff_name, '') AS staff_name,
                        IFNULL(SUM(d.`1`),0) AS JAN, IFNULL(SUM(d.`2`),0) AS FEB,
@@ -88,7 +90,7 @@ class ModelPl extends Model
                 LEFT JOIN yp_plan__master_mpp_salary s
                        ON s.dept_id = h.id_dept AND s.type = h.id_tipe AND s.year_code = h.year_code AND s.status = 'A'
                 WHERE h.year_code = ? AND cc.type = ?
-                GROUP BY h.id_dept, cc.cost_desc, tm.desc_mpp, h.staff_name, s.salary
+                GROUP BY h.id_dept, cc.cost_desc, cc.cost_center_sap, tm.desc_mpp, h.staff_name, s.salary
                 ORDER BY h.id_dept";
 
         try {
@@ -100,12 +102,14 @@ class ModelPl extends Model
     }
 
     /**
-     * Ringkasan Depresiasi CAPEX per Cost Center (OPEX & FOH).
+     * @deprecated Gunakan get_capex_monitoring() untuk tab CAPEX di monitoring.
+     * Ringkasan depresiasi CAPEX per Cost Center (OPEX & FOH).
      */
     public function get_capex_summary(string $year, ?string $idDept = null, ?string $userLevel = null): array
     {
         $sql = "SELECT c.dept_id AS id_dept,
                        COALESCE(cc.cost_desc, '') AS cost_desc,
+                       COALESCE(cc.cost_center_sap, c.dept_id, '') AS main_account,
                        IFNULL(SUM(c.`1`),0) AS JAN, IFNULL(SUM(c.`2`),0) AS FEB,
                        IFNULL(SUM(c.`3`),0) AS MAR, IFNULL(SUM(c.`4`),0) AS APR,
                        IFNULL(SUM(c.`5`),0) AS MAY, IFNULL(SUM(c.`6`),0) AS JUN,
@@ -116,7 +120,7 @@ class ModelPl extends Model
                 FROM yp_plan__trans_capex_entry_depreciation c
                 LEFT JOIN gw_plan__master_cost_center cc ON cc.cost_center = c.dept_id
                 WHERE c.year_code = ?
-                GROUP BY c.dept_id, cc.cost_desc
+                GROUP BY c.dept_id, cc.cost_desc, cc.cost_center_sap
                 ORDER BY c.dept_id";
 
         try {
@@ -132,7 +136,9 @@ class ModelPl extends Model
      */
     public function get_detail_by_dept(string $year, string $idDept, string $type): array
     {
-        $sql = "SELECT t.id_coa, t.id_dept, COALESCE(c.cost_center_desc, '') AS cost_center_desc, t.total,
+        $sql = "SELECT t.id_coa, t.id_dept,
+                       COALESCE(NULLIF(c.id_acct_ext,''), c.main_account, 0) AS acct_code,
+                       COALESCE(c.cost_center_desc, '') AS cost_center_desc, t.total,
                        IFNULL(t.`1`,0) AS m1, IFNULL(t.`2`,0) AS m2, IFNULL(t.`3`,0) AS m3,
                        IFNULL(t.`4`,0) AS m4, IFNULL(t.`5`,0) AS m5, IFNULL(t.`6`,0) AS m6,
                        IFNULL(t.`7`,0) AS m7, IFNULL(t.`8`,0) AS m8, IFNULL(t.`9`,0) AS m9,
@@ -156,7 +162,7 @@ class ModelPl extends Model
     public function get_pl_summary(string $year): array
     {
         $sql = "SELECT COALESCE(c.cost_center_desc, '') AS account_desc,
-                       COALESCE(c.main_account, 0) AS account_code,
+                       COALESCE(NULLIF(c.id_acct_ext,''), c.main_account, 0) AS account_code,
                        IFNULL(SUM(t.`1`),0) AS jan, IFNULL(SUM(t.`2`),0) AS feb,
                        IFNULL(SUM(t.`3`),0) AS mar, IFNULL(SUM(t.`4`),0) AS apr,
                        IFNULL(SUM(t.`5`),0) AS may, IFNULL(SUM(t.`6`),0) AS jun,
@@ -184,7 +190,9 @@ class ModelPl extends Model
      */
     public function get_pl_details(string $year): array
     {
-        $sql = "SELECT c.main_account AS account_code, COALESCE(c.cost_center_desc, '') AS account_desc,
+        $sql = "SELECT COALESCE(NULLIF(c.id_acct_ext,''), c.main_account, 0) AS account_code,
+                       c.main_account AS id_coa,
+                       COALESCE(c.cost_center_desc, '') AS account_desc,
                        COALESCE(c.type, 'Expense') AS type,
                        IFNULL(SUM(t.total),0) AS annual_total
                 FROM gw_plan__master_coa c
@@ -208,10 +216,12 @@ class ModelPl extends Model
      */
     public function get_detail_account(string $account, string $year): array
     {
-        $sql = "SELECT t.id_dept AS cost_center, COALESCE(c.cost_center_desc, '') AS remarks,
+        $sql = "SELECT COALESCE(NULLIF(cc.cost_center_sap,''), CAST(t.id_dept AS CHAR)) AS cost_center,
+                       COALESCE(c.cost_center_desc, '') AS remarks,
                        IFNULL(t.total,0) AS amount
                 FROM yp_plan__trans_budget_entry_data t
                 LEFT JOIN gw_plan__master_coa c ON c.main_account = t.id_coa
+                LEFT JOIN gw_plan__master_cost_center cc ON cc.cost_center = t.id_dept
                 WHERE t.id_coa = ? AND t.year_code = ?";
 
         try {
@@ -229,7 +239,7 @@ class ModelPl extends Model
     {
         try {
             return $this->db->table('gw_plan__master_cost_center')
-                ->select('id_cost_center AS id_dept, cost_center, cost_desc')
+                ->select("id_cost_center AS id_dept, cost_center, COALESCE(NULLIF(cost_center_sap,''), CAST(cost_center AS CHAR)) AS cc_sap, cost_desc")
                 ->where('status', 'A')
                 ->orderBy('cost_center', 'ASC')
                 ->get()
@@ -388,13 +398,14 @@ class ModelPl extends Model
         }
         $monthSelectSql = implode(', ', $monthSelect);
 
-        $sql = "SELECT t.id_coa AS account,
+        $sql = "SELECT COALESCE(NULLIF(c.id_acct_ext,''), t.id_coa, 0) AS account,
                        COALESCE(c.cost_center_desc, '') AS account_desc,
-                       COALESCE(t.id_dept, '') AS cost_center,
+                       COALESCE(NULLIF(cc.cost_center_sap,''), CAST(t.id_dept AS CHAR)) AS cost_center,
                        {$monthSelectSql},
                        IFNULL(t.total,0) AS total
                 FROM yp_plan__trans_budget_entry_data t
                 LEFT JOIN gw_plan__master_coa c ON c.main_account = t.id_coa
+                LEFT JOIN gw_plan__master_cost_center cc ON cc.cost_center = t.id_dept
                 WHERE t.year_code = ? AND c.type = ?
                 ORDER BY t.id_coa, t.id_dept";
 
@@ -456,6 +467,43 @@ class ModelPl extends Model
         }
 
         return $items;
+    }
+
+    /**
+     * Rincian item CAPEX (header + detail bulanan + mapping SAP) untuk tab monitoring.
+     * Return: cost_center_desc, item_desc, main_account(SAP), cost_center(SAP CC),
+     *         unit, unit_price, remarks, JAN..DEC, total.
+     */
+    public function get_capex_monitoring(string $year): array
+    {
+        $monthSelect = [];
+        foreach (range(1, 12) as $m) {
+            $name = strtoupper(date('M', mktime(0, 0, 0, $m, 1)));
+            $monthSelect[] = "IFNULL(d.`{$m}`,0) AS `{$name}`";
+        }
+        $monthSelectSql = implode(', ', $monthSelect);
+
+        $sql = "SELECT COALESCE(cc.cost_desc, '') AS cost_center_desc,
+                       h.item_desc,
+                       COALESCE(NULLIF(c.id_acct_ext,''), h.main_account, 0) AS main_account,
+                       COALESCE(NULLIF(cc.cost_center_sap,''), CAST(h.dept_id AS CHAR)) AS cost_center,
+                       h.unit, h.unit_price, h.remarks,
+                       {$monthSelectSql},
+                       IFNULL(d.total,0) AS total
+                FROM yp_plan__trans_capex_entry_header h
+                LEFT JOIN yp_plan__trans_capex_entry_detail d ON d.id_header = h.id
+                LEFT JOIN gw_plan__master_coa c ON c.main_account = h.main_account
+                LEFT JOIN gw_plan__master_cost_center cc ON cc.cost_center = h.dept_id
+                WHERE h.year_code = ?
+                ORDER BY h.id DESC";
+
+        try {
+            return $this->db->query($sql, [$year])->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'ModelPl::get_capex_monitoring: ' . $e->getMessage());
+
+            return [];
+        }
     }
 
     /**

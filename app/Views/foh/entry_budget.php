@@ -73,7 +73,7 @@
         >
           <option value="">— Pilih Cost Center —</option>
           <?php foreach ($costCenters as $cc): ?>
-            <option value="<?= esc($cc['cost_center']) ?>"><?= esc($cc['cost_center']) ?> — <?= esc($cc['cost_desc']) ?></option>
+            <option value="<?= esc($cc['cost_center']) ?>"><?= esc($cc['cc_code']) ?> — <?= esc($cc['cost_desc']) ?></option>
           <?php endforeach; ?>
         </select>
       </div>
@@ -132,7 +132,7 @@
                 >
                   <option value="">— Pilih COA —</option>
                   <?php foreach ($coas as $coa): ?>
-                    <option value="<?= (int) $coa['main_account'] ?>"><?= (int) $coa['main_account'] ?> — <?= esc($coa['cost_center_desc']) ?></option>
+                    <option value="<?= (int) $coa['main_account'] ?>"><?= esc($coa['acct_code']) ?> — <?= esc($coa['cost_center_desc']) ?></option>
                   <?php endforeach; ?>
                 </select>
               </td>

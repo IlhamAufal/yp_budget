@@ -19,7 +19,7 @@
                 <?php if (! empty($details)): ?>
                     <?php foreach ($details as $row): ?>
                         <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
-                            <td class="px-3 py-2 border-r border-gray-200 dark:border-gray-800 font-mono"><?= esc($row['id_coa'] ?? '-'); ?></td>
+                            <td class="px-3 py-2 border-r border-gray-200 dark:border-gray-800 font-mono"><?= esc($row['acct_code'] ?? $row['id_coa'] ?? '-'); ?></td>
                             <td class="px-3 py-2 border-r border-gray-200 dark:border-gray-800"><?= esc($row['cost_center_desc'] ?? '-'); ?></td>
                             <td class="px-3 py-2 text-right font-semibold text-gray-900 dark:text-white"><?= number_format($row['total'] ?? 0, 2); ?></td>
                         </tr>

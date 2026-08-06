@@ -10,7 +10,7 @@
                     class="w-full sm:w-80 px-3.5 py-2 text-xs md:text-sm bg-gray-50 dark:bg-meta-4/40 border border-stroke dark:border-strokedark rounded-lg text-gray-900 dark:text-white focus:border-primary focus:outline-none">
                 <option value="">- Pilih Cost Center -</option>
                 <?php $no = 1; foreach ($dept as $depts): ?>
-                    <option value="<?= esc($depts['cost_center']); ?>"><?= $no; ?>. <?= esc($depts['cost_desc']); ?></option>
+                    <option value="<?= esc($depts['cost_center']); ?>"><?= $no; ?>. <?= esc($depts['cc_code']); ?> - <?= esc($depts['cost_desc']); ?></option>
                 <?php $no++; endforeach; ?>
             </select>
         </div>

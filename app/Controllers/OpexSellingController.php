@@ -56,7 +56,7 @@ class OpexSellingController extends BaseController
         $year   = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
 
         $builder = $this->db->table('yp_plan__trans_budget_entry_data t')
-            ->select('t.id, t.id_coa AS main_account, COALESCE(c.cost_center_desc, \'\') AS cost_center_desc, t.id_dept AS cost_center_header')
+            ->select('t.id, t.id_coa, COALESCE(NULLIF(c.id_acct_ext,\'\'), c.main_account, 0) AS main_account, COALESCE(c.cost_center_desc, \'\') AS cost_center_desc, t.id_dept AS cost_center_header')
             ->select("t.`1` AS isi_1, t.`2` AS isi_2, t.`3` AS isi_3, t.`4` AS isi_4, t.`5` AS isi_5, t.`6` AS isi_6")
             ->select("t.`7` AS isi_7, t.`8` AS isi_8, t.`9` AS isi_9, t.`10` AS isi_10, t.`11` AS isi_11, t.`12` AS isi_12, t.total AS isi_tot")
             ->join('gw_plan__master_coa c', 'c.main_account = t.id_coa', 'left')
@@ -168,7 +168,7 @@ class OpexSellingController extends BaseController
         $rows = [];
         try {
             $builder = $this->db->table('yp_plan__trans_budget_entry_data t')
-                ->select("t.id_coa AS main_account, COALESCE(c.cost_center_desc, '') AS cost_center_desc")
+                ->select("COALESCE(NULLIF(c.id_acct_ext,\'\'), c.main_account, 0) AS main_account, COALESCE(c.cost_center_desc, '') AS cost_center_desc")
                 ->select("t.`1` AS isi_1, t.`2` AS isi_2, t.`3` AS isi_3, t.`4` AS isi_4, t.`5` AS isi_5, t.`6` AS isi_6")
                 ->select("t.`7` AS isi_7, t.`8` AS isi_8, t.`9` AS isi_9, t.`10` AS isi_10, t.`11` AS isi_11, t.`12` AS isi_12, t.total AS isi_tot")
                 ->join('gw_plan__master_coa c', 'c.main_account = t.id_coa', 'left')
@@ -293,7 +293,7 @@ class OpexSellingController extends BaseController
 
         $rows = $this->opexModel->getEntryData($year);
         $data = array_map(function ($r) use ($monthKeys) {
-            $line = [$r['id_coa'], $r['coa_desc'] ?? '', $r['id_dept']];
+            $line = [$r['acct_code'] ?? $r['id_coa'], $r['coa_desc'] ?? '', $r['id_dept']];
             foreach ($monthKeys as $m) {
                 $line[] = (float) ($r[$m] ?? 0);
             }
