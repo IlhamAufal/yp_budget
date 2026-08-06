@@ -306,6 +306,20 @@ class OpexGaController extends BaseController
     }
 
     /**
+     * Manual Book — view opex_ga/manual_book (PDF viewer).
+     */
+    public function manualBook(): string
+    {
+        $pdfPath = FCPATH . 'assets/manual_book/MANUAL BOOK - BUDGET SYSTEM - INPUT OPEX GA.pdf';
+
+        return view('opex_ga/manual_book', [
+            'title'      => 'Manual Book - OPEX GA',
+            'pdfExists'  => is_file($pdfPath),
+            'pdfUrl'     => base_url('assets/manual_book/MANUAL BOOK - BUDGET SYSTEM - INPUT OPEX GA.pdf'),
+        ]);
+    }
+
+    /**
      * Report Department — view opex_ga/report_department.
      */
     public function reportDepartment(): string

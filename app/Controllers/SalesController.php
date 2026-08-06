@@ -33,7 +33,8 @@ class SalesController extends BaseController
         return view('sales/summary', [
             'title'       => 'Sales Summary & Discount Reclass',
             'workingYear' => $workingYear,
-            'summary'     => $this->getAssumptionData($workingYear),
+            'summary'     => $this->getSalesSummary($workingYear),
+            'discount'    => $this->getDiscountReclass($workingYear),
         ]);
     }
 
@@ -112,14 +113,64 @@ class SalesController extends BaseController
             return $this->response->setStatusCode(405)->setJSON(['status' => 'error', 'message' => 'Invalid method']);
         }
 
-        $postData = $this->request->getJSON(true);
+        $year   = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $userId = (int) (session()->get('user_id') ?? 0);
 
-        // TODO: alokasi/reclass diskon — dilengkapi pada iterasi berikutnya
+        // View mengirim via ypFetch (application/x-www-form-urlencoded) — pakai getPost,
+        // bukan getJSON (yang mem-parsing php://input sebagai JSON dan akan selalu kosong).
+        $post = $this->request->getPost() ?? [];
 
-        return $this->response->setJSON([
-            'status'  => 'success',
-            'message' => 'Discount reclassification saved successfully!',
-        ]);
+        // Bulan 1..12 (default 0)
+        $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+        $values = [];
+        $total  = 0;
+        foreach ($months as $i => $mk) {
+            $val = (float) ($post[$mk] ?? 0);
+            $values[(string) ($i + 1)] = $val;
+            $total += $val;
+        }
+
+        try {
+            $this->db->transStart();
+
+            // Hapus baris reclass existing utk tahun ini (mode replace)
+            $this->db->table('yp_plan__master_reclass_monthly')
+                ->where('year_code', $year)
+                ->delete();
+
+            $sql = 'INSERT INTO yp_plan__master_reclass_monthly
+                    (id_coa, id_dept, total, notes, year_code, created_by, created_date,
+                     `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`, `11`, `12`)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+
+            $this->db->query($sql, array_merge([
+                null,                     // id_coa — reclass global (bukan per akun)
+                null,                     // id_dept
+                $total,
+                'DISCOUNT RECLASS',
+                (int) $year,
+                $userId,
+                date('Y-m-d H:i:s'),
+            ], array_values($values)));
+
+            $this->db->transComplete();
+
+            if ($this->db->transStatus() === false) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menyimpan alokasi diskon.']);
+            }
+
+            AuditLog::saved('sales/saveDiscountReclass', "Discount reclass tahun {$year} disimpan (total {$total})");
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'Alokasi diskon berhasil disimpan.',
+                'total'   => $total,
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'SalesController::saveDiscountReclass: ' . $e->getMessage());
+
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menyimpan alokasi diskon: ' . $e->getMessage()]);
+        }
     }
 
     /**
@@ -212,6 +263,121 @@ class SalesController extends BaseController
             'Sales_Assumption_' . $year,
             'Sales'
         );
+    }
+
+    /**
+     * Ringkasan sales nyata (IDR) per bulan dari tabel transaksi sales.
+     *
+     * Return: ['domestic' => [jan..dec,total], 'export' => [...], 'total' => [...]]
+     * Kolom revenue mengikuti format legacy `{bulan}_rev` di
+     * yp_plan__trans_sales_domestic & yp_plan__trans_sales_export.
+     */
+    private function getSalesSummary(string $year): array
+    {
+        $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+        $build = function (string $table) use ($year, $months): array {
+            $selects = [];
+            foreach ($months as $mk) {
+                // Alias `dec` adalah reserved word — wajib escape backtick
+                $alias = $mk === 'dec' ? '`dec`' : $mk;
+                $selects[] = "IFNULL(SUM({$mk}_rev),0) AS {$alias}";
+            }
+            $totalExpr = implode(' + ', array_map(fn ($mk) => "IFNULL(SUM({$mk}_rev),0)", $months));
+
+            try {
+                $row = $this->db->query(
+                    "SELECT " . implode(', ', $selects) . ", ({$totalExpr}) AS total FROM {$table} WHERE year_code = ?",
+                    [$year]
+                )->getRowArray() ?? [];
+            } catch (\Throwable $e) {
+                log_message('error', "SalesController::getSalesSummary({$table}): " . $e->getMessage());
+                $row = [];
+            }
+
+            return $row;
+        };
+
+        $domestic = $build('yp_plan__trans_sales_domestic');
+        $export   = $build('yp_plan__trans_sales_export');
+
+        $summary = [
+            'domestic' => [],
+            'export'   => [],
+            'total'    => [],
+        ];
+
+        foreach ($months as $mk) {
+            $d = (float) ($domestic[$mk] ?? 0);
+            $e = (float) ($export[$mk] ?? 0);
+            $summary['domestic'][$mk] = $d;
+            $summary['export'][$mk]   = $e;
+            $summary['total'][$mk]    = $d + $e;
+        }
+
+        $summary['domestic']['total'] = (float) ($domestic['total'] ?? 0);
+        $summary['export']['total']   = (float) ($export['total'] ?? 0);
+        $summary['total']['total']    = $summary['domestic']['total'] + $summary['export']['total'];
+
+        return $summary;
+    }
+
+    /**
+     * Alokasi discount reclass tahun berjalan dari yp_plan__master_reclass_monthly.
+     *
+     * Return: ['jan'..'dec' => float, 'total' => float]
+     */
+    private function getDiscountReclass(string $year): array
+    {
+        return $this->loadDiscountReclass($year);
+    }
+
+    /**
+     * AJAX: data alokasi discount reclass untuk tahun berjalan (dipakai view summary).
+     */
+    public function getDiscountReclassAjax(): ResponseInterface
+    {
+        $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+
+        return $this->response->setJSON([
+            'status'   => 'success',
+            'discount' => $this->loadDiscountReclass($year),
+        ]);
+    }
+
+    /**
+     * Implementasi pengambilan alokasi discount reclass (dipakai index & AJAX).
+     *
+     * Return: ['jan'..'dec' => float, 'total' => float]
+     */
+    private function loadDiscountReclass(string $year): array
+    {
+        $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+        $out    = [];
+        foreach ($months as $mk) {
+            $out[$mk] = 0.0;
+        }
+        $out['total'] = 0.0;
+
+        try {
+            $rows = $this->db->table('yp_plan__master_reclass_monthly')
+                ->where('year_code', $year)
+                ->get()
+                ->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'SalesController::getDiscountReclass: ' . $e->getMessage());
+
+            return $out;
+        }
+
+        foreach ($rows as $r) {
+            foreach ($months as $i => $mk) {
+                $out[$mk] += (float) ($r[(string) ($i + 1)] ?? 0);
+            }
+            $out['total'] += (float) ($r['total'] ?? 0);
+        }
+
+        return $out;
     }
 
     /**

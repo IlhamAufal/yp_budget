@@ -175,8 +175,12 @@ class CapexController extends BaseController
 
     public function manual_book()
     {
+        $pdfPath = FCPATH . 'assets/docs/manual_book_capex.pdf';
+
         return view('capex/manual_book', [
-            'title' => 'CAPEX - Manual Book & Documentation',
+            'title'     => 'CAPEX - Manual Book & Documentation',
+            'pdfExists' => is_file($pdfPath),
+            'pdfUrl'    => base_url('assets/docs/manual_book_capex.pdf'),
         ]);
     }
 
@@ -185,7 +189,7 @@ class CapexController extends BaseController
      */
     public function pdfReader()
     {
-        return view('capex/manual_book');
+        return $this->manual_book();
     }
 
     /**

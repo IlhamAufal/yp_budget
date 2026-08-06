@@ -143,6 +143,8 @@ $routes->group('opex-ga', ['filter' => 'auth'], function ($routes) {
     $routes->get('actual', 'OpexGaController::actual');
     $routes->get('report/department', 'OpexGaController::reportDepartment');
     $routes->get('report/combine', 'OpexGaController::index');
+    $routes->get('manual_book', 'OpexGaController::manualBook');
+    $routes->get('manual-book', 'OpexGaController::manualBook');
     $routes->post('cari_actual_table', 'OpexGaController::cariActualTable');
     $routes->get('export_template_opex_ga/(:num)', 'OpexGaController::exportTemplateOpexGa/$1');
     $routes->get('getEntryData', 'OpexGaController::getEntryData');
@@ -197,6 +199,9 @@ $routes->group('opex-selling', ['filter' => 'auth'], function ($routes) {
     $routes->post('saveBudget', 'OpexSellingController::saveBudget');
     $routes->post('uploadActual', 'OpexSellingController::uploadActual');
     $routes->get('exportExcel', 'OpexSellingController::exportExcel');
+    $routes->get('getDetailItems', 'OpexSellingController::getDetailItems');
+    $routes->post('saveDetail', 'OpexSellingController::saveDetail');
+    $routes->post('deleteDetail', 'OpexSellingController::deleteDetail');
 });
 $routes->group('opex_selling', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'OpexSellingController::index');
@@ -207,6 +212,9 @@ $routes->group('opex_selling', ['filter' => 'auth'], function ($routes) {
     $routes->get('report/department', 'OpexSellingController::reportDepartment');
     $routes->post('uploadActual', 'OpexSellingController::uploadActual');
     $routes->get('exportExcel', 'OpexSellingController::exportExcel');
+    $routes->get('getDetailItems', 'OpexSellingController::getDetailItems');
+    $routes->post('saveDetail', 'OpexSellingController::saveDetail');
+    $routes->post('deleteDetail', 'OpexSellingController::deleteDetail');
 });
 
 // Sales
@@ -222,6 +230,7 @@ $routes->group('sales', ['filter' => 'auth'], function ($routes) {
     $routes->get('simulation', 'SalesController::simulation');
     $routes->get('setup-target', 'SalesController::setupTarget');
     $routes->post('saveDiscountReclass', 'SalesController::saveDiscountReclass');
+    $routes->get('getDiscountReclass', 'SalesController::getDiscountReclassAjax');
     $routes->post('processUpload', 'SalesController::processUpload');
     $routes->get('exportExcel', 'SalesController::exportExcel');
 });

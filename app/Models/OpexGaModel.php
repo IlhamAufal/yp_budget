@@ -200,7 +200,7 @@ class OpexGaModel extends Model
         $builder = $this->db->table('yp_plan__trans_budget_actual a')
             ->select('a.id, a.id_coa, a.id_dept')
             ->select("COALESCE(c.cost_center_desc, '') AS coa_desc")
-            ->select('IFNULL(a.total,0) AS total, a.assumption, a.notes')
+            ->select('(IFNULL(a.`1`,0)+IFNULL(a.`2`,0)+IFNULL(a.`3`,0)+IFNULL(a.`4`,0)+IFNULL(a.`5`,0)+IFNULL(a.`6`,0)+IFNULL(a.`7`,0)+IFNULL(a.`8`,0)+IFNULL(a.`9`,0)+IFNULL(a.`10`,0)+IFNULL(a.`11`,0)+IFNULL(a.`12`,0)) AS total, a.assumption, a.notes')
             ->select("IFNULL(a.`1`,0) AS jan, IFNULL(a.`2`,0) AS feb, IFNULL(a.`3`,0) AS mar, IFNULL(a.`4`,0) AS apr, IFNULL(a.`5`,0) AS may, IFNULL(a.`6`,0) AS jun")
             ->select("IFNULL(a.`7`,0) AS jul, IFNULL(a.`8`,0) AS aug, IFNULL(a.`9`,0) AS sep, IFNULL(a.`10`,0) AS oct, IFNULL(a.`11`,0) AS nov, IFNULL(a.`12`,0) AS `dec`")
             ->join('gw_plan__master_coa c', 'c.main_account = a.id_coa', 'left')

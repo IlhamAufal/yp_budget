@@ -236,6 +236,14 @@
                     Report Combined
                   </a>
                 </li>
+                <li>
+                  <a
+                    href="<?= base_url('opex-ga/manual_book') ?>"
+                    class="menu-dropdown-item group <?= url_is('opex-ga/manual*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
+                  >
+                    Manual Book
+                  </a>
+                </li>
               </ul>
             </div>
           </li>
@@ -344,6 +352,14 @@
                     class="menu-dropdown-item group <?= url_is('capex/report*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
                   >
                     Report
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="<?= base_url('capex/manual_book') ?>"
+                    class="menu-dropdown-item group <?= url_is('capex/manual*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
+                  >
+                    Manual Book
                   </a>
                 </li>
               </ul>

@@ -1,7 +1,7 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div x-data="opexSellingEntryHandler()" class="space-y-6">
+<div x-data="opexSellingEntryHandler()" @open-selling-breakdown.window="openDetail($event.detail.id)" class="space-y-6">
 
     <div class="p-5 bg-white dark:bg-boxdark rounded-2xl border border-stroke dark:border-strokedark shadow-default flex flex-col md:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-3 w-full md:w-auto">
@@ -50,11 +50,24 @@
 
     <?= view('opex_selling/upload_actual_modal') ?>
 
+    <!-- MODAL BREAKDOWN SUB-DETAIL (reusable partial)                -->
+    <?= $this->include('partials/breakdown_modal', [
+        'bmListUrl'   => base_url('opex-selling/getDetailItems'),
+        'bmSaveUrl'   => base_url('opex-selling/saveDetail'),
+        'bmDeleteUrl' => base_url('opex-selling/deleteDetail'),
+    ]) ?>
+
 </div>
 
 <script>
 function opexSellingEntryHandler() {
     return {
+        ...breakdownModalComponent({
+            list: '<?= base_url('opex-selling/getDetailItems') ?>',
+            save: '<?= base_url('opex-selling/saveDetail') ?>',
+            delete: '<?= base_url('opex-selling/deleteDetail') ?>',
+        }),
+
         selectedDept: '',
         isLoading: false,
         tableHtml: '',
@@ -81,5 +94,44 @@ function opexSellingEntryHandler() {
         }
     }
 }
+
+// Handler breakdown dari tombol pada tabel yang di-inject via AJAX.
+// Tabel di-render server-side; tombol memanggil fungsi global ini,
+// lalu di-forward ke Alpine scope melalui custom event.
+window.openSellingBreakdown = function (entryDataId) {
+    document.dispatchEvent(new CustomEvent('open-selling-breakdown', { detail: { id: entryDataId } }));
+};
+
+// budgetTableSellingHandler didefinisikan di partial entry_budget_table.php,
+// tapi partial di-load via AJAX (x-html) sehingga <script> tidak tereksekusi.
+// Definisikan ulang di halaman induk agar x-data pada tabel tersambung.
+function budgetTableSellingHandler() {
+    return {
+        isSaving: false,
+        saveBudget() {
+            if (!window.confirm('Are you sure you want to save budget selling data?')) return;
+
+            this.isSaving = true;
+            const formData = new FormData(document.getElementById('simpan_data_selling'));
+
+            fetch('<?= base_url('opex_selling/saveBudget'); ?>', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.isSaving = false;
+                window.showToast ? window.showToast('success', data.message || 'Data successfully saved!') : alert('Data successfully saved!');
+            })
+            .catch(err => {
+                this.isSaving = false;
+                window.showToast ? window.showToast('error', 'An error occurred while saving.') : alert('An error occurred while saving.');
+                console.error(err);
+            });
+        }
+    }
+}
+
 </script>
 <?= $this->endSection() ?>

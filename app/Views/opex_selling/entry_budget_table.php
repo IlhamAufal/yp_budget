@@ -7,6 +7,7 @@
                         <th class="py-3 px-4 border-r border-white/20 whitespace-nowrap min-w-[220px]" rowspan="2">MAIN ACCOUNT</th>
                         <th class="py-2 px-4 border-b border-white/20" colspan="12">BUDGET SELLING (MONTHLY)</th>
                         <th class="py-3 px-4 border-l border-white/20 whitespace-nowrap min-w-[120px]" rowspan="2">TOTAL</th>
+                        <th class="py-3 px-4 border-l border-white/20 whitespace-nowrap min-w-[110px]" rowspan="2">DETAIL & #</th>
                     </tr>
                     <tr class="bg-primary/90 text-white text-right text-xs">
                         <?php foreach (['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'] as $m) : ?>
@@ -46,6 +47,18 @@
                                 <span><?= number_format((float)$rowTotal, 2); ?></span>
                                 <input type="hidden" name="toti_aa[]" value="<?= esc($rowTotal); ?>">
                             </td>
+                            <td class="py-2.5 px-4 text-center whitespace-nowrap">
+                                <button
+                                    type="button"
+                                    onclick="window.openSellingBreakdown && window.openSellingBreakdown(<?= (int) ($row['id'] ?? 0); ?>)"
+                                    <?= empty($row['id']) ? 'disabled' : ''; ?>
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stroke dark:border-strokedark bg-white dark:bg-boxdark text-primary dark:text-white text-xs font-medium hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white transition-colors <?= empty($row['id']) ? 'opacity-40 cursor-not-allowed' : ''; ?>"
+                                    title="Breakdown Detail Item"
+                                >
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2m-6 0a2 2 0 002 2h2a2 2 0 002-2m-6 0a2 2 0 012-2h2a2 2 0 012 2m-6 0h6"/></svg>
+                                    Detail
+                                </button>
+                            </td>
                         </tr>
                     <?php 
                         $no++;
@@ -63,6 +76,7 @@
                         <td class="py-3 px-4 text-right text-primary dark:text-success whitespace-nowrap">
                             <?= number_format($grandTotal, 2); ?>
                         </td>
+                        <td></td>
                     </tr>
                 </tfoot>
             </table>
@@ -81,8 +95,8 @@ function budgetTableSellingHandler() {
     return {
         isSaving: false,
         saveBudget() {
-            if (!confirm('Are you sure you want to save budget selling data?')) return;
-            
+            if (!window.confirm('Are you sure you want to save budget selling data?')) return;
+
             this.isSaving = true;
             const formData = new FormData(document.getElementById('simpan_data_selling'));
 
@@ -94,11 +108,11 @@ function budgetTableSellingHandler() {
             .then(res => res.json())
             .then(data => {
                 this.isSaving = false;
-                alert('Data successfully saved!');
+                window.showToast ? window.showToast('success', data.message || 'Data successfully saved!') : alert('Data successfully saved!');
             })
             .catch(err => {
                 this.isSaving = false;
-                alert('An error occurred while saving.');
+                window.showToast ? window.showToast('error', 'An error occurred while saving.') : alert('An error occurred while saving.');
                 console.error(err);
             });
         }
