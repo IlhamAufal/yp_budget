@@ -80,6 +80,27 @@ $routes->group('master', ['filter' => 'auth'], function ($routes) {
     $routes->post('api/period/delete', 'Master::periodDelete');
 });
 
+// System Administration — Phase 1.1 RBAC (Menu, Role, User Management)
+$routes->group('sys-admin', ['filter' => 'auth'], function ($routes) {
+    $routes->get('menu', 'Menu::index');
+    $routes->post('api/menu/save', 'Menu::save');
+    $routes->post('api/menu/toggle', 'Menu::toggle');
+    $routes->post('api/menu/delete', 'Menu::delete');
+
+    $routes->get('role', 'Role::index');
+    $routes->post('api/role/save', 'Role::save');
+    $routes->post('api/role/toggle', 'Role::toggle');
+    $routes->post('api/role/delete', 'Role::delete');
+    $routes->post('api/role/menus', 'Role::menus');
+    $routes->post('api/role/menus/save', 'Role::saveMenus');
+
+    $routes->get('user', 'User::index');
+    $routes->post('api/user/save', 'User::save');
+    $routes->post('api/user/toggle', 'User::toggle');
+    $routes->post('api/user/delete', 'User::delete');
+    $routes->post('api/user/reset-password', 'User::resetPassword');
+});
+
 $routes->group('mpp', ['filter' => ['auth', 'context']], function($routes) {
     // 7.1 Entry MPP
     $routes->get('entry', 'NewHeadcountController::entry');

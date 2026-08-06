@@ -82,6 +82,8 @@ yp_budget_system_data.sql
 package-lock.json
 PRD_Budget_Planning_System_CI4.md
 PRD_CI4_MIGRATION.md
+PRD_Master_Migration_Blueprint_YP_Budget_CI4.md
+project_progress.md
 tmp_*.php
 test_*.php
 *.sql

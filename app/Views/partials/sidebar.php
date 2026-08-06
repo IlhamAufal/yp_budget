@@ -14,6 +14,8 @@
       $currentGroup = 'NewHeadAccount';
   } elseif (url_is('master*')) {
       $currentGroup = 'MasterData';
+  } elseif (url_is('sys-admin*')) {
+      $currentGroup = 'SysAdmin';
   }
 ?>
 <aside
@@ -567,6 +569,61 @@
                     class="menu-dropdown-item group <?= (url_is('master/configure-period*') || url_is('master/period*')) ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
                   >
                     Configure Period
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
+
+          <!-- Menu Item: System Administration -->
+          <li>
+            <a
+              href="#"
+              @click.prevent="selected = (selected === 'SysAdmin' ? '' : 'SysAdmin')"
+              class="menu-item group <?= url_is('sys-admin*') ? 'menu-item-active' : 'menu-item-inactive' ?>"
+              :class="selected === 'SysAdmin' ? 'menu-item-active' : ''"
+            >
+              <i class="fa-solid fa-user-shield text-lg min-w-[24px] text-center <?= url_is('sys-admin*') ? 'text-brand-500 dark:text-brand-400' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300' ?>" :class="selected === 'SysAdmin' ? 'text-brand-500 dark:text-brand-400' : ''"></i>
+              <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                System Administration
+              </span>
+              <i
+                class="fa-solid fa-chevron-down menu-item-arrow text-xs transition-transform duration-200"
+                :class="[(selected === 'SysAdmin') ? 'menu-item-arrow-active rotate-180' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
+              ></i>
+            </a>
+
+            <!-- Dropdown Menu -->
+            <div
+              class="overflow-hidden transition-all duration-300"
+              :class="(selected === 'SysAdmin') ? 'block' : 'hidden'"
+            >
+              <ul
+                :class="sidebarToggle ? 'lg:hidden' : 'flex'"
+                class="flex flex-col gap-1 mt-2 menu-dropdown pl-9"
+              >
+                <li>
+                  <a
+                    href="<?= base_url('sys-admin/menu') ?>"
+                    class="menu-dropdown-item group <?= url_is('sys-admin/menu*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
+                  >
+                    Menu Configuration
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="<?= base_url('sys-admin/role') ?>"
+                    class="menu-dropdown-item group <?= url_is('sys-admin/role*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
+                  >
+                    Role Management
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="<?= base_url('sys-admin/user') ?>"
+                    class="menu-dropdown-item group <?= url_is('sys-admin/user*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
+                  >
+                    User Management
                   </a>
                 </li>
               </ul>

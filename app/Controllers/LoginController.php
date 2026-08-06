@@ -115,7 +115,16 @@ class LoginController extends BaseController
          ];
      
          session()->set($sessionData);
-     
+
+         // 7b. Muat role dari tabel relasi gw_sm__user_role (RBAC Phase 1.1).
+         //     RoleFilter (Phase 1.3) akan memvalidasi hak akses URL dari sini.
+         $userRoleModel = new \App\Models\UserRoleModel();
+         $roleIds = $userRoleModel->getRoleIdsByUser((int) ($user['user_id'] ?? 0));
+         session()->set('role_ids', $roleIds);
+         if (! empty($roleIds)) {
+             session()->set('role_id', $roleIds[0]);
+         }
+
          // 8. Redirect ke Dashboard
          return redirect()->to('/dashboard');
      }
