@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\MenuModel;
 use App\Models\RoleModel;
+use App\Libraries\AuditLog;
 use CodeIgniter\HTTP\ResponseInterface;
 
 /**
@@ -45,7 +46,7 @@ class Role extends BaseController
         $id   = ! empty($data['id']) ? (int) $data['id'] : null;
         $result = $this->roleModel->saveRole($data, $id);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'sys-admin/role/save');
     }
 
     public function toggle(): ResponseInterface
@@ -53,7 +54,7 @@ class Role extends BaseController
         $id     = (int) $this->request->getPost('id');
         $result = $this->roleModel->toggleRole($id);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'sys-admin/role/toggle');
     }
 
     public function delete(): ResponseInterface
@@ -61,7 +62,7 @@ class Role extends BaseController
         $id     = (int) $this->request->getPost('id');
         $result = $this->roleModel->deleteRole($id);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'sys-admin/role/delete');
     }
 
     /**
@@ -97,13 +98,14 @@ class Role extends BaseController
 
         $result = $this->roleModel->saveRoleMenus($roleId, $menuIds);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'sys-admin/role/saveMenus');
     }
 
-    private function jsonResult(array $result): ResponseInterface
+    private function jsonResult(array $result, string $action = 'sys-admin/role'): ResponseInterface
     {
         if ($result['success']) {
             session()->setFlashdata('sysadmin_msg', $result['message']);
+            AuditLog::saved($action, 'Role config: ' . $result['message']);
         } else {
             session()->setFlashdata('sysadmin_err', $result['message']);
         }

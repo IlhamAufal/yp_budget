@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Models\CapexModel;
 use App\Models\CoaModel;
 use App\Libraries\AccessRestrict;
+use App\Libraries\AuditLog;
 use CodeIgniter\API\ResponseTrait;
 
 /**
@@ -146,6 +147,8 @@ class CapexController extends BaseController
         }
 
         if ($success) {
+            AuditLog::saved('capex/saveCapex', "Proposal CAPEX {$year} disimpan");
+
             return $this->respond(['status' => 'success', 'message' => 'Data Capex Berhasil Disimpan']);
         }
 
@@ -162,6 +165,8 @@ class CapexController extends BaseController
         $success = $this->capexModel->syncToOpex($year);
 
         if ($success) {
+            AuditLog::log('SYNC', 'capex/syncToOpex', "Depresiasi CAPEX {$year} disinkronkan ke OPEX Engine");
+
             return $this->respond(['status' => 'success', 'message' => "Depresiasi CAPEX Tahun {$year} berhasil disinkronkan ke OPEX Engine."]);
         }
 

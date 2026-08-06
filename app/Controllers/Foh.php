@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\FohModel;
 use App\Libraries\AccessRestrict;
+use App\Libraries\AuditLog;
 use CodeIgniter\HTTP\ResponseInterface;
 
 /**
@@ -81,6 +82,11 @@ class Foh extends BaseController
 
         $result = $this->fohModel->saveBudget($year, $dept, $rows, $userId);
 
+        if ($result['success']) {
+            $savedCount = $result['count'] ?? 0;
+            AuditLog::saved('foh/saveBudget', "Budget FOH {$year} CC {$dept} disimpan ({$savedCount} baris)");
+        }
+
         return $this->response->setJSON([
             'status'  => $result['success'] ? 'success' : 'error',
             'message' => $result['message'],
@@ -98,6 +104,10 @@ class Foh extends BaseController
         $dept   = $this->request->getPost('dept') ?? '';
 
         $result = $this->fohModel->submitBudget($year, $dept, $userId);
+
+        if ($result['success']) {
+            AuditLog::submitted('foh/submit', "Budget FOH {$year} CC {$dept} disubmit");
+        }
 
         return $this->response->setJSON([
             'status'  => $result['success'] ? 'success' : 'error',
@@ -182,6 +192,10 @@ class Foh extends BaseController
 
         $result = $this->fohModel->saveDetailItem($data, $userId);
 
+        if ($result['success']) {
+            AuditLog::saved('foh/saveDetail', "Breakdown item FOH ditambah/ubah (entry_data_id " . ($data['entry_data_id'] ?? '-') . ")");
+        }
+
         return $this->response->setJSON([
             'status'  => $result['success'] ? 'success' : 'error',
             'message' => $result['message'],
@@ -197,6 +211,10 @@ class Foh extends BaseController
         $id = (int) $this->request->getPost('id');
 
         $result = $this->fohModel->deleteDetailItem($id);
+
+        if ($result['success']) {
+            AuditLog::log('DELETE', 'foh/deleteDetail', "Breakdown item FOH dihapus (id {$id})");
+        }
 
         return $this->response->setJSON([
             'status'  => $result['success'] ? 'success' : 'error',

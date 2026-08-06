@@ -6,6 +6,7 @@ use App\Models\OpexSellingModel;
 use App\Libraries\ExcelExporter;
 use App\Libraries\ExcelImporter;
 use App\Libraries\AccessRestrict;
+use App\Libraries\AuditLog;
 use CodeIgniter\HTTP\ResponseInterface;
 
 /**
@@ -140,6 +141,8 @@ class OpexSellingController extends BaseController
             }
         }
 
+        AuditLog::saved('opex-selling/saveBudget', "Budget OPEX Selling {$year} CC {$dept} disimpan (" . count((array) $mainAccount) . " baris)");
+
         return $this->response->setJSON(['status' => 'success', 'message' => 'Data Budget Selling berhasil disimpan!']);
     }
 
@@ -205,6 +208,10 @@ class OpexSellingController extends BaseController
             $userId = (int) (session()->get('user_id') ?? 0);
 
             $result = $this->opexModel->saveActualFromImport($year, $rows, $userId);
+
+            if ($result['success']) {
+                AuditLog::log('UPLOAD', 'opex-selling/uploadActual', 'Upload Excel actual selling (' . $type . '): ' . $result['message']);
+            }
 
             return $this->response->setJSON([
                 'status'  => $result['success'] ? 'success' : 'error',

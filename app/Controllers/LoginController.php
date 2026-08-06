@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\UserModel;
+use App\Libraries\AuditLog;
 
 class LoginController extends BaseController
 {
@@ -125,7 +126,9 @@ class LoginController extends BaseController
              session()->set('role_id', $roleIds[0]);
          }
 
-         // 8. Redirect ke Dashboard
+         // 8. Audit trail + Redirect ke Dashboard
+         AuditLog::log('LOGIN', 'login/process', "User '{$login}' berhasil login", (string) ($user['user_id'] ?? ''));
+
          return redirect()->to('/dashboard');
      }
 
@@ -134,6 +137,9 @@ class LoginController extends BaseController
      */
     public function logout()
     {
+        // Audit trail sebelum session dihapus
+        AuditLog::log('LOGOUT', 'login/logout', "User '" . session()->get('user_username') . "' logout");
+
         // Opsional: Release lock akses concurrent jika ada di Library AccessRestrict
         // if (session()->has('user_id')) {
         //     service('accessRestrict')->release(session()->get('user_id'));

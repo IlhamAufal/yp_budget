@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Libraries\ExcelExporter;
 use App\Libraries\ExcelImporter;
+use App\Libraries\AuditLog;
 use App\Models\AssumptionModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
@@ -177,6 +178,8 @@ class SalesController extends BaseController
                 return redirect()->back()->with('error', 'Gagal menyimpan data upload sales.');
             }
 
+            AuditLog::log('UPLOAD', 'sales/processUpload', "Upload sales {$typeSales} tahun {$year} ({$saved} baris)");
+
             return redirect()->back()->with('success', "Data Sales {$typeSales} berhasil diimport ({$saved} baris).");
         } catch (\Throwable $e) {
             log_message('error', 'Sales upload: ' . $e->getMessage());
@@ -200,6 +203,8 @@ class SalesController extends BaseController
                 $r['year_code'] ?? '',
             ];
         }, $rows);
+
+        AuditLog::log('EXPORT', 'sales/exportExcel', "Export data sales assumption {$year} ke Excel");
 
         return ExcelExporter::export(
             ['TYPE SALES', 'VALUE', 'YEAR'],

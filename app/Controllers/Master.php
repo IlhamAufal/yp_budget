@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Libraries\ExcelExporter;
 use App\Libraries\ExcelImporter;
+use App\Libraries\AuditLog;
 use App\Models\AssumptionModel;
 use App\Models\CoaModel;
 use App\Models\CostCenterModel;
@@ -359,7 +360,7 @@ class Master extends BaseController
         $id   = ! empty($data['id']) ? (int) $data['id'] : null;
         $result = $this->coa->saveAccount($data, $id);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'master/coa/save');
     }
 
     public function coaToggle(): ResponseInterface
@@ -367,7 +368,7 @@ class Master extends BaseController
         $id     = (int) $this->request->getPost('id');
         $result = $this->coa->toggleStatus($id);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'master/coa/toggle');
     }
 
     public function coaCopyYear(): ResponseInterface
@@ -376,7 +377,7 @@ class Master extends BaseController
         $to     = (int) $this->request->getPost('to_year');
         $result = $this->coa->copyYear($from, $to);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'master/coa/copyYear');
     }
 
     /* ------------------------------------------------------------------
@@ -389,7 +390,7 @@ class Master extends BaseController
         $id   = ! empty($data['id']) ? (int) $data['id'] : null;
         $result = $this->costCenter->saveCostCenter($data, $id);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'master/cost-center/save');
     }
 
     public function costCenterToggle(): ResponseInterface
@@ -397,7 +398,7 @@ class Master extends BaseController
         $id     = (int) $this->request->getPost('id');
         $result = $this->costCenter->toggleStatus($id);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'master/cost-center/toggle');
     }
 
     /* ------------------------------------------------------------------
@@ -410,7 +411,7 @@ class Master extends BaseController
         $id   = ! empty($data['id']) ? (int) $data['id'] : null;
         $result = $this->department->saveDepartment($data, $id);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'master/department/save');
     }
 
     public function departmentToggle(): ResponseInterface
@@ -418,7 +419,7 @@ class Master extends BaseController
         $id     = (int) $this->request->getPost('id');
         $result = $this->department->toggleStatus($id);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'master/department/toggle');
     }
 
     /* ------------------------------------------------------------------
@@ -431,7 +432,7 @@ class Master extends BaseController
         $id   = ! empty($data['id']) ? (int) $data['id'] : null;
         $result = $this->product->saveProduct($data, $id);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'master/product/save');
     }
 
     public function productToggle(): ResponseInterface
@@ -439,7 +440,7 @@ class Master extends BaseController
         $id     = (int) $this->request->getPost('id');
         $result = $this->product->toggleStatus($id);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'master/product/toggle');
     }
 
     /* ------------------------------------------------------------------
@@ -452,7 +453,7 @@ class Master extends BaseController
         $id   = ! empty($data['id']) ? (int) $data['id'] : null;
         $result = $this->salaryMpp->saveSalaryMpp($data, $id);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'master/salary-mpp/save');
     }
 
     public function salaryMppToggle(): ResponseInterface
@@ -460,7 +461,7 @@ class Master extends BaseController
         $id     = (int) $this->request->getPost('id');
         $result = $this->salaryMpp->toggleStatus($id);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'master/salary-mpp/toggle');
     }
 
     /* ------------------------------------------------------------------
@@ -488,7 +489,7 @@ class Master extends BaseController
             default    => ['success' => false, 'message' => 'Kategori asumsi tidak dikenal.'],
         };
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'master/assumption/save');
     }
 
     public function assumptionUpload()
@@ -578,6 +579,7 @@ class Master extends BaseController
             }
 
             session()->setFlashdata('master_msg', "Data asumsi {$category} tahun {$year} berhasil diimport ({$saved} baris).");
+            AuditLog::log('UPLOAD', 'master/assumption/upload', "Upload asumsi {$category} tahun {$year} ({$saved} baris)");
 
             return redirect()->back();
         } catch (\Throwable $e) {
@@ -625,6 +627,8 @@ class Master extends BaseController
                 return $this->response->setStatusCode(404);
         }
 
+        AuditLog::log('EXPORT', 'master/assumption/export', "Export asumsi {$category} tahun {$year} ke Excel");
+
         return ExcelExporter::export($headers, $rows, 'Assumption_' . $category . '_' . $year, 'Assumption');
     }
 
@@ -637,7 +641,7 @@ class Master extends BaseController
         $data = $this->request->getPost();
         $result = $this->period->saveYear($data);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'master/period/save');
     }
 
     public function periodSetActive(): ResponseInterface
@@ -645,7 +649,7 @@ class Master extends BaseController
         $year   = (int) $this->request->getPost('year_code');
         $result = $this->period->setActive($year);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'master/period/setActive');
     }
 
     public function periodSetLocked(): ResponseInterface
@@ -654,7 +658,7 @@ class Master extends BaseController
         $locked = (bool) $this->request->getPost('locked');
         $result = $this->period->setLocked($year, $locked);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'master/period/setLocked');
     }
 
     public function periodDelete(): ResponseInterface
@@ -662,7 +666,7 @@ class Master extends BaseController
         $year   = (int) $this->request->getPost('year_code');
         $result = $this->period->deleteYear($year);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'master/period/delete');
     }
 
     /* ------------------------------------------------------------------
@@ -689,10 +693,11 @@ class Master extends BaseController
         return $yearParam === '' ? null : (int) $yearParam;
     }
 
-    private function jsonResult(array $result): ResponseInterface
+    private function jsonResult(array $result, string $action = 'master/save'): ResponseInterface
     {
         if ($result['success']) {
             session()->setFlashdata('master_msg', $result['message']);
+            AuditLog::saved($action, $result['message']);
         } else {
             session()->setFlashdata('master_err', $result['message']);
         }

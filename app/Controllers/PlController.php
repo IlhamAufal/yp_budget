@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\ModelPl;
 use App\Libraries\ExcelExporter;
+use App\Libraries\AuditLog;
 use CodeIgniter\HTTP\ResponseInterface;
 
 /**
@@ -145,6 +146,10 @@ class PlController extends BaseController
 
         $ok = $this->modelPl->save_pl_note($year, $code, $notes, $userId);
 
+        if ($ok) {
+            AuditLog::log('NOTES', 'pl/saveNotes', "Catatan P/L {$year} bagian {$code} disimpan");
+        }
+
         return $this->response->setJSON([
             'status'  => $ok ? 'success' : 'error',
             'message' => $ok ? 'Catatan berhasil disimpan.' : 'Gagal menyimpan catatan.',
@@ -166,6 +171,10 @@ class PlController extends BaseController
         $value  = (float) str_replace(',', '', (string) ($this->request->getPost('value') ?? 0));
 
         $ok = $this->modelPl->save_pl_adjs($year, $code, $value, $userId);
+
+        if ($ok) {
+            AuditLog::log('ADJUSTMENT', 'pl/saveAdjs', "Adjustment manual P/L {$year} bagian {$code} = {$value}");
+        }
 
         return $this->response->setJSON([
             'status'  => $ok ? 'success' : 'error',
@@ -198,6 +207,8 @@ class PlController extends BaseController
 
             $rows[] = $line;
         }
+
+        AuditLog::log('EXPORT', 'pl/exportExcel', "Export P/L report {$year} ke Excel");
 
         return ExcelExporter::export($headers, $rows, 'PL_Report_' . $year, 'P&L Report');
     }

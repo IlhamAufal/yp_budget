@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\RoleModel;
 use App\Models\UserModel;
 use App\Models\UserRoleModel;
+use App\Libraries\AuditLog;
 use CodeIgniter\HTTP\ResponseInterface;
 
 /**
@@ -57,7 +58,7 @@ class User extends BaseController
             $this->userRoleModel->saveUserRoles((int) $result['id'], $roleIds);
         }
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'sys-admin/user/save');
     }
 
     public function toggle(): ResponseInterface
@@ -65,7 +66,7 @@ class User extends BaseController
         $id     = (int) $this->request->getPost('id');
         $result = $this->userModel->toggleUser($id);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'sys-admin/user/toggle');
     }
 
     public function delete(): ResponseInterface
@@ -73,7 +74,7 @@ class User extends BaseController
         $id     = (int) $this->request->getPost('id');
         $result = $this->userModel->deleteUser($id);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'sys-admin/user/delete');
     }
 
     /**
@@ -91,7 +92,7 @@ class User extends BaseController
 
         $result = $this->userRoleModel->saveUserRoles($userId, $roleIds);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'sys-admin/user/saveRoles');
     }
 
     public function resetPassword(): ResponseInterface
@@ -100,13 +101,14 @@ class User extends BaseController
         $password = (string) $this->request->getPost('user_password');
         $result   = $this->userModel->resetPassword($id, $password);
 
-        return $this->jsonResult($result);
+        return $this->jsonResult($result, 'sys-admin/user/resetPassword');
     }
 
-    private function jsonResult(array $result): ResponseInterface
+    private function jsonResult(array $result, string $action = 'sys-admin/user'): ResponseInterface
     {
         if ($result['success']) {
             session()->setFlashdata('sysadmin_msg', $result['message']);
+            AuditLog::saved($action, 'User management: ' . $result['message']);
         } else {
             session()->setFlashdata('sysadmin_err', $result['message']);
         }

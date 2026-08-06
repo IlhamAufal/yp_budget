@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\OpexGaModel;
 use App\Libraries\AccessRestrict;
+use App\Libraries\AuditLog;
 use App\Libraries\ExcelExporter;
 use App\Libraries\ExcelImporter;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -118,6 +119,11 @@ class OpexGaController extends BaseController
 
         $result = $this->opexModel->saveBudget($year, $dept, $rows, $userId);
 
+        if ($result['success']) {
+            $savedCount = $result['count'] ?? 0;
+            AuditLog::saved('opex-ga/saveBudget', "Budget OPEX GA {$year} CC {$dept} disimpan ({$savedCount} baris)");
+        }
+
         return $this->response->setJSON([
             'status'  => $result['success'] ? 'success' : 'error',
             'message' => $result['message'],
@@ -135,6 +141,10 @@ class OpexGaController extends BaseController
         $dept   = $this->request->getPost('dept') ?? '';
 
         $result = $this->opexModel->submitBudget($year, $dept, $userId);
+
+        if ($result['success']) {
+            AuditLog::submitted('opex-ga/submitBudget', "Budget OPEX GA {$year} CC {$dept} disubmit");
+        }
 
         return $this->response->setJSON([
             'status'  => $result['success'] ? 'success' : 'error',
@@ -175,6 +185,10 @@ class OpexGaController extends BaseController
         $userId = (int) (session()->get('user_id') ?? 0);
         $result = $this->opexModel->saveDetailItem((array) $this->request->getPost(), $userId);
 
+        if ($result['success']) {
+            AuditLog::saved('opex-ga/saveDetail', 'Breakdown item OPEX GA ditambah/ubah');
+        }
+
         return $this->response->setJSON([
             'status'  => $result['success'] ? 'success' : 'error',
             'message' => $result['message'],
@@ -186,6 +200,10 @@ class OpexGaController extends BaseController
     {
         $id     = (int) $this->request->getPost('id');
         $result = $this->opexModel->deleteDetailItem($id);
+
+        if ($result['success']) {
+            AuditLog::log('DELETE', 'opex-ga/deleteDetail', "Breakdown item OPEX GA dihapus (id {$id})");
+        }
 
         return $this->response->setJSON([
             'status'  => $result['success'] ? 'success' : 'error',
@@ -219,6 +237,8 @@ class OpexGaController extends BaseController
             if (! $result['success']) {
                 return redirect()->back()->with('error', $result['message']);
             }
+
+            AuditLog::log('UPLOAD', 'opex-ga/processUpload', 'Upload Excel actual OPEX GA: ' . $result['message']);
 
             return redirect()->back()->with('success', $result['message']);
         } catch (\Throwable $e) {

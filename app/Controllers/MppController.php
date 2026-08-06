@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\MppModel;
 use App\Libraries\AccessRestrict;
+use App\Libraries\AuditLog;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class MppController extends BaseController
@@ -78,6 +79,8 @@ class MppController extends BaseController
         $success = $this->mppModel->saveMppBudget($yearCode, $idDept, $details, $isNewlines);
 
         if ($success) {
+            AuditLog::saved('mpp/saveBudget', "MPP {$yearCode} CC {$idDept} disimpan");
+
             return $this->response->setJSON(['status' => 'success', 'message' => 'Data Man Power Planning berhasil disimpan!']);
         }
 
@@ -110,6 +113,8 @@ class MppController extends BaseController
         $success = $this->mppModel->syncToOpex($workingYear);
 
         if ($success) {
+            AuditLog::log('SYNC', 'mpp/syncToOpex', "Alokasi gaji MPP {$workingYear} ke OPEX Engine berhasil");
+
             return $this->response->setJSON([
                 'status'  => 'success',
                 'message' => "Proses alokasi Gaji ke OPEX Engine Tahun {$workingYear} berhasil dilakukan!"

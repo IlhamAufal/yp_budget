@@ -2,12 +2,24 @@
 
 namespace App\Controllers;
 
+use App\Models\DashboardModel;
+
 class Dashboard extends BaseController
 {
     public function index()
     {
+        $workingYear = (int) (session()->get('year_code') ?? session()->get('working_year') ?? date('Y'));
+
+        $dashboard = new DashboardModel();
+
         $data = [
-            'title' => 'Dashboard | YP Budget',
+            'title'       => 'Dashboard | YP Budget',
+            'workingYear' => $workingYear,
+            'stats'       => $dashboard->getStats($workingYear),
+            'monthly'     => $dashboard->getMonthlySeries($workingYear),
+            'composition' => $dashboard->getComposition($workingYear),
+            'statusRows'  => $dashboard->getStatusRows($workingYear),
+            'hasBudget'   => $dashboard->hasBudgetData($workingYear),
         ];
 
         // Phase 1.3: peringatan untuk admin bila ada user aktif tanpa role.
