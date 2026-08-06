@@ -91,7 +91,7 @@
             name="search"
             value="<?= esc($filters['search'] ?? '') ?>"
             placeholder="Cari kode departemen atau nama..."
-            class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 pl-8 pr-3 text-xs text-gray-800 placeholder-gray-400 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-colors"
+            class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 pl-9 pr-3 text-xs text-gray-800 placeholder-gray-400 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-colors"
           />
         </div>
 
@@ -113,6 +113,7 @@
         >
           <i class="fa-solid fa-filter text-[10px]"></i>
         </button>
+        <?php if (! empty($has_filter)): ?>
         <a
           href="<?= base_url('master/department') ?>"
           class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-1.5 px-2.5 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -120,6 +121,7 @@
         >
           <i class="fa-solid fa-rotate-left text-[10px]"></i>
         </a>
+        <?php endif; ?>
       </form>
     </div>
 

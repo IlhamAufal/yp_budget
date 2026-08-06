@@ -30,12 +30,13 @@ class Menu extends BaseController
         ];
 
         return view('sys-admin/menu', [
-            'title'   => 'System Administration - Menu Configuration',
-            'rows'    => $this->menuModel->getAll($filters),
-            'groups'  => $this->menuModel->getGroups(),
-            'parents' => $this->menuModel->getParents(),
-            'filters' => $filters,
-            'flash'   => $this->consumeFlash(),
+            'title'      => 'System Administration - Menu Configuration',
+            'rows'       => $this->menuModel->getAll($filters),
+            'groups'     => $this->menuModel->getGroups(),
+            'parents'    => $this->menuModel->getParents(),
+            'filters'    => $filters,
+            'has_filter' => ! empty(array_filter($this->request->getGet())),
+            'flash'      => $this->consumeFlash(),
         ]);
     }
 

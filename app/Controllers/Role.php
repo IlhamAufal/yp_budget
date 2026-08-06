@@ -32,11 +32,12 @@ class Role extends BaseController
         ];
 
         return view('sys-admin/role', [
-            'title'   => 'System Administration - Role Management',
-            'rows'    => $this->roleModel->getAll($filters),
-            'menus'   => $this->menuModel->getAll(['status' => 'Y']),
-            'filters' => $filters,
-            'flash'   => $this->consumeFlash(),
+            'title'      => 'System Administration - Role Management',
+            'rows'       => $this->roleModel->getAll($filters),
+            'menus'      => $this->menuModel->getAll(['status' => 'Y']),
+            'filters'    => $filters,
+            'has_filter' => ! empty(array_filter($this->request->getGet())),
+            'flash'      => $this->consumeFlash(),
         ]);
     }
 

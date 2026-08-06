@@ -19,7 +19,24 @@
     flashMsg: '',
     _flashTimer: null,
 
-    rowState: <?= json_encode($rowState ?? [], JSON_NUMERIC_CHECK) ?>,
+    page: { summary: 1, sections: 1, detail: 1 },
+    perPage: 10,
+    isRowVisible(tab, idx) {
+        return idx >= (this.page[tab] - 1) * this.perPage && idx < this.page[tab] * this.perPage;
+    },
+    totalPages(total) {
+        return Math.ceil(total / this.perPage) || 1;
+    },
+    pageNumbers(tab, total) {
+        const totalP = this.totalPages(total);
+        const currP = this.page[tab] || 1;
+        if (totalP <= 7) return Array.from({ length: totalP }, (_, i) => i + 1);
+        if (currP <= 4) return [1, 2, 3, 4, 5, '...', totalP];
+        if (currP >= totalP - 3) return [1, '...', totalP - 4, totalP - 3, totalP - 2, totalP - 1, totalP];
+        return [1, '...', currP - 1, currP, currP + 1, '...', totalP];
+    },
+
+    rowState: <?= esc(json_encode($rowState ?? [], JSON_NUMERIC_CHECK), 'attr') ?>,
 
     openDetail(accountCode, accountDesc) {
         this.selectedAccount = accountCode + ' - ' + accountDesc;
@@ -61,7 +78,11 @@
         fd.append('code', code);
         fd.append('notes', event.target.value);
 
-        fetch('<?= base_url('pl/save_notes') ?>', { method: 'POST', body: fd })
+        fetch('<?= base_url('pl/save_notes') ?>', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: fd
+        })
             .then(r => r.json())
             .then(d => this.saveFlash(code, d.message || 'Tersimpan'))
             .catch(() => this.saveFlash(code, 'Gagal menyimpan catatan.'));
@@ -72,7 +93,11 @@
         fd.append('code', code);
         fd.append('value', this.rowState[code] ? this.rowState[code].adj : 0);
 
-        fetch('<?= base_url('pl/save_adjs') ?>', { method: 'POST', body: fd })
+        fetch('<?= base_url('pl/save_adjs') ?>', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: fd
+        })
             .then(r => r.json())
             .then(d => this.saveFlash(code, d.message || 'Tersimpan'))
             .catch(() => this.saveFlash(code, 'Gagal menyimpan adjustment.'));
@@ -122,7 +147,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
                     <input type="text" x-model="searchQuery" placeholder="Cari akun / uraian..."
-                           class="w-full pl-10 pr-3.5 py-2 text-xs rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:ring-brand-500/20">
+                           class="w-full pl-11 pr-3.5 py-2 text-xs rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:ring-brand-500/20">
                 </div>
 
                 <select x-model="filterDept" class="px-3 py-2 text-xs rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
@@ -179,8 +204,8 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-gray-600 dark:text-gray-300">
                             <?php if (!empty($pl_summary)): ?>
-                                <?php foreach ($pl_summary as $item): ?>
-                                    <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors <?= !empty($item['is_header']) ? 'font-bold bg-gray-50/50 dark:bg-gray-800/30' : '' ?>">
+                                <?php foreach ($pl_summary as $i => $item): ?>
+                                    <tr x-show="isRowVisible('summary', <?= $i ?>)" class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors <?= !empty($item['is_header']) ? 'font-bold bg-gray-50/50 dark:bg-gray-800/30' : '' ?>">
                                         <td class="px-4 py-2.5 border-r border-gray-200 dark:border-gray-800">
                                             <?= esc($item['account_desc']); ?>
                                         </td>
@@ -206,6 +231,24 @@
                             <?php endif; ?>
                         </tbody>
                     </table>
+                </div>
+                <?php $cnt1 = count($pl_summary ?? []); ?>
+                <div class="p-3 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
+                    <div>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200" x-text="<?= $cnt1 ?> === 0 ? 0 : ((page.summary - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(page.summary * perPage, <?= $cnt1 ?>)"></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= $cnt1 ?></span> data</div>
+                    <div class="flex items-center gap-1.5" x-show="totalPages(<?= $cnt1 ?>) > 1">
+                        <button type="button" @click="page.summary--" :disabled="page.summary === 1" class="h-7 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold">Prev</button>
+                        <template x-for="(p, i) in pageNumbers('summary', <?= $cnt1 ?>)" :key="i">
+                            <div>
+                                <template x-if="p === '...'">
+                                    <span class="px-1.5 font-bold">...</span>
+                                </template>
+                                <template x-if="p !== '...'">
+                                    <button type="button" @click="page.summary = p" :class="page.summary === p ? 'bg-brand-500 text-white font-bold' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300'" class="h-7 min-w-[28px] px-1.5 rounded-lg font-semibold" x-text="p"></button>
+                                </template>
+                            </div>
+                        </template>
+                        <button type="button" @click="page.summary++" :disabled="page.summary === totalPages(<?= $cnt1 ?>)" class="h-7 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold">Next</button>
+                    </div>
                 </div>
             </div>
 
@@ -242,9 +285,9 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-gray-600 dark:text-gray-300">
                             <?php if (!empty($pl_sections)): ?>
-                                <?php foreach ($pl_sections as $sec): ?>
+                                <?php foreach ($pl_sections as $i => $sec): ?>
                                     <?php $secCode = $sec['code']; ?>
-                                    <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors align-top">
+                                    <tr x-show="isRowVisible('sections', <?= $i ?>)" class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors align-top">
                                         <td class="px-4 py-2.5 border-r border-gray-200 dark:border-gray-800">
                                             <div class="font-bold text-gray-900 dark:text-white"><?= esc($secCode); ?></div>
                                             <div class="text-[11px] text-gray-500 dark:text-gray-400"><?= esc($sec['label']); ?></div>
@@ -260,7 +303,7 @@
                                             <input type="number" step="any"
                                                    x-model.number="rowState['<?= $secCode; ?>'].adj"
                                                    @blur="saveSectionAdjs('<?= $secCode; ?>')"
-                                                   class="w-28 px-2 py-1.5 text-right text-xs rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                                   class="w-28 px-2 py-1.5 text-xs rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
                                         </td>
                                         <td class="px-3 py-2.5 text-right font-semibold text-brand-600 dark:text-brand-400 border-r border-gray-200 dark:border-gray-800 whitespace-nowrap" x-text="fmt(adjTotal('<?= $secCode; ?>'))"></td>
                                         <td class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-800">
@@ -285,6 +328,24 @@
                         </tbody>
                     </table>
                 </div>
+                <?php $cnt2 = count($pl_sections ?? []); ?>
+                <div class="p-3 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
+                    <div>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200" x-text="<?= $cnt2 ?> === 0 ? 0 : ((page.sections - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(page.sections * perPage, <?= $cnt2 ?>)"></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= $cnt2 ?></span> data</div>
+                    <div class="flex items-center gap-1.5" x-show="totalPages(<?= $cnt2 ?>) > 1">
+                        <button type="button" @click="page.sections--" :disabled="page.sections === 1" class="h-7 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold">Prev</button>
+                        <template x-for="(p, i) in pageNumbers('sections', <?= $cnt2 ?>)" :key="i">
+                            <div>
+                                <template x-if="p === '...'">
+                                    <span class="px-1.5 font-bold">...</span>
+                                </template>
+                                <template x-if="p !== '...'">
+                                    <button type="button" @click="page.sections = p" :class="page.sections === p ? 'bg-brand-500 text-white font-bold' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300'" class="h-7 min-w-[28px] px-1.5 rounded-lg font-semibold" x-text="p"></button>
+                                </template>
+                            </div>
+                        </template>
+                        <button type="button" @click="page.sections++" :disabled="page.sections === totalPages(<?= $cnt2 ?>)" class="h-7 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold">Next</button>
+                    </div>
+                </div>
             </div>
 
             <div x-show="activeTab === 'detail'" x-cloak class="space-y-4">
@@ -301,8 +362,8 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-gray-600 dark:text-gray-300">
                             <?php if (!empty($pl_details)): ?>
-                                <?php foreach ($pl_details as $detail): ?>
-                                    <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
+                                <?php foreach ($pl_details as $i => $detail): ?>
+                                    <tr x-show="isRowVisible('detail', <?= $i ?>)" class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
                                         <td class="px-4 py-2.5 font-medium border-r border-gray-200 dark:border-gray-800"><?= esc($detail['account_code']); ?></td>
                                         <td class="px-4 py-2.5 border-r border-gray-200 dark:border-gray-800"><?= esc($detail['account_desc']); ?></td>
                                         <td class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-800">
@@ -329,6 +390,24 @@
                             <?php endif; ?>
                         </tbody>
                     </table>
+                </div>
+                <?php $cnt3 = count($pl_details ?? []); ?>
+                <div class="p-3 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
+                    <div>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200" x-text="<?= $cnt3 ?> === 0 ? 0 : ((page.detail - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(page.detail * perPage, <?= $cnt3 ?>)"></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= $cnt3 ?></span> data</div>
+                    <div class="flex items-center gap-1.5" x-show="totalPages(<?= $cnt3 ?>) > 1">
+                        <button type="button" @click="page.detail--" :disabled="page.detail === 1" class="h-7 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold">Prev</button>
+                        <template x-for="(p, i) in pageNumbers('detail', <?= $cnt3 ?>)" :key="i">
+                            <div>
+                                <template x-if="p === '...'">
+                                    <span class="px-1.5 font-bold">...</span>
+                                </template>
+                                <template x-if="p !== '...'">
+                                    <button type="button" @click="page.detail = p" :class="page.detail === p ? 'bg-brand-500 text-white font-bold' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300'" class="h-7 min-w-[28px] px-1.5 rounded-lg font-semibold" x-text="p"></button>
+                                </template>
+                            </div>
+                        </template>
+                        <button type="button" @click="page.detail++" :disabled="page.detail === totalPages(<?= $cnt3 ?>)" class="h-7 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold">Next</button>
+                    </div>
                 </div>
             </div>
 

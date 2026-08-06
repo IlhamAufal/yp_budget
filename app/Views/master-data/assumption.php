@@ -380,6 +380,10 @@
       year: '<?= (int) $year ?>',
       saving: false,
 
+      // Pagination state per tab
+      page: { ekonomi: 1, domestic: 1, export: 1, other: 1 },
+      perPage: 10,
+
       types: <?= json_encode(array_map(fn($t) => ['id' => (int) $t['id'], 'desc' => $t['desc_assumption']], $types ?? []), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) ?>,
 
       economic:  <?= json_encode($economic ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) ?>,
@@ -387,11 +391,39 @@
       exportRows: <?= json_encode($export ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) ?>,
       other:     <?= json_encode($other ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) ?>,
 
+      paginatedRows(cat) {
+        const key = cat === 'ekonomi' ? 'economic' : (cat === 'export' ? 'exportRows' : cat);
+        const list = this[key] || [];
+        const p = this.page[cat] || 1;
+        return list.slice((p - 1) * this.perPage, p * this.perPage);
+      },
+
+      totalPages(cat) {
+        const key = cat === 'ekonomi' ? 'economic' : (cat === 'export' ? 'exportRows' : cat);
+        const list = this[key] || [];
+        return Math.ceil(list.length / this.perPage) || 1;
+      },
+
+      pageNumbers(cat) {
+        const totalP = this.totalPages(cat);
+        const currP = this.page[cat] || 1;
+        if (totalP <= 7) return Array.from({ length: totalP }, (_, i) => i + 1);
+        if (currP <= 4) return [1, 2, 3, 4, 5, '...', totalP];
+        if (currP >= totalP - 3) return [1, '...', totalP - 4, totalP - 3, totalP - 2, totalP - 1, totalP];
+        return [1, '...', currP - 1, currP, currP + 1, '...', totalP];
+      },
+
       addRow(cat) {
         if (cat === 'economic') this.economic.push({ desc: '', type_id: this.types[0] ? this.types[0].id : '', value: 0 });
         if (cat === 'domestic') this.domestic.push({ key_channel: '', key_description: 'Volume', key_indicator: '', key_value: 0 });
         if (cat === 'export') this.exportRows.push({ key_channel: '', key_description: 'Volume', key_indicator: '', key_value: 0 });
         if (cat === 'other') this.other.push({ id_assp: '', tipe_group: '', variable_text: '', value_text: 0 });
+      },
+
+      removeRowObject(cat, row) {
+        const key = cat === 'ekonomi' ? 'economic' : (cat === 'export' ? 'exportRows' : cat);
+        const index = this[key].indexOf(row);
+        if (index > -1) this[key].splice(index, 1);
       },
 
       removeRow(cat, idx) {

@@ -130,7 +130,7 @@
                 name="search"
                 value="<?= esc($filters['search'] ?? '') ?>"
                 placeholder="Cari nomor akun atau nama..."
-                class="w-full rounded-xl border border-gray-200/80 bg-gray-50/60 py-2.5 pl-10 pr-4 text-xs md:text-sm font-medium text-gray-800 placeholder:text-gray-400/80 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700/80 dark:bg-gray-800/80 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-brand-400 transition-all duration-200 shadow-xs"
+                class="w-full rounded-xl border border-gray-200/80 bg-gray-50/60 py-2.5 pl-11 pr-4 text-xs md:text-sm font-medium text-gray-800 placeholder:text-gray-400/80 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700/80 dark:bg-gray-800/80 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-brand-400 transition-all duration-200 shadow-xs"
             />
             </div>
 
@@ -174,6 +174,7 @@
         >
           <i class="fa-solid fa-filter text-xs"></i>
         </button>
+        <?php if (! empty($has_filter)): ?>
         <a
           href="<?= base_url('master/coa') ?>"
           class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-2.5 px-4 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -181,6 +182,7 @@
         >
           <i class="fa-solid fa-rotate-left text-xs"></i>
         </a>
+        <?php endif; ?>
       </form>
     </div>
 
@@ -231,11 +233,11 @@
                 <!-- Name -->
                 <td class="py-4 px-5 font-semibold text-gray-800 dark:text-gray-100">
                   <div><?= esc($r['cost_center_desc'] ?: '-') ?></div>
-                  <?php if (! empty($r['cost_center_sub'])): ?>
+                  <!-- <?php if (! empty($r['cost_center_sub'])): ?>
                     <div class="text-xs font-normal text-gray-400 dark:text-gray-500 mt-1">
                       Sub: <?= esc($r['cost_center_sub']) ?>
                     </div>
-                  <?php endif; ?>
+                  <?php endif; ?> -->
                 </td>
 
                 <!-- Category -->

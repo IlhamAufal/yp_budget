@@ -62,12 +62,13 @@ class Master extends BaseController
         ];
 
         return view('master-data/chart-of-account', [
-            'title'   => 'Master Data - Chart of Account (COA)',
-            'rows'    => $this->coa->getAll($filters),
-            'years'   => $years,
-            'types'   => $this->coa->getTypes(),
-            'filters' => $filters,
-            'flash'   => $this->consumeFlash(),
+            'title'      => 'Master Data - Chart of Account (COA)',
+            'rows'       => $this->coa->getAll($filters),
+            'years'      => $years,
+            'types'      => $this->coa->getTypes(),
+            'filters'    => $filters,
+            'has_filter' => ! empty(array_filter($this->request->getGet())),
+            'flash'      => $this->consumeFlash(),
         ]);
     }
 
@@ -99,10 +100,11 @@ class Master extends BaseController
         ];
 
         return view('master-data/departemen', [
-            'title'   => 'Master Data - Departemen',
-            'rows'    => $this->department->getAll($filters),
-            'filters' => $filters,
-            'flash'   => $this->consumeFlash(),
+            'title'      => 'Master Data - Departemen',
+            'rows'       => $this->department->getAll($filters),
+            'filters'    => $filters,
+            'has_filter' => ! empty(array_filter($this->request->getGet())),
+            'flash'      => $this->consumeFlash(),
         ]);
     }
 
@@ -116,12 +118,13 @@ class Master extends BaseController
         ];
 
         return view('master-data/product', [
-            'title'    => 'Master Data - Produk',
-            'rows'     => $this->product->getAll($filters),
-            'channels' => $this->product->getChannels(),
-            'years'    => $this->product->getYears(),
-            'filters'  => $filters,
-            'flash'    => $this->consumeFlash(),
+            'title'      => 'Master Data - Produk',
+            'rows'       => $this->product->getAll($filters),
+            'channels'   => $this->product->getChannels(),
+            'years'      => $this->product->getYears(),
+            'filters'    => $filters,
+            'has_filter' => ! empty(array_filter($this->request->getGet())),
+            'flash'      => $this->consumeFlash(),
         ]);
     }
 
@@ -142,6 +145,7 @@ class Master extends BaseController
             'mppTypes'    => $this->salaryMpp->getMppTypes(),
             'years'       => $this->salaryMpp->getYears(),
             'filters'     => $filters,
+            'has_filter'  => ! empty(array_filter($this->request->getGet())),
             'flash'       => $this->consumeFlash(),
         ]);
     }

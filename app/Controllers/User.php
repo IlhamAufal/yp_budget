@@ -37,11 +37,12 @@ class User extends BaseController
         ];
 
         return view('sys-admin/user', [
-            'title'   => 'System Administration - User Management',
-            'rows'    => $this->userModel->getAllUsers($filters),
-            'roles'   => $this->roleModel->getAll(['status' => 'Y']),
-            'filters' => $filters,
-            'flash'   => $this->consumeFlash(),
+            'title'      => 'System Administration - User Management',
+            'rows'       => $this->userModel->getAllUsers($filters),
+            'roles'      => $this->roleModel->getAll(['status' => 'Y']),
+            'filters'    => $filters,
+            'has_filter' => ! empty(array_filter($this->request->getGet())),
+            'flash'      => $this->consumeFlash(),
         ]);
     }
 

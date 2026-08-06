@@ -34,7 +34,9 @@ class ModelPl extends Model
                        IFNULL(SUM(t.`7`),0) AS JUL, IFNULL(SUM(t.`8`),0) AS AUG,
                        IFNULL(SUM(t.`9`),0) AS SEP, IFNULL(SUM(t.`10`),0) AS OCT,
                        IFNULL(SUM(t.`11`),0) AS NOV, IFNULL(SUM(t.`12`),0) AS `DEC`,
-                       IFNULL(SUM(t.total),0) AS TOT
+                       (IFNULL(SUM(t.`1`),0)+IFNULL(SUM(t.`2`),0)+IFNULL(SUM(t.`3`),0)+IFNULL(SUM(t.`4`),0)
+                       +IFNULL(SUM(t.`5`),0)+IFNULL(SUM(t.`6`),0)+IFNULL(SUM(t.`7`),0)+IFNULL(SUM(t.`8`),0)
+                       +IFNULL(SUM(t.`9`),0)+IFNULL(SUM(t.`10`),0)+IFNULL(SUM(t.`11`),0)+IFNULL(SUM(t.`12`),0)) AS TOT
                 FROM yp_plan__trans_budget_entry_data t
                 LEFT JOIN gw_plan__master_cost_center cc ON cc.cost_center = t.id_dept
                 WHERE t.year_code = ? AND cc.type = ?
@@ -138,7 +140,10 @@ class ModelPl extends Model
     {
         $sql = "SELECT t.id_coa, t.id_dept,
                        COALESCE(NULLIF(c.id_acct_ext,''), c.main_account, 0) AS acct_code,
-                       COALESCE(c.cost_center_desc, '') AS cost_center_desc, t.total,
+                       COALESCE(c.cost_center_desc, '') AS cost_center_desc,
+                       (IFNULL(t.`1`,0)+IFNULL(t.`2`,0)+IFNULL(t.`3`,0)+IFNULL(t.`4`,0)
+                       +IFNULL(t.`5`,0)+IFNULL(t.`6`,0)+IFNULL(t.`7`,0)+IFNULL(t.`8`,0)
+                       +IFNULL(t.`9`,0)+IFNULL(t.`10`,0)+IFNULL(t.`11`,0)+IFNULL(t.`12`,0)) AS total,
                        IFNULL(t.`1`,0) AS m1, IFNULL(t.`2`,0) AS m2, IFNULL(t.`3`,0) AS m3,
                        IFNULL(t.`4`,0) AS m4, IFNULL(t.`5`,0) AS m5, IFNULL(t.`6`,0) AS m6,
                        IFNULL(t.`7`,0) AS m7, IFNULL(t.`8`,0) AS m8, IFNULL(t.`9`,0) AS m9,
@@ -169,7 +174,10 @@ class ModelPl extends Model
                        IFNULL(SUM(t.`7`),0) AS jul, IFNULL(SUM(t.`8`),0) AS aug,
                        IFNULL(SUM(t.`9`),0) AS sep, IFNULL(SUM(t.`10`),0) AS oct,
                        IFNULL(SUM(t.`11`),0) AS nov, IFNULL(SUM(t.`12`),0) AS `dec`,
-                       IFNULL(SUM(t.total),0) AS total, 0 AS is_header
+                       (IFNULL(SUM(t.`1`),0)+IFNULL(SUM(t.`2`),0)+IFNULL(SUM(t.`3`),0)+IFNULL(SUM(t.`4`),0)
+                       +IFNULL(SUM(t.`5`),0)+IFNULL(SUM(t.`6`),0)+IFNULL(SUM(t.`7`),0)+IFNULL(SUM(t.`8`),0)
+                       +IFNULL(SUM(t.`9`),0)+IFNULL(SUM(t.`10`),0)+IFNULL(SUM(t.`11`),0)+IFNULL(SUM(t.`12`),0)) AS total,
+                       0 AS is_header
                 FROM yp_plan__trans_budget_entry_data t
                 LEFT JOIN gw_plan__master_coa c ON c.main_account = t.id_coa
                 WHERE t.year_code = ?
@@ -194,7 +202,9 @@ class ModelPl extends Model
                        c.main_account AS id_coa,
                        COALESCE(c.cost_center_desc, '') AS account_desc,
                        COALESCE(c.type, 'Expense') AS type,
-                       IFNULL(SUM(t.total),0) AS annual_total
+                       (IFNULL(SUM(t.`1`),0)+IFNULL(SUM(t.`2`),0)+IFNULL(SUM(t.`3`),0)+IFNULL(SUM(t.`4`),0)
+                       +IFNULL(SUM(t.`5`),0)+IFNULL(SUM(t.`6`),0)+IFNULL(SUM(t.`7`),0)+IFNULL(SUM(t.`8`),0)
+                       +IFNULL(SUM(t.`9`),0)+IFNULL(SUM(t.`10`),0)+IFNULL(SUM(t.`11`),0)+IFNULL(SUM(t.`12`),0)) AS annual_total
                 FROM gw_plan__master_coa c
                 LEFT JOIN yp_plan__trans_budget_entry_data t
                        ON t.id_coa = c.main_account AND t.year_code = ?
@@ -218,7 +228,9 @@ class ModelPl extends Model
     {
         $sql = "SELECT COALESCE(NULLIF(cc.cost_center_sap,''), CAST(t.id_dept AS CHAR)) AS cost_center,
                        COALESCE(c.cost_center_desc, '') AS remarks,
-                       IFNULL(t.total,0) AS amount
+                       (IFNULL(t.`1`,0)+IFNULL(t.`2`,0)+IFNULL(t.`3`,0)+IFNULL(t.`4`,0)
+                       +IFNULL(t.`5`,0)+IFNULL(t.`6`,0)+IFNULL(t.`7`,0)+IFNULL(t.`8`,0)
+                       +IFNULL(t.`9`,0)+IFNULL(t.`10`,0)+IFNULL(t.`11`,0)+IFNULL(t.`12`,0)) AS amount
                 FROM yp_plan__trans_budget_entry_data t
                 LEFT JOIN gw_plan__master_coa c ON c.main_account = t.id_coa
                 LEFT JOIN gw_plan__master_cost_center cc ON cc.cost_center = t.id_dept
@@ -310,7 +322,10 @@ class ModelPl extends Model
         }
         $monthSelectSql = implode(', ', $monthSelect);
 
-        $sql = "SELECT COALESCE(c.type, 'OE') AS sec, {$monthSelectSql}, IFNULL(SUM(t.total),0) AS total
+        $sql = "SELECT COALESCE(c.type, 'OE') AS sec, {$monthSelectSql},
+                       (IFNULL(SUM(t.`1`),0)+IFNULL(SUM(t.`2`),0)+IFNULL(SUM(t.`3`),0)+IFNULL(SUM(t.`4`),0)
+                       +IFNULL(SUM(t.`5`),0)+IFNULL(SUM(t.`6`),0)+IFNULL(SUM(t.`7`),0)+IFNULL(SUM(t.`8`),0)
+                       +IFNULL(SUM(t.`9`),0)+IFNULL(SUM(t.`10`),0)+IFNULL(SUM(t.`11`),0)+IFNULL(SUM(t.`12`),0)) AS total
                 FROM yp_plan__trans_budget_entry_data t
                 LEFT JOIN gw_plan__master_coa c ON c.main_account = t.id_coa
                 WHERE t.year_code = ?
@@ -402,7 +417,9 @@ class ModelPl extends Model
                        COALESCE(c.cost_center_desc, '') AS account_desc,
                        COALESCE(NULLIF(cc.cost_center_sap,''), CAST(t.id_dept AS CHAR)) AS cost_center,
                        {$monthSelectSql},
-                       IFNULL(t.total,0) AS total
+                       (IFNULL(t.`1`,0)+IFNULL(t.`2`,0)+IFNULL(t.`3`,0)+IFNULL(t.`4`,0)
+                       +IFNULL(t.`5`,0)+IFNULL(t.`6`,0)+IFNULL(t.`7`,0)+IFNULL(t.`8`,0)
+                       +IFNULL(t.`9`,0)+IFNULL(t.`10`,0)+IFNULL(t.`11`,0)+IFNULL(t.`12`,0)) AS total
                 FROM yp_plan__trans_budget_entry_data t
                 LEFT JOIN gw_plan__master_coa c ON c.main_account = t.id_coa
                 LEFT JOIN gw_plan__master_cost_center cc ON cc.cost_center = t.id_dept

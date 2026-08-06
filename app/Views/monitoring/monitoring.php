@@ -8,6 +8,22 @@
     modalSubtitle: '',
     modalContent: '',
     isLoadingModal: false,
+    page: { opex_ga: 1, foh: 1, mpp_opex: 1, mpp_foh: 1, capex: 1 },
+    perPage: 10,
+    isRowVisible(tab, idx) {
+        return idx >= (this.page[tab] - 1) * this.perPage && idx < this.page[tab] * this.perPage;
+    },
+    totalPages(total) {
+        return Math.ceil(total / this.perPage) || 1;
+    },
+    pageNumbers(tab, total) {
+        const totalP = this.totalPages(total);
+        const currP = this.page[tab] || 1;
+        if (totalP <= 7) return Array.from({ length: totalP }, (_, i) => i + 1);
+        if (currP <= 4) return [1, 2, 3, 4, 5, '...', totalP];
+        if (currP >= totalP - 3) return [1, '...', totalP - 4, totalP - 3, totalP - 2, totalP - 1, totalP];
+        return [1, '...', currP - 1, currP, currP + 1, '...', totalP];
+    },
 
     openDetail(idDept, deptDesc, type) {
         this.detailModalOpen = true;
@@ -24,7 +40,7 @@
                 this.isLoadingModal = false;
             })
             .catch(err => {
-                this.modalContent = '<div class="p-4 text-center text-red-500 font-medium">Gagal memuat data detail. Silakan coba lagi.</div>';
+                this.modalContent = '<div class=&quot;p-4 text-center text-red-500 font-medium&quot;>Gagal memuat data detail. Silakan coba lagi.</div>';
                 this.isLoadingModal = false;
             });
     }
@@ -126,8 +142,8 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-gray-600 dark:text-gray-300">
                             <?php if (!empty($curr)): ?>
-                                <?php foreach ($curr as $files): ?>
-                                    <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
+                                <?php foreach ($curr as $i => $files): ?>
+                                    <tr x-show="isRowVisible('opex_ga', <?= $i ?>)" class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
                                         <td class="px-4 py-2.5 font-medium border-r border-gray-200 dark:border-gray-800">
                                             <button @click="openDetail('<?= $files['id_dept']; ?>', '<?= esc($files['cost_desc'] ?? ''); ?>', 'OPEX GA')" 
                                                     class="text-brand-600 hover:text-brand-700 dark:text-brand-400 font-semibold hover:underline text-left">
@@ -158,6 +174,24 @@
                         </tbody>
                     </table>
                 </div>
+                <?php $totCount = count($curr ?? []); ?>
+                <div class="p-3 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
+                    <div>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200" x-text="<?= $totCount ?> === 0 ? 0 : ((page.opex_ga - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(page.opex_ga * perPage, <?= $totCount ?>)"></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= $totCount ?></span> data</div>
+                    <div class="flex items-center gap-1.5" x-show="totalPages(<?= $totCount ?>) > 1">
+                        <button type="button" @click="page.opex_ga--" :disabled="page.opex_ga === 1" class="h-7 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold">Prev</button>
+                        <template x-for="(p, i) in pageNumbers('opex_ga', <?= $totCount ?>)" :key="i">
+                            <div>
+                                <template x-if="p === '...'">
+                                    <span class="px-1.5 font-bold">...</span>
+                                </template>
+                                <template x-if="p !== '...'">
+                                    <button type="button" @click="page.opex_ga = p" :class="page.opex_ga === p ? 'bg-brand-500 text-white font-bold' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300'" class="h-7 min-w-[28px] px-1.5 rounded-lg font-semibold" x-text="p"></button>
+                                </template>
+                            </div>
+                        </template>
+                        <button type="button" @click="page.opex_ga++" :disabled="page.opex_ga === totalPages(<?= $totCount ?>)" class="h-7 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold">Next</button>
+                    </div>
+                </div>
             </div>
 
             <div x-show="activeTab === 'foh'" x-cloak class="space-y-4">
@@ -187,8 +221,8 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-gray-600 dark:text-gray-300">
                             <?php if (!empty($curr2)): ?>
-                                <?php foreach ($curr2 as $files2): ?>
-                                    <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
+                                <?php foreach ($curr2 as $i => $files2): ?>
+                                    <tr x-show="isRowVisible('foh', <?= $i ?>)" class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
                                         <td class="px-4 py-2.5 font-medium border-r border-gray-200 dark:border-gray-800">
                                             <button @click="openDetail('<?= $files2['id_dept']; ?>', '<?= esc($files2['cost_desc'] ?? ''); ?>', 'FOH')" 
                                                     class="text-brand-600 hover:text-brand-700 dark:text-brand-400 font-semibold hover:underline text-left">
@@ -218,6 +252,24 @@
                             <?php endif; ?>
                         </tbody>
                     </table>
+                </div>
+                <?php $totCount2 = count($curr2 ?? []); ?>
+                <div class="p-3 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
+                    <div>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200" x-text="<?= $totCount2 ?> === 0 ? 0 : ((page.foh - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(page.foh * perPage, <?= $totCount2 ?>)"></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= $totCount2 ?></span> data</div>
+                    <div class="flex items-center gap-1.5" x-show="totalPages(<?= $totCount2 ?>) > 1">
+                        <button type="button" @click="page.foh--" :disabled="page.foh === 1" class="h-7 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold">Prev</button>
+                        <template x-for="(p, i) in pageNumbers('foh', <?= $totCount2 ?>)" :key="i">
+                            <div>
+                                <template x-if="p === '...'">
+                                    <span class="px-1.5 font-bold">...</span>
+                                </template>
+                                <template x-if="p !== '...'">
+                                    <button type="button" @click="page.foh = p" :class="page.foh === p ? 'bg-brand-500 text-white font-bold' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300'" class="h-7 min-w-[28px] px-1.5 rounded-lg font-semibold" x-text="p"></button>
+                                </template>
+                            </div>
+                        </template>
+                        <button type="button" @click="page.foh++" :disabled="page.foh === totalPages(<?= $totCount2 ?>)" class="h-7 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold">Next</button>
+                    </div>
                 </div>
             </div>
 
@@ -265,8 +317,8 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-gray-600 dark:text-gray-300">
                             <?php if (!empty($mpp)): ?>
-                                <?php foreach ($mpp as $files1): ?>
-                                    <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
+                                <?php foreach ($mpp as $i => $files1): ?>
+                                    <tr x-show="isRowVisible('mpp_opex', <?= $i ?>)" class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
                                         <td class="px-4 py-2.5 font-medium border-r border-gray-200 dark:border-gray-800">
                                             <button @click="openDetail('<?= $files1['cost_center']; ?>', '<?= esc($files1['cost_desc'] ?? ''); ?>', 'MPP OPEX')" 
                                                     class="text-brand-600 hover:text-brand-700 dark:text-brand-400 font-semibold hover:underline text-left">
@@ -312,6 +364,24 @@
                             <?php endif; ?>
                         </tbody>
                     </table>
+                </div>
+                <?php $totCount3 = count($mpp ?? []); ?>
+                <div class="p-3 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
+                    <div>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200" x-text="<?= $totCount3 ?> === 0 ? 0 : ((page.mpp_opex - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(page.mpp_opex * perPage, <?= $totCount3 ?>)"></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= $totCount3 ?></span> data</div>
+                    <div class="flex items-center gap-1.5" x-show="totalPages(<?= $totCount3 ?>) > 1">
+                        <button type="button" @click="page.mpp_opex--" :disabled="page.mpp_opex === 1" class="h-7 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold">Prev</button>
+                        <template x-for="(p, i) in pageNumbers('mpp_opex', <?= $totCount3 ?>)" :key="i">
+                            <div>
+                                <template x-if="p === '...'">
+                                    <span class="px-1.5 font-bold">...</span>
+                                </template>
+                                <template x-if="p !== '...'">
+                                    <button type="button" @click="page.mpp_opex = p" :class="page.mpp_opex === p ? 'bg-brand-500 text-white font-bold' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300'" class="h-7 min-w-[28px] px-1.5 rounded-lg font-semibold" x-text="p"></button>
+                                </template>
+                            </div>
+                        </template>
+                        <button type="button" @click="page.mpp_opex++" :disabled="page.mpp_opex === totalPages(<?= $totCount3 ?>)" class="h-7 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold">Next</button>
+                    </div>
                 </div>
             </div>
 
@@ -359,8 +429,8 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-gray-600 dark:text-gray-300">
                             <?php if (!empty($mpp_foh)): ?>
-                                <?php foreach ($mpp_foh as $files_foh): ?>
-                                    <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
+                                <?php foreach ($mpp_foh as $i => $files_foh): ?>
+                                    <tr x-show="isRowVisible('mpp_foh', <?= $i ?>)" class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
                                         <td class="px-4 py-2.5 font-medium border-r border-gray-200 dark:border-gray-800">
                                             <button @click="openDetail('<?= $files_foh['cost_center']; ?>', '<?= esc($files_foh['cost_desc'] ?? ''); ?>', 'MPP FOH')" 
                                                     class="text-brand-600 hover:text-brand-700 dark:text-brand-400 font-semibold hover:underline text-left">
@@ -407,6 +477,24 @@
                         </tbody>
                     </table>
                 </div>
+                <?php $totCount4 = count($mpp_foh ?? []); ?>
+                <div class="p-3 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
+                    <div>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200" x-text="<?= $totCount4 ?> === 0 ? 0 : ((page.mpp_foh - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(page.mpp_foh * perPage, <?= $totCount4 ?>)"></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= $totCount4 ?></span> data</div>
+                    <div class="flex items-center gap-1.5" x-show="totalPages(<?= $totCount4 ?>) > 1">
+                        <button type="button" @click="page.mpp_foh--" :disabled="page.mpp_foh === 1" class="h-7 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold">Prev</button>
+                        <template x-for="(p, i) in pageNumbers('mpp_foh', <?= $totCount4 ?>)" :key="i">
+                            <div>
+                                <template x-if="p === '...'">
+                                    <span class="px-1.5 font-bold">...</span>
+                                </template>
+                                <template x-if="p !== '...'">
+                                    <button type="button" @click="page.mpp_foh = p" :class="page.mpp_foh === p ? 'bg-brand-500 text-white font-bold' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300'" class="h-7 min-w-[28px] px-1.5 rounded-lg font-semibold" x-text="p"></button>
+                                </template>
+                            </div>
+                        </template>
+                        <button type="button" @click="page.mpp_foh++" :disabled="page.mpp_foh === totalPages(<?= $totCount4 ?>)" class="h-7 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold">Next</button>
+                    </div>
+                </div>
             </div>
 
             <div x-show="activeTab === 'capex'" x-cloak class="space-y-4">
@@ -441,8 +529,8 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-gray-600 dark:text-gray-300">
                             <?php if (!empty($capex)): ?>
-                                <?php foreach ($capex as $row): ?>
-                                    <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
+                                <?php foreach ($capex as $i => $row): ?>
+                                    <tr x-show="isRowVisible('capex', <?= $i ?>)" class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
                                         <td class="px-4 py-2.5 font-medium border-r border-gray-200 dark:border-gray-800"><?= esc($row['cost_center_desc'] ?? ''); ?></td>
                                         <td class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-800"><?= esc($row['item_desc'] ?? ''); ?></td>
                                         <td class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-800"><?= esc($row['main_account'] ?? ''); ?></td>
@@ -472,6 +560,24 @@
                             <?php endif; ?>
                         </tbody>
                     </table>
+                </div>
+                <?php $totCount5 = count($capex ?? []); ?>
+                <div class="p-3 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
+                    <div>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200" x-text="<?= $totCount5 ?> === 0 ? 0 : ((page.capex - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(page.capex * perPage, <?= $totCount5 ?>)"></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= $totCount5 ?></span> data</div>
+                    <div class="flex items-center gap-1.5" x-show="totalPages(<?= $totCount5 ?>) > 1">
+                        <button type="button" @click="page.capex--" :disabled="page.capex === 1" class="h-7 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold">Prev</button>
+                        <template x-for="(p, i) in pageNumbers('capex', <?= $totCount5 ?>)" :key="i">
+                            <div>
+                                <template x-if="p === '...'">
+                                    <span class="px-1.5 font-bold">...</span>
+                                </template>
+                                <template x-if="p !== '...'">
+                                    <button type="button" @click="page.capex = p" :class="page.capex === p ? 'bg-brand-500 text-white font-bold' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300'" class="h-7 min-w-[28px] px-1.5 rounded-lg font-semibold" x-text="p"></button>
+                                </template>
+                            </div>
+                        </template>
+                        <button type="button" @click="page.capex++" :disabled="page.capex === totalPages(<?= $totCount5 ?>)" class="h-7 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold">Next</button>
+                    </div>
                 </div>
             </div>
 

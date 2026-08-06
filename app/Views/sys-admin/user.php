@@ -58,7 +58,7 @@
             name="search"
             value="<?= esc($filters['search'] ?? '') ?>"
             placeholder="Cari username, nama, atau email..."
-            class="w-full rounded-xl border border-gray-200/80 bg-gray-50/60 py-2.5 pl-10 pr-4 text-xs md:text-sm font-medium text-gray-800 placeholder:text-gray-400/80 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700/80 dark:bg-gray-800/80 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-brand-400 transition-all duration-200 shadow-xs"
+            class="w-full rounded-xl border border-gray-200/80 bg-gray-50/60 py-2.5 pl-11 pr-4 text-xs md:text-sm font-medium text-gray-800 placeholder:text-gray-400/80 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700/80 dark:bg-gray-800/80 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-brand-400 transition-all duration-200 shadow-xs"
           />
         </div>
 
@@ -90,6 +90,7 @@
         >
           <i class="fa-solid fa-filter text-xs"></i>
         </button>
+        <?php if (! empty($has_filter)): ?>
         <a
           href="<?= base_url('sys-admin/user') ?>"
           class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-2.5 px-4 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -97,6 +98,7 @@
         >
           <i class="fa-solid fa-rotate-left text-xs"></i>
         </a>
+        <?php endif; ?>
       </form>
     </div>
 
@@ -146,9 +148,9 @@
                         <?php endif; ?>
                       </div>
                       <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                        <span class="font-mono">@<?= esc($r['user_username']) ?></span>
+                        <!-- <span class="font-mono"><?= esc($r['user_username']) ?></span> -->
                         <?php if (! empty($r['user_email'])): ?>
-                          <span>· <?= esc($r['user_email']) ?></span>
+                          <span> <?= esc($r['user_email']) ?></span>
                         <?php endif; ?>
                       </div>
                     </div>
@@ -163,7 +165,7 @@
                   <?php if (empty($userRoleIds)): ?>
                     <?php if ($isAdminFlag): ?>
                       <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
-                        <i class="fa-solid fa-crown text-[10px]"></i> Admin
+                        <i class="fa-solid text-[10px]"></i> Admin
                       </span>
                     <?php else: ?>
                       <span class="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-500 dark:bg-gray-800 dark:text-gray-400">
@@ -186,9 +188,9 @@
                         ?>
                         <span class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold <?= $isAdminRole ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' : 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400' ?>">
                           <?php if ($isAdminRole): ?>
-                            <i class="fa-solid fa-crown text-[10px]"></i>
+                            <i class="fa-solid text-[10px]"></i>
                           <?php else: ?>
-                            <i class="fa-solid fa-user-tag text-[10px]"></i>
+                            <i class="fa-solid text-[10px]"></i>
                           <?php endif; ?>
                           <?= esc($roleName ?: 'Role #' . $rid) ?>
                         </span>
@@ -439,7 +441,7 @@
               class="w-full flex items-center justify-between gap-3 rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-left font-semibold text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
             >
               <span class="flex items-center gap-2.5">
-                <i class="fa-solid fa-user-tag text-gray-400"></i>
+                <i class="fa-solid text-gray-400"></i>
                 <span x-text="roleLabel()" :class="form.role_id ? '' : 'text-gray-400 dark:text-gray-500'"></span>
               </span>
               <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform" :class="roleDropdownOpen ? 'rotate-180' : ''"></i>
@@ -462,7 +464,7 @@
                   type="text"
                   x-model="roleSearch"
                   placeholder="Cari role..."
-                  class="w-full bg-transparent py-3 pl-10 pr-4 text-sm text-gray-800 dark:text-white placeholder:text-gray-400 focus:outline-none"
+                  class="w-full bg-transparent py-3 pl-11 pr-4 text-sm text-gray-800 dark:text-white placeholder:text-gray-400 focus:outline-none"
                 />
               </div>
               <div class="max-h-56 overflow-y-auto py-1.5">
@@ -474,7 +476,7 @@
                     :class="String(form.role_id) === String(role.role_id) ? 'bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400 font-semibold' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'"
                   >
                     <span class="flex items-center gap-2.5">
-                      <i class="fa-solid fa-user-tag text-xs text-gray-400"></i>
+                      <i class="fa-solid text-xs text-gray-400"></i>
                       <span x-text="role.role_name_idn"></span>
                     </span>
                     <i class="fa-solid fa-check text-xs" x-show="String(form.role_id) === String(role.role_id)"></i>

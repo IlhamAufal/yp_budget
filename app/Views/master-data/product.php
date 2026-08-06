@@ -95,7 +95,7 @@
         <div class="relative flex-1 min-w-[180px]">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400"></i>
           <input type="text" name="search" value="<?= esc($filters['search'] ?? '') ?>" placeholder="Cari nama produk, MID, atau key..." 
-            class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 pl-8 pr-3 text-xs focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-colors" />
+            class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 pl-9 pr-3 text-xs focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-colors" />
         </div>
         
         <!-- Filter Channel -->
@@ -128,9 +128,11 @@
         <button type="submit" class="rounded-lg bg-gray-900 dark:bg-brand-500 py-1.5 px-3 text-xs font-semibold text-white hover:bg-black dark:hover:bg-brand-600 transition-colors shadow-xs" title="Terapkan Filter">
           <i class="fa-solid fa-filter text-[10px]"></i>
         </button>
+        <?php if (! empty($has_filter)): ?>
         <a href="<?= base_url('master/product') ?>" class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-1.5 px-2.5 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Reset Filter">
           <i class="fa-solid fa-rotate-left text-[10px]"></i>
         </a>
+        <?php endif; ?>
       </form>
     </div>
     <div class="overflow-x-auto">

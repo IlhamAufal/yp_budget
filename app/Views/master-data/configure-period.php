@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
 
-<div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-4" x-data="periodPage()">
+<div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6" x-data="periodPage()">
 
   <!-- ============================================================ -->
   <!-- BREADCRUMB & HEADER -->
@@ -60,17 +60,17 @@
       </h2>
     </div>
 
-    <form @submit.prevent="saveUpload()" class="p-4 md:p-5 space-y-4">
+    <form @submit.prevent="saveUpload()" class="p-4 md:p-5 space-y-5">
 
       <!-- Form Budget -->
       <div class="grid grid-cols-1 sm:grid-cols-[140px_1fr] gap-2 sm:gap-4 items-start">
         <label class="text-xs font-bold text-gray-700 dark:text-gray-300 pt-2">
           Form Budget <span class="text-red-500">*</span>
         </label>
-        <div class="relative">
+        <div class="relative" x-data="{ open: false }" @click.outside="open = false">
           <div
             class="flex flex-wrap gap-1.5 min-h-[36px] p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20 transition-all cursor-pointer"
-            @click="$refs.formBudgetDropdown.open = !$refs.formBudgetDropdown.open"
+            @click="open = !open"
           >
             <template x-if="uploadForm.form_budget.length === 0">
               <span class="text-xs text-gray-400 py-0.5">-- Pilih Form Budget --</span>
@@ -86,10 +86,7 @@
           </div>
 
           <div
-            x-data="{ open: false }"
-            x-ref="formBudgetDropdown"
             x-show="open"
-            @click.outside="open = false"
             x-transition
             class="absolute z-50 w-full sm:w-[400px] mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1"
           >
@@ -100,6 +97,25 @@
               </label>
             </template>
           </div>
+        </div>
+      </div>
+
+      <!-- Tahun Anggaran -->
+      <div class="grid grid-cols-1 sm:grid-cols-[140px_1fr] gap-2 sm:gap-4 items-center">
+        <label class="text-xs font-bold text-gray-700 dark:text-gray-300">
+          Tahun Anggaran <span class="text-red-500">*</span>
+        </label>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <input
+            type="number"
+            x-model.number="uploadForm.year_code"
+            @change="syncPeriodToYear()"
+            required
+            min="2000"
+            max="2100"
+            class="max-w-[180px] rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-1.5 text-xs font-bold text-gray-900 dark:text-gray-100 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
+          />
+          <span class="text-xs text-gray-400">Periode otomatis mengikuti tahun ini</span>
         </div>
       </div>
 
@@ -126,10 +142,10 @@
         <label class="text-xs font-bold text-gray-700 dark:text-gray-300 pt-2">
           Cost Center <span class="text-red-500">*</span>
         </label>
-        <div class="relative">
+        <div class="relative" x-data="{ open: false, search: '' }" @click.outside="open = false">
           <div
             class="flex flex-wrap gap-1.5 min-h-[36px] p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20 transition-all cursor-pointer"
-            @click="$refs.ccDropdown.open = !$refs.ccDropdown.open"
+            @click="open = !open"
           >
             <template x-if="uploadForm.cost_center.includes('*')">
               <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-gray-600 text-white text-[11px] font-bold shadow-sm">
@@ -150,10 +166,7 @@
           </div>
 
           <div
-            x-data="{ open: false, search: '' }"
-            x-ref="ccDropdown"
             x-show="open"
-            @click.outside="open = false"
             x-transition
             class="absolute z-50 w-full sm:w-[500px] mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg flex flex-col overflow-hidden"
           >
@@ -164,7 +177,7 @@
                   type="text"
                   x-model="search"
                   placeholder="Cari Cost Center..."
-                  class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-7 pr-3 py-1.5 text-xs focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none"
+                  class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 pl-8 pr-3 py-1.5 text-xs focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none"
                 >
               </div>
             </div>
@@ -342,15 +355,19 @@ function periodPage() {
     uploadForm: {
       form_budget: [],
       cost_center: ['*'],
+      year_code: new Date().getFullYear() + 1,
       period_start: '',
       period_end: ''
     },
 
     init() {
-      const now = new Date();
-      const year = now.getFullYear();
-      this.uploadForm.period_start = `${year}-01-01T00:00`;
-      this.uploadForm.period_end = `${year}-12-31T23:59`;
+      this.syncPeriodToYear();
+    },
+
+    syncPeriodToYear() {
+      const y = this.uploadForm.year_code || new Date().getFullYear();
+      this.uploadForm.period_start = `${y}-01-01T00:00`;
+      this.uploadForm.period_end = `${y}-12-31T23:59`;
     },
 
     toggleFormBudget(val) {
@@ -365,6 +382,8 @@ function periodPage() {
     toggleCostCenter(val) {
       const idx = this.uploadForm.cost_center.indexOf(val);
       if (idx === -1) {
+        // Pilih CC spesifik → lepas 'ALL COST CENTER' agar tidak dobel
+        this.uploadForm.cost_center = this.uploadForm.cost_center.filter(v => v !== '*');
         this.uploadForm.cost_center.push(val);
       } else {
         this.uploadForm.cost_center.splice(idx, 1);
@@ -402,7 +421,7 @@ function periodPage() {
       this.savingUpload = true;
       try {
         const payload = {
-          year_code: new Date().getFullYear() + 1,
+          year_code: this.uploadForm.year_code,
           form_budget: this.uploadForm.form_budget.join(','),
           cost_center: this.uploadForm.cost_center.join(','),
           period_start: this.uploadForm.period_start,
