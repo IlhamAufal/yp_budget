@@ -10,6 +10,8 @@ use CodeIgniter\Filters\InvalidChars;
 use CodeIgniter\Filters\SecureHeaders;
 use App\Filters\AuthFilter;
 use App\Filters\EnsureContextFilter;
+use App\Filters\RoleFilter;
+use App\Filters\PeriodLockFilter;
 
 class Filters extends BaseConfig
 {
@@ -27,6 +29,8 @@ class Filters extends BaseConfig
         'secureheaders' => SecureHeaders::class,
         'auth'          => AuthFilter::class,
         'ensureContext' => EnsureContextFilter::class,
+        'role'          => RoleFilter::class,
+        'periodLock'    => PeriodLockFilter::class,
     ];
 
     /**
@@ -38,6 +42,8 @@ class Filters extends BaseConfig
     public $globals = [
         'before' => [
             'ensureContext',
+            'role',
+            'periodLock',
         ],
         'after' => [
             'toolbar',

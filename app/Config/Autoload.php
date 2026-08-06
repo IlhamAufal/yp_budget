@@ -66,7 +66,7 @@ class Autoload extends AutoloadConfig
      */
     public $classmap = [];
 
-    public $helpers = ['url', 'form'];
+    public $helpers = ['url', 'form', 'menu_helper'];
 
     /**
      * -------------------------------------------------------------------

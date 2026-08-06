@@ -160,6 +160,7 @@ $routes->group('foh', ['filter' => 'auth'], function ($routes) {
     $routes->get('actual', 'Foh::actual');
     $routes->post('cariActualTable', 'Foh::cariActualTable');
     $routes->get('summary', 'Foh::summary');
+    $routes->get('report/department', 'Foh::summary');
     $routes->get('getDetailItems', 'Foh::getDetailItems');
     $routes->post('saveDetail', 'Foh::saveDetail');
     $routes->post('deleteDetail', 'Foh::deleteDetail');
@@ -189,6 +190,7 @@ $routes->group('opex-selling', ['filter' => 'auth'], function ($routes) {
     $routes->post('cari_actual_table', 'OpexSellingController::cariActualTable');
     $routes->post('saveBudget', 'OpexSellingController::saveBudget');
     $routes->post('uploadActual', 'OpexSellingController::uploadActual');
+    $routes->get('exportExcel', 'OpexSellingController::exportExcel');
 });
 $routes->group('opex_selling', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'OpexSellingController::index');
@@ -198,6 +200,7 @@ $routes->group('opex_selling', ['filter' => 'auth'], function ($routes) {
     $routes->post('saveBudget', 'OpexSellingController::saveBudget');
     $routes->get('report/department', 'OpexSellingController::reportDepartment');
     $routes->post('uploadActual', 'OpexSellingController::uploadActual');
+    $routes->get('exportExcel', 'OpexSellingController::exportExcel');
 });
 
 // Sales

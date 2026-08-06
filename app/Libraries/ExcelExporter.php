@@ -19,8 +19,8 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
  */
 class ExcelExporter
 {
-    /** Warna header tabel (brand blue). */
-    public const HEADER_FILL = '1D4ED8';
+    /** Warna header tabel (brand blue) — format ARGB 8 karakter. */
+    public const HEADER_FILL = 'FF1D4ED8';
 
     /**
      * Buat response download .xlsx dari array sederhana.
