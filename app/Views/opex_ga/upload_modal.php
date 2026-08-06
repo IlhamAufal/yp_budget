@@ -2,16 +2,16 @@
      @open-upload-modal.window="open = true; uploadType = $event.detail.type"
      x-show="open" 
      class="fixed inset-0 flex items-center justify-center p-4" 
-     style="z-index: 999999; background-color: rgba(0,0,0,0.65); backdrop-filter: blur(4px);"
+     style="z-index: 999999; background-color: rgba(0,0,0,0.65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);"
      @click.self="open = false" 
      x-cloak>
 
-    <div class="w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden border border-gray-100">
-        <div class="flex items-center justify-between bg-gray-50 px-6 py-4 border-b border-gray-200 rounded-t-2xl">
-            <h3 class="text-base font-semibold text-gray-800">
-                Upload OPEX GA (<span class="capitalize" x-text="uploadType"></span>)
+    <div class="w-full max-w-md rounded-2xl bg-white dark:bg-gray-900 shadow-2xl overflow-hidden border border-gray-200/80 dark:border-gray-800">
+        <div class="flex items-center justify-between bg-gray-50/80 dark:bg-gray-800/60 px-6 py-4 border-b border-gray-200 dark:border-gray-800 rounded-t-2xl">
+            <h3 class="text-base font-extrabold text-gray-900 dark:text-white">
+                Upload OPEX GA (<span class="capitalize text-primary" x-text="uploadType"></span>)
             </h3>
-            <button type="button" @click="open = false" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-200 transition-colors">
+            <button type="button" @click="open = false" class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>

@@ -1,9 +1,9 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div x-data="reportTotalOpexHandler()" class="space-y-6">
+<div x-data="reportTotalOpexHandler()" class="p-4 md:p-6 lg:p-8 space-y-8 pb-12">
 
-    <div class="border-b border-stroke dark:border-strokedark bg-white dark:bg-boxdark rounded-2xl p-2 shadow-default overflow-x-auto">
+    <div class="border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-2xl p-2 shadow-xs overflow-x-auto">
         <nav class="flex gap-2 min-w-max">
             <template x-for="tab in tabs" :key="tab.id">
                 <button type="button" 

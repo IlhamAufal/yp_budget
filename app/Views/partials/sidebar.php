@@ -414,39 +414,7 @@
                     href="<?= base_url('sales/summary') ?>"
                     class="menu-dropdown-item group <?= (url_is('sales/summary') && !url_is('sales/summary/*')) ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
                   >
-                    Summary Keseluruhan
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="<?= base_url('sales/summary/domestic') ?>"
-                    class="menu-dropdown-item group <?= url_is('sales/summary/domestic*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
-                  >
-                    Summary Domestic
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="<?= base_url('sales/summary/export') ?>"
-                    class="menu-dropdown-item group <?= url_is('sales/summary/export*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
-                  >
-                    Summary Export
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="<?= base_url('sales/summary/country') ?>"
-                    class="menu-dropdown-item group <?= url_is('sales/summary/country*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
-                  >
-                    Summary per Negara
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="<?= base_url('sales/summary/region') ?>"
-                    class="menu-dropdown-item group <?= url_is('sales/summary/region*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
-                  >
-                    Summary per Region
+                    Summary 
                   </a>
                 </li>
               </ul>

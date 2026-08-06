@@ -206,7 +206,7 @@ $routes->group('opex-selling', ['filter' => 'auth'], function ($routes) {
 $routes->group('opex_selling', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'OpexSellingController::index');
     $routes->get('entry', 'OpexSellingController::index');
-    $routes->get('entryBudgetDetail', 'OpexSellingController::entryBudgetDetail');
+    $routes->post('entryBudgetDetail', 'OpexSellingController::entryBudgetDetail');
     $routes->post('cari_actual_table', 'OpexSellingController::cariActualTable');
     $routes->post('saveBudget', 'OpexSellingController::saveBudget');
     $routes->get('report/department', 'OpexSellingController::reportDepartment');

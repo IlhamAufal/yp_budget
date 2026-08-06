@@ -13,6 +13,15 @@
   <link href="<?= base_url('assets/css/style.css') ?>" rel="stylesheet">
   <style>
     [x-cloak] { display: none !important; }
+
+    /* Global Darkmode Text Enforcement: Make all non-accent text pure white */
+    .dark body,
+    .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6,
+    .dark p, .dark label, .dark td, .dark th, .dark caption,
+    .dark .text-gray-400, .dark .text-gray-500, .dark .text-gray-600, .dark .text-gray-700, .dark .text-gray-800, .dark .text-gray-900,
+    .dark .dark\:text-gray-200, .dark .dark\:text-gray-300, .dark .dark\:text-gray-400, .dark .dark\:text-gray-500 {
+      color: #ffffff !important;
+    }
   </style>
 </head>
 <body
@@ -20,7 +29,7 @@
     x-init="
          darkMode = JSON.parse(localStorage.getItem('darkMode'));
          $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
-    :class="{'dark bg-gray-900': darkMode === true}"
+    :class="{'dark bg-gray-900 text-white': darkMode === true}"
   >
 
   <!-- ============================================================ -->

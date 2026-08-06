@@ -1,14 +1,14 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div x-data="{ activeTab: 'department' }" class="space-y-6">
+<div x-data="{ activeTab: 'department' }" class="p-4 md:p-6 lg:p-8 space-y-8 pb-12">
     
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-2xl border border-gray-100 shadow-xs">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
         <div>
-            <h1 class="text-xl font-bold text-gray-800">Laporan Konsolidasi CAPEX</h1>
-            <p class="text-xs text-gray-500 mt-1">Rekap alokasi belanja modal & dampak penyusutan ke OPEX/FOH (<?= esc($working_year) ?>)</p>
+            <h1 class="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">Laporan Konsolidasi CAPEX</h1>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Rekap alokasi belanja modal & dampak penyusutan ke OPEX/FOH.</p>
         </div>
-        <button @click="syncToOpex()" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-medium hover:bg-emerald-700 transition-colors shadow-xs flex items-center gap-2">
+        <button @click="syncToOpex()" class="px-4.5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs sm:text-sm font-semibold hover:bg-emerald-700 active:scale-[0.98] transition-all shadow-xs flex items-center gap-2 cursor-pointer">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             Process & Sync to OPEX
         </button>
@@ -25,24 +25,24 @@
         </nav>
     </div>
 
-    <div x-show="activeTab === 'department'" class="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
+    <div x-show="activeTab === 'department'" class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-                <thead class="bg-gray-50 text-gray-500 font-medium border-b border-gray-100">
+                <thead class="bg-gray-100/80 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 text-[11px] font-bold tracking-wider uppercase border-b border-gray-200 dark:border-gray-700">
                     <tr>
-                        <th class="p-4">Departemen</th>
-                        <th class="p-4 text-right">Total Item Aset</th>
-                        <th class="p-4 text-right">Nilai Akuisisi CAPEX</th>
-                        <th class="p-4 text-right">Beban Depresiasi / Tahun</th>
+                        <th class="px-5 py-3.5">Departemen</th>
+                        <th class="px-5 py-3.5 text-right">Total Item Aset</th>
+                        <th class="px-5 py-3.5 text-right">Nilai Akuisisi CAPEX</th>
+                        <th class="px-5 py-3.5 text-right">Beban Depresiasi / Tahun</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-gray-200/80 dark:divide-gray-800/80 text-gray-700 dark:text-gray-300">
                     <?php foreach ($dept_reports as $row) : ?>
-                        <tr class="hover:bg-gray-50/50">
-                            <td class="p-4 font-medium text-gray-900"><?= esc($row['department_name']) ?></td>
-                            <td class="p-4 text-right"><?= number_format($row['total_items']) ?></td>
-                            <td class="p-4 text-right font-medium text-gray-900">Rp <?= number_format($row['total_acquisition'], 0, ',', '.') ?></td>
-                            <td class="p-4 text-right text-emerald-600 font-medium">Rp <?= number_format($row['annual_depreciation'], 0, ',', '.') ?></td>
+                        <tr class="hover:bg-slate-50/80 dark:hover:bg-gray-800/50 transition-colors">
+                            <td class="px-5 py-3.5 font-semibold text-gray-900 dark:text-white"><?= esc($row['department_name']) ?></td>
+                            <td class="px-5 py-3.5 text-right font-mono font-medium"><?= number_format($row['total_items']) ?></td>
+                            <td class="px-5 py-3.5 text-right font-mono font-bold text-gray-900 dark:text-white">Rp <?= number_format($row['total_acquisition'], 0, ',', '.') ?></td>
+                            <td class="px-5 py-3.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">Rp <?= number_format($row['annual_depreciation'], 0, ',', '.') ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -50,27 +50,29 @@
         </div>
     </div>
 
-    <div x-show="activeTab === 'total_sync'" class="bg-white rounded-2xl border border-gray-100 shadow-xs p-6">
-        <h3 class="text-sm font-bold text-gray-800 mb-4">Konsolidasi Alokasi Depresiasi CAPEX ke Akun OPEX / FOH</h3>
-        <p class="text-xs text-gray-500 mb-6">Nilai depresiasi bulanan di bawah ini secara otomatis dialokasikan ke beban operasional departemen terkait.</p>
+    <div x-show="activeTab === 'total_sync'" class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs p-6 space-y-4">
+        <div>
+            <h3 class="text-sm font-extrabold text-gray-900 dark:text-white">Konsolidasi Alokasi Depresiasi CAPEX ke Akun OPEX / FOH</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Nilai depresiasi bulanan di bawah ini secara otomatis dialokasikan ke beban operasional departemen terkait.</p>
+        </div>
         
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto rounded-xl border border-gray-200/80 dark:border-gray-800">
             <table class="w-full text-left text-xs">
-                <thead class="bg-gray-50 text-gray-500 font-medium border-b border-gray-100">
+                <thead class="bg-gray-100/80 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 text-[11px] font-bold tracking-wider uppercase border-b border-gray-200 dark:border-gray-700">
                     <tr>
-                        <th class="p-4">Akun Tujuan (OPEX/FOH)</th>
-                        <th class="p-4 text-right">Jan - Jun</th>
-                        <th class="p-4 text-right">Jul - Des</th>
-                        <th class="p-4 text-right">Total Depresiasi</th>
+                        <th class="px-5 py-3.5">Akun Tujuan (OPEX/FOH)</th>
+                        <th class="px-5 py-3.5 text-right">Jan - Jun</th>
+                        <th class="px-5 py-3.5 text-right">Jul - Des</th>
+                        <th class="px-5 py-3.5 text-right">Total Depresiasi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-gray-200/80 dark:divide-gray-800/80 text-gray-700 dark:text-gray-300">
                     <?php foreach ($total_opex_sync as $sync) : ?>
-                        <tr>
-                            <td class="p-4 font-medium text-gray-900"><?= esc($sync['account_name']) ?></td>
-                            <td class="p-4 text-right">Rp <?= number_format($sync['h1_amount'], 0, ',', '.') ?></td>
-                            <td class="p-4 text-right">Rp <?= number_format($sync['h2_amount'], 0, ',', '.') ?></td>
-                            <td class="p-4 text-right text-brand-600 font-bold">Rp <?= number_format($sync['total_amount'], 0, ',', '.') ?></td>
+                        <tr class="hover:bg-slate-50/80 dark:hover:bg-gray-800/50 transition-colors">
+                            <td class="px-5 py-3.5 font-semibold text-gray-900 dark:text-white"><?= esc($sync['account_name']) ?></td>
+                            <td class="px-5 py-3.5 text-right font-mono font-medium">Rp <?= number_format($sync['h1_amount'], 0, ',', '.') ?></td>
+                            <td class="px-5 py-3.5 text-right font-mono font-medium">Rp <?= number_format($sync['h2_amount'], 0, ',', '.') ?></td>
+                            <td class="px-5 py-3.5 text-right font-mono font-bold text-primary">Rp <?= number_format($sync['total_amount'], 0, ',', '.') ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

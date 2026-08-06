@@ -1,9 +1,9 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div x-data="opexSellingEntryHandler()" @open-selling-breakdown.window="openDetail($event.detail.id)" class="space-y-6">
+<div x-data="opexSellingEntryHandler()" @open-selling-breakdown.window="openDetail($event.detail.id)" class="p-4 md:p-6 lg:p-8 space-y-8 pb-12">
 
-    <div class="p-5 bg-white dark:bg-boxdark rounded-2xl border border-stroke dark:border-strokedark shadow-default flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="p-6 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-3 w-full md:w-auto">
             <label for="deptSelect" class="text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Department / Cost Center:</label>
             <select id="deptSelect" 
@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    <div class="bg-white dark:bg-boxdark rounded-2xl border border-stroke dark:border-strokedark shadow-default p-5">
+    <div class="bg-white dark:bg-boxdark rounded-2xl border border-stroke dark:border-strokedark shadow-default p-5 mt-5">
         <template x-if="!selectedDept">
             <div class="py-12 text-center text-gray-400">
                 <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

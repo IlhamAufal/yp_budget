@@ -5,22 +5,23 @@
     search: '',
     filterDept: 'all',
     activeTab: 'summary'
-}" class="space-y-6">
+}" class="p-4 md:p-6 lg:p-8 space-y-8 pb-12">
 
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <h2 class="text-2xl font-bold text-gray-800">OPEX General & Administrative</h2>
-            <p class="text-sm text-gray-500">Working Year: <span class="font-semibold text-primary"><?= esc($workingYear) ?></span></p>
+    <!-- Page Header Card -->
+    <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
+        <div class="space-y-1.5">
+            <h2 class="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">OPEX General & Administrative</h2>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Ringkasan dan manajemen beban operasional umum & administrasi.</p>
         </div>
         
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 shrink-0">
             <button @click="$dispatch('open-upload-modal', { type: 'opex_summary' })" 
-                    class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-xs hover:bg-emerald-700 transition-colors">
+                    class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4.5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-emerald-700 active:scale-[0.98] transition-all cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                 Upload Excel
             </button>
             <a href="<?= base_url('opexga/exportExcel') ?>" 
-               class="inline-flex items-center gap-2 rounded-lg bg-gray-800 px-4 py-2.5 text-sm font-medium text-white shadow-xs hover:bg-gray-900 transition-colors">
+               class="inline-flex items-center gap-2 rounded-xl bg-gray-900 dark:bg-gray-800 px-4.5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-gray-800 dark:hover:bg-gray-700 active:scale-[0.98] transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 Export Report
             </a>

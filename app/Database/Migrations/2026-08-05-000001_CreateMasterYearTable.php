@@ -34,6 +34,17 @@ class CreateMasterYearTable extends Migration
                 'type' => 'DATE',
                 'null' => true,
             ],
+            'form_budget'  => [
+                'type'       => 'VARCHAR',
+                'constraint' => 255,
+                'null'       => true,
+            ],
+            'cost_center'  => [
+                'type'       => 'VARCHAR',
+                'constraint' => 255,
+                'null'       => true,
+                'default'    => '*',
+            ],
             'status'       => [
                 'type'       => 'ENUM',
                 'constraint' => ['A', 'D'],

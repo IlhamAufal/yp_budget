@@ -44,14 +44,14 @@
                 this.isLoadingModal = false;
             });
     }
-}" class="space-y-6">
+}" class="p-4 md:p-6 lg:p-8 space-y-8 pb-12">
 
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
         <div>
-            <h2 class="text-xl font-bold text-gray-800 dark:text-white">
+            <h2 class="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                 Summary Profit & Loss Monitoring
             </h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
                 Monitoring alokasi anggaran OPEX, FOH, MPP, dan CAPEX per Cost Center.
             </p>
         </div>
@@ -586,7 +586,7 @@
 
     <div x-show="detailModalOpen" 
          class="fixed inset-0 flex items-center justify-center p-4 sm:p-6"
-         style="z-index: 999999; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px);"
+         style="z-index: 999999; background-color: rgba(0,0,0,0.65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);"
          @click.self="detailModalOpen = false" 
          x-cloak
          x-transition:enter="transition ease-out duration-200"

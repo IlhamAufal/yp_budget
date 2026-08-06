@@ -53,8 +53,8 @@
   <!-- ============================================================ -->
   <!-- CONFIGURE FORM -->
   <!-- ============================================================ -->
-  <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
-    <div class="px-4 py-2.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+  <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+    <div class="px-4 py-2.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-t-xl">
       <h2 class="text-xs font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
         <i class="fa-solid fa-gear text-brand-500"></i> Tambah Konfigurasi Periode
       </h2>
@@ -156,7 +156,7 @@
               <span class="text-xs text-gray-400 py-0.5">-- Pilih Cost Center --</span>
             </template>
             <template x-for="val in uploadForm.cost_center.filter(v => v !== '*')" :key="val">
-              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-600 text-white text-[11px] font-bold shadow-sm">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-brand-500 text-white text-[11px] font-bold shadow-sm">
                 <span x-text="val"></span>
                 <button type="button" @click.stop="toggleCostCenter(val)" class="text-white/70 hover:text-white transition-colors">
                   <i class="fa-solid fa-xmark text-[9px]"></i>
@@ -211,7 +211,7 @@
           <button
             type="submit"
             :disabled="savingUpload || uploadForm.form_budget.length === 0"
-            class="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 disabled:opacity-50 transition-all"
+            class="inline-flex items-center gap-2 rounded-xl bg-blue-50 hover:bg-blue-600 active:bg-blue-700 text-blue-700 hover:text-white dark:bg-blue-950/50 dark:text-blue-300 dark:hover:bg-blue-600 dark:hover:text-white border border-blue-200/80 dark:border-blue-800/80 px-5 py-2.5 text-xs font-bold shadow-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-all cursor-pointer"
           >
             <i class="fa-solid fa-spinner fa-spin" x-show="savingUpload"></i>
             <i class="fa-solid fa-floppy-disk" x-show="!savingUpload"></i>
@@ -237,7 +237,7 @@
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead>
-          <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+          <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30 text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400">
             <th class="py-3 px-4">Form Budget</th>
             <th class="py-3 px-4">Begin Date</th>
             <th class="py-3 px-4">End Date</th>
@@ -249,7 +249,7 @@
           <?php if (empty($rows)): ?>
             <tr>
               <td colspan="5" class="py-12 text-center text-gray-400">
-                <div class="flex flex-col items-center justify-center gap-2">
+                <div class="flex flex-col items-center mt-5 mb-5 justify-center gap-2">
                   <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-700">
                     <i class="fa-solid fa-calendar-days text-xl text-gray-300 dark:text-gray-500"></i>
                   </div>

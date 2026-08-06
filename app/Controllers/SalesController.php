@@ -34,6 +34,8 @@ class SalesController extends BaseController
             'title'       => 'Sales Summary & Discount Reclass',
             'workingYear' => $workingYear,
             'summary'     => $this->getSalesSummary($workingYear),
+            'country'     => $this->getCountrySummary($workingYear),
+            'region'      => $this->getRegionSummary($workingYear),
             'discount'    => $this->getDiscountReclass($workingYear),
         ]);
     }
@@ -320,6 +322,65 @@ class SalesController extends BaseController
         $summary['total']['total']    = $summary['domestic']['total'] + $summary['export']['total'];
 
         return $summary;
+    }
+
+    /**
+     * Agregasi revenue per country (domestic + export breakdown).
+     *
+     * Return: rows [label, jan..dec, total] diurut total DESC.
+     */
+    private function getCountrySummary(string $year): array
+    {
+        return $this->getGroupedSummary('country', $year);
+    }
+
+    /**
+     * Agregasi revenue per region (domestic + export breakdown).
+     *
+     * Return: rows [label, jan..dec, total] diurut total DESC.
+     */
+    private function getRegionSummary(string $year): array
+    {
+        return $this->getGroupedSummary('region', $year);
+    }
+
+    /**
+     * Query revenue per bulan dikelompokkan kolom tertentu (country/region)
+     * dari tabel breakdown domestic_region + export_country (UNION ALL).
+     */
+    private function getGroupedSummary(string $groupCol, string $year): array
+    {
+        $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+        $tables = ['yp_plan__trans_sales_domestic_region', 'yp_plan__trans_sales_export_country'];
+
+        $selects = [];
+        foreach ($months as $mk) {
+            // Alias `dec` reserved word — wajib escape backtick
+            $alias    = $mk === 'dec' ? '`dec`' : $mk;
+            $selects[] = "IFNULL(SUM(t.{$mk}_rev),0) AS {$alias}";
+        }
+        $totalExpr = implode(' + ', array_map(fn ($mk) => "IFNULL(SUM(t.{$mk}_rev),0)", $months));
+
+        $union = [];
+        foreach ($tables as $t) {
+            $cols = implode(', ', array_map(fn ($mk) => "{$mk}_rev", $months));
+            $union[] = "SELECT {$groupCol}, {$cols} FROM {$t} WHERE year_code = ? AND {$groupCol} IS NOT NULL AND {$groupCol} <> ''";
+        }
+
+        try {
+            $rows = $this->db->query(
+                "SELECT t.{$groupCol} AS label, " . implode(', ', $selects) . ", ({$totalExpr}) AS total
+                 FROM (" . implode(' UNION ALL ', $union) . ") t
+                 GROUP BY t.{$groupCol}
+                 ORDER BY total DESC",
+                [$year, $year]
+            )->getResultArray() ?? [];
+        } catch (\Throwable $e) {
+            log_message('error', "SalesController::getGroupedSummary({$groupCol}): " . $e->getMessage());
+            $rows = [];
+        }
+
+        return $rows;
     }
 
     /**

@@ -3,13 +3,13 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs sm:text-sm border-collapse">
                 <thead>
-                    <tr class="bg-primary text-white text-center font-semibold">
+                    <tr class="bg-primary text-black text-center font-semibold">
                         <th class="py-3 px-4 border-r border-white/20 whitespace-nowrap min-w-[220px]" rowspan="2">MAIN ACCOUNT</th>
                         <th class="py-2 px-4 border-b border-white/20" colspan="12">BUDGET SELLING (MONTHLY)</th>
                         <th class="py-3 px-4 border-l border-white/20 whitespace-nowrap min-w-[120px]" rowspan="2">TOTAL</th>
                         <th class="py-3 px-4 border-l border-white/20 whitespace-nowrap min-w-[110px]" rowspan="2">DETAIL & #</th>
                     </tr>
-                    <tr class="bg-primary/90 text-white text-right text-xs">
+                    <tr class="bg-primary/90 text-black text-right text-xs">
                         <?php foreach (['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'] as $m) : ?>
                             <th class="py-2 px-3 border-r border-white/10 w-20"><?= $m ?></th>
                         <?php endforeach; ?>
