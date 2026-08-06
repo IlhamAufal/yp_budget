@@ -27,7 +27,6 @@ class MenuModel extends Model
         'menu_active',
         'menu_icon',
         'menu_link',
-        'menu_group',
         'menu_level',
         'menu_order',
         'menu_lower_level',
@@ -59,16 +58,13 @@ class MenuModel extends Model
             ->groupEnd();
         }
 
-        if (($filters['group'] ?? '') !== '') {
-            $builder->where('m.menu_group', $filters['group']);
-        }
-
         if (($filters['status'] ?? '') !== '') {
             $builder->where('m.menu_active', $filters['status']);
         }
 
+        // Kolom menu_group tidak ada di skema legacy — urutkan per level & order.
         return $builder
-            ->orderBy('m.menu_group', 'ASC')
+            ->orderBy('m.menu_level', 'ASC')
             ->orderBy('m.menu_order', 'ASC')
             ->orderBy('m.menu_id', 'ASC')
             ->get()
@@ -77,18 +73,13 @@ class MenuModel extends Model
 
     /**
      * Grup menu unik (untuk filter & dropdown).
+     *
+     * Kolom menu_group tidak tersedia di skema legacy → kembalikan array kosong
+     * (fitur grup menu di-nonaktifkan sementara).
      */
     public function getGroups(): array
     {
-        $rows = $this->db->table('gw_sm__menu')
-            ->select('menu_group')
-            ->distinct()
-            ->where('menu_group !=', '')
-            ->orderBy('menu_group', 'ASC')
-            ->get()
-            ->getResultArray();
-
-        return array_map(fn($r) => $r['menu_group'], $rows);
+        return [];
     }
 
     /**
@@ -125,7 +116,6 @@ class MenuModel extends Model
             'menu_active'   => ($data['menu_active'] ?? 'Y') === 'Y' ? 'Y' : 'N',
             'menu_icon'     => trim($data['menu_icon'] ?? '') ?: '',
             'menu_link'     => trim($data['menu_link'] ?? '#') ?: '#',
-            'menu_group'    => trim($data['menu_group'] ?? '') ?: '',
             'menu_level'    => ($data['menu_level'] ?? '1') === '2' ? '2' : '1',
             'menu_order'    => trim($data['menu_order'] ?? '') !== '' ? trim($data['menu_order'] ?? '') : '0',
         ];

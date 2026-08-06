@@ -42,7 +42,7 @@ class RoleModel extends Model
         $builder = $this->db->table('gw_sm__role r')
             ->select("r.*,
                 (SELECT COUNT(*) FROM gw_sm__rolemenu rm WHERE rm.rolemenu_role_id = r.role_id AND rm.rolemenu_active = 'Y') AS menu_count,
-                (SELECT COUNT(*) FROM gw_sm__user_role ur WHERE ur.user_role_role_id = r.role_id) AS user_count");
+                (SELECT COUNT(*) FROM gw_sm__profile p WHERE p.profile_role_id = r.role_id) AS user_count");
 
         $search = trim($filters['search'] ?? '');
         if ($search !== '') {
@@ -148,7 +148,7 @@ class RoleModel extends Model
         $this->db->transStart();
 
         $this->db->table('gw_sm__rolemenu')->where('rolemenu_role_id', $id)->delete();
-        $this->db->table('gw_sm__user_role')->where('user_role_role_id', $id)->delete();
+        $this->db->table('gw_sm__profile')->where('profile_role_id', $id)->delete();
         $this->db->table('gw_sm__role')->where('role_id', $id)->delete();
 
         $this->db->transComplete();

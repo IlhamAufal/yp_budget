@@ -60,11 +60,14 @@ class OpexSellingController extends BaseController
             ->select("t.`1` AS isi_1, t.`2` AS isi_2, t.`3` AS isi_3, t.`4` AS isi_4, t.`5` AS isi_5, t.`6` AS isi_6")
             ->select("t.`7` AS isi_7, t.`8` AS isi_8, t.`9` AS isi_9, t.`10` AS isi_10, t.`11` AS isi_11, t.`12` AS isi_12, t.total AS isi_tot")
             ->join('gw_plan__master_coa c', 'c.main_account = t.id_coa', 'left')
-            ->where('t.year_code', $year)
-            ->groupStart()
+            ->where('t.year_code', $year);
+
+        if (\App\Libraries\DbCompat::hasEntrySource()) {
+            $builder->groupStart()
                 ->where('t.source', 'SELLING')
                 ->orWhere('t.source IS NULL')
             ->groupEnd();
+        }
 
         if (! empty($dept)) {
             $builder->where('t.id_dept', $dept);
@@ -96,6 +99,12 @@ class OpexSellingController extends BaseController
         $lock   = (new AccessRestrict())->checkLock((string) $userId, 'opex-selling/entry', (int) $year);
         if (! $lock['allowed']) {
             return $this->response->setJSON(['status' => 'error', 'message' => $lock['message']]);
+        }
+
+        // Kolom source tidak ada di skema legacy → simpan di-nonaktifkan sementara
+        // (keputusan user 6 Agt 2026: jangan ubah struktur DB).
+        if (! \App\Libraries\DbCompat::hasEntrySource()) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Penyimpanan budget OPEX Selling dinonaktifkan sementara (kolom source belum tersedia di skema DB legacy).']);
         }
 
         if (! empty($mainAccount) && is_array($mainAccount)) {
@@ -172,11 +181,14 @@ class OpexSellingController extends BaseController
                 ->select("t.`1` AS isi_1, t.`2` AS isi_2, t.`3` AS isi_3, t.`4` AS isi_4, t.`5` AS isi_5, t.`6` AS isi_6")
                 ->select("t.`7` AS isi_7, t.`8` AS isi_8, t.`9` AS isi_9, t.`10` AS isi_10, t.`11` AS isi_11, t.`12` AS isi_12, t.total AS isi_tot")
                 ->join('gw_plan__master_coa c', 'c.main_account = t.id_coa', 'left')
-                ->where('t.year_code', $year)
-                ->groupStart()
+                ->where('t.year_code', $year);
+
+            if (\App\Libraries\DbCompat::hasEntrySource()) {
+                $builder->groupStart()
                     ->where('t.source', 'SELLING')
                     ->orWhere('t.source IS NULL')
                 ->groupEnd();
+            }
 
             if (! empty($dept)) {
                 $builder->where('t.id_dept', $dept);

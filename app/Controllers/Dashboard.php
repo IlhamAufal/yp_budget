@@ -35,8 +35,8 @@ class Dashboard extends BaseController
                   WHERE u.user_admin = 'N'
                     AND u.user_active = 'Y'
                     AND NOT EXISTS (
-                        SELECT 1 FROM gw_sm__user_role ur
-                         WHERE ur.user_role_user_id = u.user_id
+                        SELECT 1 FROM gw_sm__profile p
+                         WHERE p.profile_user_id = u.user_id
                     )"
             )->getRow()->total;
 

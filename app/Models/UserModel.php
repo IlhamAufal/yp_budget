@@ -105,8 +105,8 @@ class UserModel extends Model
             ->select("u.*,
                 GROUP_CONCAT(DISTINCT r.role_name_idn ORDER BY r.role_id SEPARATOR ', ') AS role_names,
                 GROUP_CONCAT(DISTINCT r.role_id ORDER BY r.role_id SEPARATOR ',') AS role_ids")
-            ->join('gw_sm__user_role ur', 'ur.user_role_user_id = u.user_id', 'left')
-            ->join('gw_sm__role r', 'r.role_id = ur.user_role_role_id AND r.role_active = \'Y\'', 'left')
+            ->join('gw_sm__profile p', 'p.profile_user_id = u.user_id', 'left')
+            ->join('gw_sm__role r', 'r.role_id = p.profile_role_id AND r.role_active = \'Y\'', 'left')
             ->groupBy('u.user_id');
 
         $search = trim($filters['search'] ?? '');
@@ -119,7 +119,7 @@ class UserModel extends Model
         }
 
         if (($filters['role_id'] ?? '') !== '') {
-            $builder->where('ur.user_role_role_id', (int) $filters['role_id']);
+            $builder->where('p.profile_role_id', (int) $filters['role_id']);
         }
 
         if (($filters['status'] ?? '') !== '') {
@@ -262,7 +262,7 @@ class UserModel extends Model
 
         $this->db->transStart();
 
-        $this->db->table('gw_sm__user_role')->where('user_role_user_id', $id)->delete();
+        $this->db->table('gw_sm__profile')->where('profile_user_id', $id)->delete();
         $this->db->table('gw_sm__user')->where('user_id', $id)->delete();
 
         $this->db->transComplete();

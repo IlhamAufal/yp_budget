@@ -87,7 +87,9 @@ project_progress.md
 /.agents/
 
 test_*.php
+tmp_*.php
 *.sql
+
 
 # -----------------------------------------------------------------------
 # PHPUnit & Tests — tidak ada test yang ditulis di proyek ini

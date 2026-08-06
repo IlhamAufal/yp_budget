@@ -153,7 +153,7 @@ class RbacSeeder extends Seeder
     {
         $isParent = $parentId === null;
 
-        return [
+        $row = [
             'menu_name_idn'    => $def['idn'],
             'menu_name_eng'    => $def['eng'],
             'menu_name_jpn'    => '',
@@ -161,7 +161,6 @@ class RbacSeeder extends Seeder
             'menu_active'      => 'Y',
             'menu_icon'        => $def['icon'],
             'menu_link'        => $def['link'],
-            'menu_group'       => $group !== '' ? $group : ($def['group'] ?? ''),
             'menu_level'       => $def['level'],
             'menu_order'       => $def['order'],
             'menu_lower_level' => $isParent ? 'Y' : 'N',
@@ -169,6 +168,14 @@ class RbacSeeder extends Seeder
             'menu_created_on'  => $now,
             'menu_created_by'  => $createdBy,
         ];
+
+        // Kolom menu_group tidak ada di skema legacy (keputusan user 6 Agt 2026:
+        // jangan ubah struktur) — hanya disertakan bila tersedia.
+        if (\App\Libraries\DbCompat::hasMenuGroup()) {
+            $row['menu_group'] = $group !== '' ? $group : ($def['group'] ?? '');
+        }
+
+        return $row;
     }
 
     /**
@@ -332,9 +339,9 @@ class RbacSeeder extends Seeder
             return;
         }
 
-        $linked = $this->db->table('gw_sm__user_role')
-            ->where('user_role_user_id', $admin->user_id)
-            ->where('user_role_role_id', 1)
+        $linked = $this->db->table('gw_sm__profile')
+            ->where('profile_user_id', $admin->user_id)
+            ->where('profile_role_id', 1)
             ->countAllResults();
 
         if ($linked > 0) {
@@ -343,10 +350,10 @@ class RbacSeeder extends Seeder
             return;
         }
 
-        $this->db->table('gw_sm__user_role')->insert([
-            'user_role_user_id'    => $admin->user_id,
-            'user_role_role_id'    => 1,
-            'user_role_created_on' => date('Y-m-d H:i:s'),
+        $this->db->table('gw_sm__profile')->insert([
+            'profile_user_id'    => $admin->user_id,
+            'profile_role_id'    => 1,
+            'profile_created_on' => date('Y-m-d H:i:s'),
         ]);
 
         echo 'User "admin" berhasil ditautkan ke role Administrator.' . PHP_EOL;

@@ -455,9 +455,10 @@
         <!-- Menu Groups -->
         <div class="max-h-[420px] overflow-y-auto space-y-6 pr-2 -mr-2">
           <?php
+            // Kolom menu_group tidak selalu ada di skema legacy → fallback 'TANPA GRUP'.
             $grouped = [];
             foreach (($menus ?? []) as $m) {
-                $grouped[$m['menu_group'] ?: 'TANPA GRUP'][] = $m;
+                $grouped[($m['menu_group'] ?? '') ?: 'TANPA GRUP'][] = $m;
             }
           ?>
           <?php foreach ($grouped as $group => $menuList): ?>

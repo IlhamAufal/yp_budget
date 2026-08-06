@@ -790,6 +790,10 @@
           const body = new URLSearchParams();
           body.append('has_role_ids', '1');
           for (const [key, value] of Object.entries(this.form)) {
+            // role_id dikirim terpisah sebagai role_ids[] agar cocok dengan backend
+            if (key === 'role_id') {
+              continue;
+            }
             if (value !== null && value !== undefined && value !== '') {
               body.append(key, value);
             }

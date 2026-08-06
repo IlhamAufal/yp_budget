@@ -63,18 +63,6 @@
         </div>
 
         <select
-          name="group"
-          class="rounded-xl border border-gray-200 bg-gray-50/50 py-2.5 px-4 text-sm min-w-[180px] focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
-        >
-          <option value="">Semua Grup</option>
-          <?php foreach (($groups ?? []) as $g): ?>
-            <option value="<?= esc($g) ?>" <?= ($filters['group'] ?? '') === $g ? 'selected' : '' ?>>
-              <?= esc($g) ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-
-        <select
           name="status"
           class="rounded-xl border border-gray-200 bg-gray-50/50 py-2.5 px-4 text-sm min-w-[140px] focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
         >
@@ -367,26 +355,6 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Grup Menu -->
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
-              Grup Menu <span class="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              x-model="form.menu_group"
-              required
-              list="menu-group-options"
-              placeholder="Contoh: BUDGET & PLANNING"
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
-            />
-            <datalist id="menu-group-options">
-              <?php foreach (($groups ?? []) as $g): ?>
-                <option value="<?= esc($g) ?>"></option>
-              <?php endforeach; ?>
-            </datalist>
-          </div>
-
           <!-- Parent -->
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
@@ -443,7 +411,7 @@
             <input
               type="text"
               disabled
-              :value="form.parent_id ? 'Level 2 (Sub-menu)' : 'Level 1 (Parent)'"
+              :value="(form.parent_id || form.menu_level === '2') ? 'Level 2 (Sub-menu)' : 'Level 1 (Parent)'"
               class="w-full rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 text-sm font-bold text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 cursor-not-allowed"
             />
             <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">Dihitung otomatis dari pilihan Parent Menu.</p>
@@ -549,7 +517,6 @@
         menu_name_jpn: '',
         menu_icon: '',
         menu_link: '#',
-        menu_group: '',
         parent_id: '',
         menu_level: '1',
         menu_order: '0',
@@ -564,7 +531,6 @@
           menu_name_jpn: '',
           menu_icon: '',
           menu_link: '#',
-          menu_group: '',
           parent_id: '',
           menu_level: '1',
           menu_order: '0',
@@ -581,7 +547,6 @@
           menu_name_jpn: row.menu_name_jpn || '',
           menu_icon: row.menu_icon || '',
           menu_link: row.menu_link || '#',
-          menu_group: row.menu_group || '',
           parent_id: row.parent_id ? String(row.parent_id) : '',
           menu_level: row.menu_level || '1',
           menu_order: row.menu_order || '0',

@@ -71,13 +71,13 @@ class MenuBuilder
         }
 
         // 1. Semua menu aktif
-        $menus = $this->db->table('gw_sm__menu')
-            ->where('menu_active', 'Y')
-            ->orderBy('menu_group', 'ASC')
-            ->orderBy('menu_order', 'ASC')
-            ->orderBy('menu_id', 'ASC')
-            ->get()
-            ->getResultArray();
+        $menuQuery = $this->db->table('gw_sm__menu')->where('menu_active', 'Y');
+
+        // Kolom menu_group tidak selalu ada di skema legacy.
+        if (DbCompat::hasMenuGroup()) {
+            $menuQuery->orderBy('menu_group', 'ASC');
+        }
+        $menus = $menuQuery->orderBy('menu_order', 'ASC')->orderBy('menu_id', 'ASC')->get()->getResultArray();
 
         // 2. Filter by role permission
         $menuById = [];
@@ -113,7 +113,7 @@ class MenuBuilder
         $groups      = [];
         foreach ($menuById as $menuId => $menu) {
             if (isset($childrenByParent[$menuId]) || ($menu['menu_level'] ?? '2') === '1') {
-                $groupKey = ! empty($menu['menu_group']) ? $menu['menu_group'] : 'MENU UTAMA';
+                $groupKey = (DbCompat::hasMenuGroup() && ! empty($menu['menu_group'])) ? $menu['menu_group'] : 'MENU UTAMA';
                 $groups[$groupKey][$menuId] = $menu;
             }
         }

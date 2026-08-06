@@ -72,12 +72,16 @@ class FohModel extends Model
             ->select('t.id, t.id_coa, t.id_dept')
             ->select("COALESCE(NULLIF(c.id_acct_ext,''), c.main_account, 0) AS acct_code")
             ->select("COALESCE(c.cost_center_desc, '') AS coa_desc")
-            ->select('IFNULL(t.total,0) AS total, COALESCE(t.submit_status, \'DRAFT\') AS submit_status')
+            ->select('IFNULL(t.total,0) AS total, ' . \App\Libraries\DbCompat::submitStatusExpr())
             ->select("IFNULL(t.`1`,0) AS jan, IFNULL(t.`2`,0) AS feb, IFNULL(t.`3`,0) AS mar, IFNULL(t.`4`,0) AS apr, IFNULL(t.`5`,0) AS may, IFNULL(t.`6`,0) AS jun")
             ->select("IFNULL(t.`7`,0) AS jul, IFNULL(t.`8`,0) AS aug, IFNULL(t.`9`,0) AS sep, IFNULL(t.`10`,0) AS oct, IFNULL(t.`11`,0) AS nov, IFNULL(t.`12`,0) AS `dec`")
             ->join('gw_plan__master_coa c', 'c.main_account = t.id_coa', 'left')
-            ->where('t.year_code', $year)
-            ->where('t.source', 'FOH');
+            ->where('t.year_code', $year);
+
+        // Kolom source tidak selalu ada di skema legacy — filter hanya bila tersedia.
+        if (\App\Libraries\DbCompat::hasEntrySource()) {
+            $builder->where('t.source', 'FOH');
+        }
 
         if (! empty($dept)) {
             $builder->where('t.id_dept', $dept);
@@ -95,6 +99,12 @@ class FohModel extends Model
     {
         if (empty($dept)) {
             return ['success' => false, 'message' => 'Cost Center wajib dipilih.', 'count' => 0];
+        }
+
+        // Kolom source tidak ada di skema legacy → entry di-nonaktifkan sementara
+        // (keputusan user 6 Agt 2026: jangan ubah struktur DB).
+        if (! \App\Libraries\DbCompat::hasEntrySource()) {
+            return ['success' => false, 'message' => 'Penyimpanan entry FOH dinonaktifkan sementara (kolom source belum tersedia di skema DB legacy).', 'count' => 0];
         }
 
         $this->db->transStart();
@@ -154,6 +164,10 @@ class FohModel extends Model
      */
     public function submitBudget(string $year, ?string $dept, int $userId): array
     {
+        if (! \App\Libraries\DbCompat::hasEntrySubmitStatus()) {
+            return ['success' => false, 'message' => 'Workflow submit FOH dinonaktifkan sementara (kolom submit_status belum tersedia di skema DB legacy).'];
+        }
+
         $builder = $this->db->table('yp_plan__trans_budget_entry_data')
             ->where('year_code', $year)
             ->where('source', 'FOH');
@@ -209,6 +223,13 @@ class FohModel extends Model
      */
     public function getSummary(string $year): array
     {
+        $hasSource   = \App\Libraries\DbCompat::hasEntrySource();
+        $hasSubmit   = \App\Libraries\DbCompat::hasEntrySubmitStatus();
+        $sourceCond  = $hasSource ? "AND t.source = 'FOH'" : '';
+        $submitExpr  = $hasSubmit
+            ? "SUM(CASE WHEN t.submit_status = 'SUBMITTED' THEN 1 ELSE 0 END)"
+            : '0';
+
         $sql = "SELECT t.id_dept,
                        COALESCE(cc.cost_desc, '') AS cost_desc,
                        IFNULL(SUM(t.`1`),0) AS jan, IFNULL(SUM(t.`2`),0) AS feb,
@@ -218,10 +239,10 @@ class FohModel extends Model
                        IFNULL(SUM(t.`9`),0) AS sep, IFNULL(SUM(t.`10`),0) AS oct,
                        IFNULL(SUM(t.`11`),0) AS nov, IFNULL(SUM(t.`12`),0) AS `dec`,
                        IFNULL(SUM(t.total),0) AS total,
-                       SUM(CASE WHEN t.submit_status = 'SUBMITTED' THEN 1 ELSE 0 END) AS submitted_rows
+                       {$submitExpr} AS submitted_rows
                 FROM yp_plan__trans_budget_entry_data t
                 LEFT JOIN gw_plan__master_cost_center cc ON cc.cost_center = t.id_dept
-                WHERE t.year_code = ? AND t.source = 'FOH'
+                WHERE t.year_code = ? {$sourceCond}
                 GROUP BY t.id_dept, cc.cost_desc
                 ORDER BY t.id_dept";
 

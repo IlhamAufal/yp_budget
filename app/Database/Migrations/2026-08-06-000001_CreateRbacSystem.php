@@ -13,10 +13,12 @@ use CodeIgniter\Database\Migration;
  *   - gw_sm__role            : daftar role
  *   - gw_sm__rolemenu        : permission role → menu
  *
- * Ditambah tabel modern yang tidak ada di legacy:
- *   - gw_sm__user_role       : relasi user → role (legacy tidak punya cara
- *                              menautkan user ke role, dibutuhkan oleh
- *                              RoleFilter di Phase 1.3).
+ * Catatan (keputusan user 6 Agt 2026): DB di-copas dari sistem lama dan
+ * dipakai apa adanya. Relasi user → role memakai tabel legacy
+ * `gw_sm__profile` (bukan `gw_sm__user_role`) dan RBAC object-level
+ * memakai `gw_sm__role_object` — keduanya TIDAK dibuat di sini (sudah
+ * ada di skema legacy). Migrasi ini hanya menjamin tabel RBAC inti
+ * (menu/structure/role/rolemenu) tersedia.
  *
  * Semua CREATE TABLE memakai IF NOT EXISTS agar aman bila tabel sudah
  * dibuat terlebih dahulu oleh migrasi impor SQL legacy.
@@ -274,40 +276,14 @@ class CreateRbacSystem extends Migration
         $this->forge->createTable('gw_sm__rolemenu', true);
 
         // ------------------------------------------------------------------
-        // gw_sm__user_role — relasi user → role (baru, tidak ada di legacy)
+        // Relasi user → role memakai tabel legacy `gw_sm__profile` (TIDAK dibuat
+        // di sini — sudah tersedia di skema legacy). RBAC object-level memakai
+        // `gw_sm__role_object` + `gw_sm__setting` (legacy, tidak dibuat di sini).
         // ------------------------------------------------------------------
-        $this->forge->addField([
-            'user_role_id' => [
-                'type'           => 'INT',
-                'constraint'     => 11,
-                'unsigned'       => true,
-                'auto_increment' => true,
-            ],
-            'user_role_user_id' => [
-                'type'       => 'INT',
-                'constraint' => 11,
-                'unsigned'   => true,
-                'null'       => false,
-            ],
-            'user_role_role_id' => [
-                'type'       => 'INT',
-                'constraint' => 11,
-                'unsigned'   => true,
-                'null'       => false,
-            ],
-            'user_role_created_on' => [
-                'type' => 'TIMESTAMP',
-                'null' => false,
-            ],
-        ]);
-        $this->forge->addKey('user_role_id', true);
-        $this->forge->addUniqueKey(['user_role_user_id', 'user_role_role_id']);
-        $this->forge->createTable('gw_sm__user_role', true);
     }
 
     public function down(): void
     {
-        $this->forge->dropTable('gw_sm__user_role', true);
         $this->forge->dropTable('gw_sm__rolemenu', true);
         $this->forge->dropTable('gw_sm__role', true);
         $this->forge->dropTable('gw_sm__menu_structure', true);

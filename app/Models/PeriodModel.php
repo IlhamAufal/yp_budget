@@ -33,22 +33,62 @@ class PeriodModel extends Model
     /**
      * Daftar tahun anggaran aktif (untuk modal Working Year & api/active-years).
      * Mengembalikan array integer, diurutkan dari tahun terbaru.
+     *
+     * Keputusan user 6 Agt 2026: DB dipakai dari sistem lama — tabel
+     * `yp_plan__master_year` mungkin tidak ada. Fallback membaca tahun
+     * dari tabel legacy `yp_plan__master_period`, lalu tabel transaksi,
+     * lalu tahun berjalan.
      */
     public function getActiveYears(): array
     {
-        try {
-            $results = $this->where('status', 'A')
-                ->orderBy('year_code', 'DESC')
-                ->findAll();
+        // Tabel master_year mungkin tidak ada di skema legacy (keputusan user
+        // 6 Agt 2026: DB dipakai apa adanya) → hindari error di log.
+        if (\App\Libraries\DbCompat::hasColumn('yp_plan__master_year', 'year_code')) {
+            try {
+                $results = $this->where('status', 'A')
+                    ->orderBy('year_code', 'DESC')
+                    ->findAll();
 
-            if (! empty($results)) {
-                return array_map('intval', array_column($results, 'year_code'));
+                if (! empty($results)) {
+                    return array_map('intval', array_column($results, 'year_code'));
+                }
+            } catch (\Throwable $e) {
+                log_message('error', 'PeriodModel::getActiveYears(master_year): ' . $e->getMessage());
             }
-        } catch (\Throwable $e) {
-            log_message('error', 'PeriodModel::getActiveYears: ' . $e->getMessage());
         }
 
-        // Fallback jika tabel belum dibuat / kosong
+        $db = \Config\Database::connect();
+
+        // Fallback 1 — tahun dari master_period legacy (YEAR(begda)),
+        // karena tabel tsb selalu ada di skema lama.
+        try {
+            $rows = $db->query('SELECT DISTINCT YEAR(begda) AS y FROM yp_plan__master_period WHERE begda IS NOT NULL ORDER BY y DESC')
+                ->getResultArray();
+            $years = array_map('intval', array_filter(array_column($rows, 'y')));
+            if (! empty($years)) {
+                return array_values(array_unique($years));
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'PeriodModel::getActiveYears(period): ' . $e->getMessage());
+        }
+
+        // Fallback 2 — tahun unik dari data transaksi budget.
+        try {
+            $rows = $db->table('yp_plan__trans_budget_entry_data')
+                ->select('year_code')
+                ->distinct()
+                ->orderBy('year_code', 'DESC')
+                ->get()
+                ->getResultArray();
+            $years = array_map('intval', array_filter(array_column($rows, 'year_code')));
+            if (! empty($years)) {
+                return array_values(array_unique($years));
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'PeriodModel::getActiveYears(entry): ' . $e->getMessage());
+        }
+
+        // Fallback terakhir — tahun berjalan
         $currentYear = (int) date('Y');
         return [
             $currentYear + 1,

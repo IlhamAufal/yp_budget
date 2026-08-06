@@ -425,6 +425,14 @@ class CapexModel extends Model
      */
     public function syncToOpex(string $year): bool
     {
+        // Kolom source tidak ada di skema legacy → sinkronisasi di-nonaktifkan
+        // sementara (keputusan user 6 Agt 2026: jangan ubah struktur DB).
+        if (! \App\Libraries\DbCompat::hasEntrySource()) {
+            log_message('warning', 'CapexModel::syncToOpex dinonaktifkan — kolom source belum tersedia di skema DB legacy.');
+
+            return false;
+        }
+
         $this->db->transStart();
 
         $rows = $this->db->table('yp_plan__trans_capex_entry_depreciation')

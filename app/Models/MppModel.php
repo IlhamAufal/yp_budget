@@ -131,6 +131,14 @@ class MppModel extends Model
 
     public function syncToOpex(string $yearCode): bool
     {
+        // Kolom source tidak ada di skema legacy → sinkronisasi di-nonaktifkan
+        // sementara (keputusan user 6 Agt 2026: jangan ubah struktur DB).
+        if (! \App\Libraries\DbCompat::hasEntrySource()) {
+            log_message('warning', 'MppModel::syncToOpex dinonaktifkan — kolom source belum tersedia di skema DB legacy.');
+
+            return false;
+        }
+
         $this->db->transStart();
 
         $userId = (int) (session()->get('user_id') ?? 0);

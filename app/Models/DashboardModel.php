@@ -56,9 +56,15 @@ class DashboardModel extends Model
     /** Total budget OPEX GA + OPEX Selling (+ data legacy tanpa source). */
     public function getOpexGaSellingTotal(int $year): float
     {
+        // Bila kolom source tidak ada di skema legacy, semua baris dianggap legacy
+        // (tidak ada filter modul) — keputusan user 6 Agt 2026: jangan ubah struktur.
+        $sourceCond = \App\Libraries\DbCompat::hasEntrySource()
+            ? " AND (t.source IS NULL OR t.source IN ('OPEX','SELLING'))"
+            : '';
+
         $sql = "SELECT IFNULL(SUM(t.`1`+t.`2`+t.`3`+t.`4`+t.`5`+t.`6`+t.`7`+t.`8`+t.`9`+t.`10`+t.`11`+t.`12`),0) AS tot
                 FROM yp_plan__trans_budget_entry_data t
-                WHERE t.year_code = ? AND (t.source IS NULL OR t.source IN ('OPEX','SELLING'))";
+                WHERE t.year_code = ?{$sourceCond}";
 
         return (float) $this->scalar($sql, [$year]);
     }
@@ -146,11 +152,14 @@ class DashboardModel extends Model
      */
     public function getComposition(int $year): array
     {
-        $sql = "SELECT COALESCE(t.source,'LEGACY') AS src,
+        // Bila kolom source tidak ada, semua baris dikelompokkan sebagai LEGACY.
+        $srcExpr = \App\Libraries\DbCompat::hasEntrySource() ? "COALESCE(t.source,'LEGACY')" : "'LEGACY'";
+
+        $sql = "SELECT {$srcExpr} AS src,
                        IFNULL(SUM(t.`1`+t.`2`+t.`3`+t.`4`+t.`5`+t.`6`+t.`7`+t.`8`+t.`9`+t.`10`+t.`11`+t.`12`),0) AS tot
                 FROM yp_plan__trans_budget_entry_data t
                 WHERE t.year_code = ?
-                GROUP BY COALESCE(t.source,'LEGACY')";
+                GROUP BY {$srcExpr}";
 
         try {
             $rows = $this->db->query($sql, [$year])->getResultArray();
@@ -184,13 +193,19 @@ class DashboardModel extends Model
      */
     public function getStatusRows(int $year, int $limit = 8): array
     {
+        // Bila kolom submit_status tidak ada, submitted selalu 0 (keputusan user
+        // 6 Agt 2026: jangan ubah struktur DB legacy).
+        $submitExpr = \App\Libraries\DbCompat::hasEntrySubmitStatus()
+            ? "SUM(CASE WHEN t.submit_status IN ('SUBMITTED','APPROVED') THEN 1 ELSE 0 END)"
+            : '0';
+
         // 1) Budget (OPEX/Selling/FOH + push) per cost center
         $sql = "SELECT t.id_dept AS dept,
                        COALESCE(cc.cost_desc, '') AS cost_desc,
                        COALESCE(NULLIF(cc.cost_center_sap,''), CAST(cc.cost_center AS CHAR)) AS cc_sap,
                        IFNULL(SUM(t.`1`+t.`2`+t.`3`+t.`4`+t.`5`+t.`6`+t.`7`+t.`8`+t.`9`+t.`10`+t.`11`+t.`12`),0) AS opex,
                        COUNT(*) AS entries,
-                       SUM(CASE WHEN t.submit_status IN ('SUBMITTED','APPROVED') THEN 1 ELSE 0 END) AS submitted
+                       {$submitExpr} AS submitted
                 FROM yp_plan__trans_budget_entry_data t
                 LEFT JOIN gw_plan__master_cost_center cc ON cc.cost_center = t.id_dept
                 WHERE t.year_code = ?
