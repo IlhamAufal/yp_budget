@@ -72,6 +72,31 @@
               </span>
             </a>
           </li>
+
+          <li>
+            <a
+              href="<?= base_url('/') ?>"
+              class="menu-item group <?= (url_is('/') || url_is('dashboard*')) ? 'menu-item-active' : 'menu-item-inactive' ?>"
+            >
+              <i class="fa-solid fa-gauge-high text-lg min-w-[24px] text-center <?= (url_is('/') || url_is('dashboard*')) ? 'text-brand-500 dark:text-brand-400' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300' ?>"></i>
+              <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                Monitoring Progress Entry
+              </span>
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="<?= base_url('/') ?>"
+              class="menu-item group <?= (url_is('/') || url_is('dashboard*')) ? 'menu-item-active' : 'menu-item-inactive' ?>"
+            >
+              <i class="fa-solid fa-gauge-high text-lg min-w-[24px] text-center <?= (url_is('/') || url_is('dashboard*')) ? 'text-brand-500 dark:text-brand-400' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300' ?>"></i>
+              <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                1. PL
+              </span>
+            </a>
+          </li>
+
         </ul>
       </div>
 

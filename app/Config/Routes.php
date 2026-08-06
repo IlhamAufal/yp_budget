@@ -90,6 +90,25 @@ $routes->group('mpp', ['filter' => ['auth', 'context']], function($routes) {
     $routes->post('process-opex', 'NewHeadcountController::processToOpex');
 });
 
+$routes->group('capex', ['namespace' => 'App\Controllers'], static function ($routes) {
+    $routes->get('entry', 'Capex::entry');
+    $routes->get('report', 'Capex::report');
+    $routes->get('summary', 'Capex::summary');
+    $routes->get('pdf_reader', 'Capex::pdfReader');
+    
+    // AJAX Endpoints
+    $routes->post('entry_budget_table', 'Capex::entryBudgetTable');
+    $routes->post('save_capex', 'Capex::saveCapex');
+});
+
+$routes->group('mpp', ['filter' => 'auth'], function($routes) {
+    $routes->get('/', 'Mpp::index');
+    $routes->get('getEntryTable', 'Mpp::getEntryTable');
+    $routes->post('saveBudget', 'Mpp::saveBudget');
+    $routes->get('summary', 'Mpp::summary');
+    $routes->post('syncToOpex', 'Mpp::syncToOpex');
+});
+
 if (file_exists(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php')) {
     require APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php';
 }

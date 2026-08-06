@@ -1,0 +1,128 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Models\MppModel;
+use CodeIgniter\HTTP\ResponseInterface;
+
+class Mpp extends BaseController
+{
+    protected MppModel $mppModel;
+
+    public function __construct()
+    {
+        $this->mppModel = new MppModel();
+    }
+
+    /**
+     * Halaman Utama Entry MPP Form
+     */
+    public function index(): string
+    {
+        $workingYear = session()->get('working_year') ?? date('Y');
+        
+        $data = [
+            'title'       => 'Man Power Planning - Form Entry',
+            'workingYear' => $workingYear,
+            'departments' => $this->getDepartmentList()
+        ];
+
+        return view('mpp/entry', $data);
+    }
+
+    /**
+     * Dynamic AJAX Handler: Load Partial View Form Table
+     */
+    public function getEntryTable(): ResponseInterface
+    {
+        $yearCode   = session()->get('working_year') ?? date('Y');
+        $idDept     = $this->request->getGet('id_dept');
+        $isNewlines = filter_var($this->request->getGet('is_newlines'), FILTER_VALIDATE_BOOLEAN);
+
+        if (empty($idDept)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Department ID Wajib dipilih!']);
+        }
+
+        $entryData = $this->mppModel->getEntryData($yearCode, $idDept, $isNewlines);
+
+        $html = view('mpp/entry_table_mpp', [
+            'entryData'  => $entryData,
+            'isNewlines' => $isNewlines
+        ]);
+
+        return $this->response->setJSON(['status' => 'success', 'html' => $html]);
+    }
+
+    /**
+     * Dynamic AJAX Handler: Save Budget Data
+     */
+    public function saveBudget(): ResponseInterface
+    {
+        $yearCode   = session()->get('working_year') ?? date('Y');
+        $idDept     = $this->request->getPost('id_dept');
+        $isNewlines = filter_var($this->request->getPost('is_newlines'), FILTER_VALIDATE_BOOLEAN);
+        $details    = $this->request->getPost('details') ?? [];
+
+        if (empty($idDept)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menyimpan, Cost Center / Department kosong.']);
+        }
+
+        $success = $this->mppModel->saveMppBudget($yearCode, $idDept, $details, $isNewlines);
+
+        if ($success) {
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Data Man Power Planning berhasil disimpan!']);
+        }
+
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menyimpan data ke database.']);
+    }
+
+    /**
+     * Halaman Summary Headcount & Kalkulasi OPEX
+     */
+    public function summary(): string
+    {
+        $workingYear = session()->get('working_year') ?? date('Y');
+        
+        $data = [
+            'title'       => 'Summary Headcount & Salary Integration',
+            'workingYear' => $workingYear,
+            'departments' => $this->getDepartmentList(),
+            'summary'     => $this->mppModel->getSummaryWithSalary($workingYear)
+        ];
+
+        return view('mpp/summary', $data);
+    }
+
+    /**
+     * AJAX Process Sync to OPEX Engine
+     */
+    public function syncToOpex(): ResponseInterface
+    {
+        $workingYear = session()->get('working_year') ?? date('Y');
+        $success = $this->mppModel->syncToOpex($workingYear);
+
+        if ($success) {
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => "Proses alokasi Gaji ke OPEX Engine Tahun {$workingYear} berhasil dilakukan!"
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'  => 'error',
+            'message' => 'Terjadi kesalahan saat memproses data ke OPEX.'
+        ]);
+    }
+
+    /**
+     * Helper Private untuk Master Department
+     */
+    private function getDepartmentList(): array
+    {
+        $db = \Config\Database::connect();
+        return $db->table('gw_plan__master_department')
+            ->select('department_code, department_name')
+            ->where('is_active', 1)
+            ->get()->getResultArray();
+    }
+}

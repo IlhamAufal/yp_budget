@@ -1,67 +1,87 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div x-data="mppEntry()" class="space-y-6">
-    <div class="flex justify-between items-center">
-        <h2 class="text-2xl font-semibold text-gray-800">Man Power Planning</h2>
+<div x-data="mppEntry()" class="p-6 space-y-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-5 rounded-2xl shadow-xs border border-gray-100">
+        <div>
+            <h1 class="text-xl font-bold text-gray-800">Man Power Planning (MPP) Entry</h1>
+            <p class="text-xs text-gray-500 mt-1">Pengajuan Alokasi Jumlah Tenaga Kerja Tahun Anggaran: <span class="font-semibold text-blue-600"><?= esc($workingYear) ?></span></p>
+        </div>
     </div>
 
-    <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-md shadow-sm relative">
-        <h3 class="font-bold mb-1"><i class="fas fa-info-circle mr-2"></i> Information !</h3>
-        <p class="text-sm">Periode submit data MPP dimulai pada 20 Jul 2026 s/d 31 Jul 2026</p>
-    </div>
-
-    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-        <div class="mb-6 flex items-center space-x-4">
-            <label class="font-medium text-gray-700 text-sm">Cost Center</label>
-            <select x-model="selectedCostCenter" class="form-select w-64 border-gray-300 rounded-md shadow-sm text-sm">
-                <option value="">-- Select Cost Center --</option>
+    <div class="bg-white p-5 rounded-2xl shadow-xs border border-gray-100 space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-2">Cost Center / Department</label>
+                <select x-model="selectedDept" @change="loadTable()" class="w-full text-xs rounded-lg border-gray-200 p-2.5 focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">-- Pilih Department --</option>
+                    <?php foreach ($departments as $dept): ?>
+                        <option value="<?= esc($dept['department_code']) ?>"><?= esc($dept['department_code']) ?> - <?= esc($dept['department_name']) ?></option>
+                    <?php endforeach; ?>
                 </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-2">Tipe Struktur Line</label>
+                <div class="flex items-center space-x-4 mt-2">
+                    <label class="inline-flex items-center text-xs text-gray-700 cursor-pointer">
+                        <input type="radio" x-model="isNewlines" value="false" @change="loadTable()" class="text-blue-600 focus:ring-blue-500">
+                        <span class="ml-2">Existing Dept / Regular</span>
+                    </label>
+                    <label class="inline-flex items-center text-xs text-gray-700 cursor-pointer">
+                        <input type="radio" x-model="isNewlines" value="true" @change="loadTable()" class="text-blue-600 focus:ring-blue-500">
+                        <span class="ml-2">New Lines / Sub-Dept</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-xs border border-gray-100 overflow-hidden">
+        <div x-show="loading" class="p-8 text-center text-gray-500 text-xs">
+            <svg class="animate-spin h-5 w-5 mx-auto mb-2 text-blue-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            Memuat Data Form MPP...
         </div>
 
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-sm text-left text-gray-600 border">
-                <thead class="bg-gray-50 text-gray-700 text-center text-xs uppercase font-semibold">
-                    <tr>
-                        <th class="py-3 px-4 border" rowspan="2">Categories</th>
-                        <th class="py-2 px-4 border border-b-0" colspan="12">Number of Headcounts</th>
-                        <th class="py-3 px-4 border" rowspan="2">Total</th>
-                    </tr>
-                    <tr>
-                        <th class="py-1 px-2 border">Jan</th>
-                        <th class="py-1 px-2 border">Feb</th>
-                        </tr>
-                </thead>
-                <tbody>
-                    <template x-for="row in headcounts" :key="row.category">
-                        <tr class="hover:bg-gray-50 text-center">
-                            <td class="py-2 px-4 border font-medium text-left" x-text="row.category"></td>
-                            <td class="py-2 px-2 border"><input type="number" x-model="row.jan" class="w-16 text-center border-gray-300 rounded text-sm"></td>
-                            <td class="py-2 px-2 border"><input type="number" x-model="row.feb" class="w-16 text-center border-gray-300 rounded text-sm"></td>
-                            <td class="py-2 px-4 border bg-gray-50 font-bold" x-text="calculateTotal(row)"></td>
-                        </tr>
-                    </template>
-                </tbody>
-            </table>
+        <div x-show="!loading && tableHtml === ''" class="p-8 text-center text-gray-400 text-xs">
+            Silakan pilih <strong class="text-gray-600">Cost Center / Department</strong> di atas untuk memuat form entry.
         </div>
+
+        <div x-show="!loading && tableHtml !== ''" x-html="tableHtml"></div>
     </div>
 </div>
 
-<?= $this->section('footer_scripts') ?>
 <script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('mppEntry', () => ({
-            selectedCostCenter: '',
-            headcounts: [
-                { category: 'CONTRACT', jan: 0, feb: 0 /* dst... */ },
-                { category: 'PERMANENT', jan: 0, feb: 0 /* dst... */ },
-                { category: 'OUTSOURCING', jan: 0, feb: 0 /* dst... */ }
-            ],
-            calculateTotal(row) {
-                return Number(row.jan) + Number(row.feb) /* + semua bulan */;
+function mppEntry() {
+    return {
+        selectedDept: '',
+        isNewlines: 'false',
+        loading: false,
+        tableHtml: '',
+
+        async loadTable() {
+            if (!this.selectedDept) {
+                this.tableHtml = '';
+                return;
             }
-        }))
-    })
+
+            this.loading = true;
+            try {
+                let response = await fetch(`<?= base_url('mpp/getEntryTable') ?>?id_dept=${this.selectedDept}&is_newlines=${this.isNewlines}`);
+                let result = await response.json();
+                
+                if (result.status === 'success') {
+                    this.tableHtml = result.html;
+                } else {
+                    alert(result.message);
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                this.loading = false;
+            }
+        }
+    }
+}
 </script>
-<?= $this->endSection() ?>
 <?= $this->endSection() ?>
