@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Models\MppModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
-class Mpp extends BaseController
+class MppController extends BaseController
 {
     protected MppModel $mppModel;
 
@@ -19,7 +19,7 @@ class Mpp extends BaseController
      */
     public function index(): string
     {
-        $workingYear = session()->get('working_year') ?? date('Y');
+        $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
         
         $data = [
             'title'       => 'Man Power Planning - Form Entry',
@@ -35,7 +35,7 @@ class Mpp extends BaseController
      */
     public function getEntryTable(): ResponseInterface
     {
-        $yearCode   = session()->get('working_year') ?? date('Y');
+        $yearCode   = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
         $idDept     = $this->request->getGet('id_dept');
         $isNewlines = filter_var($this->request->getGet('is_newlines'), FILTER_VALIDATE_BOOLEAN);
 
@@ -58,7 +58,7 @@ class Mpp extends BaseController
      */
     public function saveBudget(): ResponseInterface
     {
-        $yearCode   = session()->get('working_year') ?? date('Y');
+        $yearCode   = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
         $idDept     = $this->request->getPost('id_dept');
         $isNewlines = filter_var($this->request->getPost('is_newlines'), FILTER_VALIDATE_BOOLEAN);
         $details    = $this->request->getPost('details') ?? [];
@@ -81,7 +81,7 @@ class Mpp extends BaseController
      */
     public function summary(): string
     {
-        $workingYear = session()->get('working_year') ?? date('Y');
+        $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
         
         $data = [
             'title'       => 'Summary Headcount & Salary Integration',
@@ -98,7 +98,7 @@ class Mpp extends BaseController
      */
     public function syncToOpex(): ResponseInterface
     {
-        $workingYear = session()->get('working_year') ?? date('Y');
+        $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
         $success = $this->mppModel->syncToOpex($workingYear);
 
         if ($success) {
@@ -121,8 +121,9 @@ class Mpp extends BaseController
     {
         $db = \Config\Database::connect();
         return $db->table('gw_plan__master_department')
-            ->select('department_code, department_name')
-            ->where('is_active', 1)
+            ->select('id_dept, dept_code AS department_code, dept_desc AS department_name')
+            ->where('status', 'A')
+            ->orderBy('dept_code', 'ASC')
             ->get()->getResultArray();
     }
 }

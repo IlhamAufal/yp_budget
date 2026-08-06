@@ -4,9 +4,13 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\CapexModel;
+use App\Models\CoaModel;
 use CodeIgniter\API\ResponseTrait;
 
-class Capex extends BaseController
+/**
+ * CapexController — Entry, Summary, Report CAPEX (raw file dihubungkan ke view TailAdmin).
+ */
+class CapexController extends BaseController
 {
     use ResponseTrait;
 
@@ -20,90 +24,83 @@ class Capex extends BaseController
     }
 
     /**
-     * Entry Page
+     * Entry Page (TailAdmin view: working_year, categories, capex_items)
      */
     public function entry()
     {
-        $year     = $this->session->get('year_code') ?? date('Y');
-        $user     = $this->session->get('user_name') ?? 'System';
-        $deptAuth = $this->session->get('auth_obj')[0]['role_object_value'] ?? "''";
-        $deptArr  = array_map('trim', explode(',', str_replace("'", "", $deptAuth)));
+        $year = $this->session->get('year_code') ?? $this->session->get('working_year') ?? date('Y');
+        $user = $this->session->get('user_name') ?? 'System';
 
-        $uri      = $this->request->getUri();
-        $segment  = $uri->getSegment(1) . '/' . $uri->getSegment(2);
-
-        $isValid  = $this->capexModel->logAccess($user, $segment, $year);
+        $uri     = $this->request->getUri();
+        $segment = $uri->getSegment(1) . '/' . $uri->getSegment(2);
+        $isValid = $this->capexModel->logAccess($user, $segment, $year);
 
         $data = [
-            'validasi' => $isValid ? 'OK' : 'NOPE',
-            'namax'    => $user,
-            'dept'     => $deptAuth,
-            'deptx'    => $this->capexModel->getCostCenters($deptArr),
+            'validasi'     => $isValid ? 'OK' : 'NOPE',
+            'working_year' => $year,
+            'namax'        => $user,
+            'categories'   => $this->getAssetCategories(),
+            'capex_items'  => $this->capexModel->getCapexItems($year),
+            'deptx'        => $this->capexModel->getCostCenters($this->getUserDeptList()),
         ];
 
         return view('capex/entry', $data);
     }
 
     /**
-     * Report Page
+     * Report Page (TailAdmin view: working_year, dept_reports, total_opex_sync)
      */
     public function report()
     {
-        $year     = $this->session->get('year_code') ?? date('Y');
-        $user     = $this->session->get('user_name') ?? 'System';
-        $deptAuth = $this->session->get('auth_obj')[0]['role_object_value'] ?? "''";
-        $deptArr  = array_map('trim', explode(',', str_replace("'", "", $deptAuth)));
+        $year = $this->session->get('year_code') ?? $this->session->get('working_year') ?? date('Y');
+        $user = $this->session->get('user_name') ?? 'System';
 
-        $uri      = $this->request->getUri();
-        $segment  = $uri->getSegment(1) . '/' . $uri->getSegment(2);
-
-        $isValid  = $this->capexModel->logAccess($user, $segment, $year);
+        $uri     = $this->request->getUri();
+        $segment = $uri->getSegment(1) . '/' . $uri->getSegment(2);
+        $isValid = $this->capexModel->logAccess($user, $segment, $year);
 
         $data = [
-            'validasi' => $isValid ? 'OK' : 'NOPE',
-            'namax'    => $user,
-            'dept'     => $deptAuth,
-            'deptx'    => $this->capexModel->getDepartments($deptArr)
+            'validasi'      => $isValid ? 'OK' : 'NOPE',
+            'working_year'  => $year,
+            'namax'         => $user,
+            'dept_reports'  => $this->capexModel->getDeptReports($year),
+            'total_opex_sync' => $this->capexModel->getTotalOpexSync($year),
+            'deptx'         => $this->capexModel->getDepartments($this->getUserDeptList()),
         ];
 
         return view('capex/report', $data);
     }
 
     /**
-     * Summary Page
+     * Summary Page (TailAdmin view: working_year, summary_data)
      */
     public function summary()
     {
-        $year     = $this->session->get('year_code') ?? date('Y');
-        $user     = $this->session->get('user_name') ?? 'System';
-        $deptAuth = $this->session->get('auth_obj')[0]['role_object_value'] ?? "''";
-        $deptArr  = array_map('trim', explode(',', str_replace("'", "", $deptAuth)));
+        $year = $this->session->get('year_code') ?? $this->session->get('working_year') ?? date('Y');
+        $user = $this->session->get('user_name') ?? 'System';
 
-        $uri      = $this->request->getUri();
-        $segment  = $uri->getSegment(1) . '/' . $uri->getSegment(2);
-
-        $isValid  = $this->capexModel->logAccess($user, $segment, $year);
+        $uri     = $this->request->getUri();
+        $segment = $uri->getSegment(1) . '/' . $uri->getSegment(2);
+        $isValid = $this->capexModel->logAccess($user, $segment, $year);
 
         $data = [
-            'validasi' => $isValid ? 'OK' : 'NOPE',
-            'namax'    => $user,
-            'dept'     => $deptAuth,
-            'years'    => $year,
-            'deptx'    => $this->capexModel->getDepartments($deptArr)
+            'validasi'     => $isValid ? 'OK' : 'NOPE',
+            'working_year' => $year,
+            'namax'        => $user,
+            'summary_data' => $this->capexModel->getSummaryData($year),
+            'deptx'        => $this->capexModel->getDepartments($this->getUserDeptList()),
         ];
 
         return view('capex/summary', $data);
     }
 
     /**
-     * Load Entry Budget Dynamic Form Table
+     * Load Entry Budget Dynamic Form Table (partial)
      */
     public function entryBudgetTable()
     {
         $post    = $this->request->getPost();
-        $year    = $this->session->get('year_code') ?? date('Y');
-        $depts   = $this->session->get('auth_obj')[0]['role_object_value'] ?? "''";
-        $deptArr = array_map('trim', explode(',', str_replace("'", "", $depts)));
+        $year    = $this->session->get('year_code') ?? $this->session->get('working_year') ?? date('Y');
 
         $dept     = $post['dep'] ?? '';
         $mainAcct = $post['main'] ?? '';
@@ -113,25 +110,33 @@ class Capex extends BaseController
             'dept'    => $dept,
             'main'    => $mainAcct,
             'idx'     => $idx,
-            'header'  => str_replace(" ", "_", $post['header'] ?? ''),
-            'headers' => str_replace("Depreciation - ", "", $post['header'] ?? ''),
+            'header'  => str_replace(' ', '_', $post['header'] ?? ''),
+            'headers' => str_replace('Depreciation - ', '', $post['header'] ?? ''),
             'amount'  => $this->capexModel->getDepreciationAmount($mainAcct),
-            'deptx'   => $this->capexModel->getCostCenters($deptArr),
-            'datax'   => $this->capexModel->getEntryTableData($mainAcct, $year, $idx, $dept)
+            'deptx'   => $this->capexModel->getCostCenters($this->getUserDeptList()),
+            'datax'   => $this->capexModel->getEntryTableData($mainAcct, $year, $idx, $dept),
         ];
 
         return view('capex/entry_table_capex', $data);
     }
 
     /**
-     * Save Capex Form AJAX Endpoint
+     * Save Capex Asset (AJAX) — format form TailAdmin:
+     * asset_description, category_id, acquisition_month, acquisition_cost, useful_life_years, monthly_depreciation
      */
     public function saveCapex()
     {
-        $year = $this->session->get('year_code') ?? date('Y');
-        $user = $this->session->get('user_username') ?? 'System';
+        $year = $this->session->get('year_code') ?? $this->session->get('working_year') ?? date('Y');
+        $user = $this->session->get('user_id') ?? 0;
 
-        $success = $this->capexModel->saveCapexTransaction($this->request->getPost(), $year, $user);
+        $post = $this->request->getPost();
+
+        // Format lama (legacy array) tetap didukung
+        if (isset($post['desc']) && is_array($post['desc'])) {
+            $success = $this->capexModel->saveCapexTransaction($post, $year, $user);
+        } else {
+            $success = $this->capexModel->saveAssetCapex($post, $year, $user);
+        }
 
         if ($success) {
             return $this->respond(['status' => 'success', 'message' => 'Data Capex Berhasil Disimpan']);
@@ -140,10 +145,26 @@ class Capex extends BaseController
         return $this->failServerError('Gagal menyimpan data CAPEX.');
     }
 
+    /**
+     * Process & Sync depresiasi CAPEX ke OPEX Engine (AJAX)
+     */
+    public function syncToOpex()
+    {
+        $year = $this->session->get('year_code') ?? $this->session->get('working_year') ?? date('Y');
+
+        $success = $this->capexModel->syncToOpex($year);
+
+        if ($success) {
+            return $this->respond(['status' => 'success', 'message' => "Depresiasi CAPEX Tahun {$year} berhasil disinkronkan ke OPEX Engine."]);
+        }
+
+        return $this->failServerError('Gagal sinkronisasi depresiasi CAPEX ke OPEX.');
+    }
+
     public function manual_book()
     {
         return view('capex/manual_book', [
-            'title' => 'CAPEX - Manual Book & Documentation'
+            'title' => 'CAPEX - Manual Book & Documentation',
         ]);
     }
 
@@ -153,5 +174,31 @@ class Capex extends BaseController
     public function pdfReader()
     {
         return view('capex/manual_book');
+    }
+
+    /**
+     * Kategori aset dari master depresiasi (main_account + tahun)
+     */
+    private function getAssetCategories(): array
+    {
+        $rows = $this->capexModel->getDepreciationMasters();
+        $cats = [];
+        foreach ($rows as $r) {
+            $cats[] = [
+                'id'            => (int) $r['id'],
+                'main_account'  => (int) $r['main_account'],
+                'category_name' => 'MA ' . $r['main_account'] . ' (' . $r['amount'] . ' th)',
+            ];
+        }
+        return $cats;
+    }
+
+    /**
+     * Daftar dept dari session auth (fallback kosong → semua dept via model)
+     */
+    private function getUserDeptList(): array
+    {
+        $deptAuth = $this->session->get('auth_obj')[0]['role_object_value'] ?? "''";
+        return array_map('trim', explode(',', str_replace("'", '', $deptAuth)));
     }
 }

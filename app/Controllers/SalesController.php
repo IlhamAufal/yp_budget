@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 
-class Sales extends BaseController
+class SalesController extends BaseController
 {
     protected $db;
 

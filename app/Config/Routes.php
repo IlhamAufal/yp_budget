@@ -101,33 +101,110 @@ $routes->group('sys-admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('api/user/reset-password', 'User::resetPassword');
 });
 
-$routes->group('mpp', ['filter' => ['auth', 'context']], function($routes) {
-    // 7.1 Entry MPP
-    $routes->get('entry', 'NewHeadcountController::entry');
-    $routes->post('save-entry', 'NewHeadcountController::saveEntry');
-    
-    // Summary Headcount
-    $routes->get('summary', 'NewHeadcountController::summary');
-    $routes->post('process-opex', 'NewHeadcountController::processToOpex');
+// -------------------------------------------------------------------
+// MODUL TRANSASI (raw files dihubungkan ke skema & route CI4)
+// -------------------------------------------------------------------
+
+// Man Power Planning (MPP) — Entry, AJAX Table, Summary, Sync OPEX
+$routes->group('mpp', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/', 'MppController::index');
+    $routes->get('entry', 'MppController::index');
+    $routes->get('getEntryTable', 'MppController::getEntryTable');
+    $routes->post('saveBudget', 'MppController::saveBudget');
+    $routes->get('summary', 'MppController::summary');
+    $routes->post('syncToOpex', 'MppController::syncToOpex');
 });
 
-$routes->group('capex', ['namespace' => 'App\Controllers'], static function ($routes) {
-    $routes->get('entry', 'Capex::entry');
-    $routes->get('report', 'Capex::report');
-    $routes->get('summary', 'Capex::summary');
-    $routes->get('pdf_reader', 'Capex::pdfReader');
-    
+// CAPEX
+$routes->group('capex', ['filter' => 'auth'], function ($routes) {
+    $routes->get('entry', 'CapexController::entry');
+    $routes->get('report', 'CapexController::report');
+    $routes->get('summary', 'CapexController::summary');
+    $routes->get('manual_book', 'CapexController::manual_book');
+
     // AJAX Endpoints
-    $routes->post('entry_budget_table', 'Capex::entryBudgetTable');
-    $routes->post('save_capex', 'Capex::saveCapex');
+    $routes->post('entry_budget_table', 'CapexController::entryBudgetTable');
+    $routes->post('save_capex', 'CapexController::saveCapex');
+    $routes->post('sync_to_opex', 'CapexController::syncToOpex');
 });
 
-$routes->group('mpp', ['filter' => 'auth'], function($routes) {
-    $routes->get('/', 'Mpp::index');
-    $routes->get('getEntryTable', 'Mpp::getEntryTable');
-    $routes->post('saveBudget', 'Mpp::saveBudget');
-    $routes->get('summary', 'Mpp::summary');
-    $routes->post('syncToOpex', 'Mpp::syncToOpex');
+// OPEX GA (sidebar pakai dash; beberapa view pakai underscore)
+$routes->group('opex-ga', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/', 'OpexGaController::index');
+    $routes->get('index', 'OpexGaController::index');
+    $routes->get('entry', 'OpexGaController::entryBudget');
+    $routes->get('entry-budget', 'OpexGaController::entryBudget');
+    $routes->get('actual', 'OpexGaController::actual');
+    $routes->get('report/department', 'OpexGaController::reportDepartment');
+    $routes->get('report/combine', 'OpexGaController::index');
+    $routes->post('cari_actual_table', 'OpexGaController::cariActualTable');
+    $routes->get('export_template_opex_ga/(:num)', 'OpexGaController::exportTemplateOpexGa/$1');
+    $routes->post('saveBudgetDetail', 'OpexGaController::saveBudgetDetail');
+    $routes->post('processUpload', 'OpexGaController::processUpload');
+    $routes->get('exportExcel', 'OpexGaController::exportExcel');
+});
+// Alias tanpa dash (beberapa view memakai base_url('opexga/...'))
+$routes->group('opexga', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/', 'OpexGaController::index');
+    $routes->get('exportExcel', 'OpexGaController::exportExcel');
+});
+$routes->group('opex_ga', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/', 'OpexGaController::index');
+    $routes->get('index', 'OpexGaController::index');
+    $routes->get('entry', 'OpexGaController::entryBudget');
+    $routes->get('actual', 'OpexGaController::actual');
+    $routes->get('report/department', 'OpexGaController::reportDepartment');
+    $routes->post('cari_actual_table', 'OpexGaController::cariActualTable');
+});
+
+// OPEX Selling
+$routes->group('opex-selling', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/', 'OpexSellingController::index');
+    $routes->get('entry', 'OpexSellingController::index');
+    $routes->get('entry-budget', 'OpexSellingController::index');
+    $routes->get('actual', 'OpexSellingController::actual');
+    $routes->get('report/department', 'OpexSellingController::reportDepartment');
+    $routes->post('entryBudgetDetail', 'OpexSellingController::entryBudgetDetail');
+    $routes->post('cari_actual_table', 'OpexSellingController::cariActualTable');
+    $routes->post('saveBudget', 'OpexSellingController::saveBudget');
+    $routes->post('uploadActual', 'OpexSellingController::uploadActual');
+});
+$routes->group('opex_selling', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/', 'OpexSellingController::index');
+    $routes->get('entry', 'OpexSellingController::index');
+    $routes->get('entryBudgetDetail', 'OpexSellingController::entryBudgetDetail');
+    $routes->post('cari_actual_table', 'OpexSellingController::cariActualTable');
+    $routes->post('saveBudget', 'OpexSellingController::saveBudget');
+    $routes->get('report/department', 'OpexSellingController::reportDepartment');
+    $routes->post('uploadActual', 'OpexSellingController::uploadActual');
+});
+
+// Sales
+$routes->group('sales', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/', 'SalesController::index');
+    $routes->get('summary', 'SalesController::index');
+    $routes->get('summary/domestic', 'SalesController::index');
+    $routes->get('summary/export', 'SalesController::index');
+    $routes->get('summary/country', 'SalesController::index');
+    $routes->get('summary/region', 'SalesController::index');
+    $routes->get('domestic/entry', 'SalesController::entryDomestic');
+    $routes->get('export/entry', 'SalesController::entryExport');
+    $routes->get('simulation', 'SalesController::simulation');
+    $routes->get('setup-target', 'SalesController::setupTarget');
+    $routes->post('saveDiscountReclass', 'SalesController::saveDiscountReclass');
+    $routes->post('processUpload', 'SalesController::processUpload');
+    $routes->get('exportExcel', 'SalesController::exportExcel');
+});
+
+// Monitoring Progress Entry (Phase 3.1) & P/L Report (Phase 3.2)
+$routes->group('monitoring', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/', 'PlController::index');
+    $routes->get('cari_view_data', 'PlController::cariViewData');
+});
+$routes->group('pl', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/', 'PlController::summary');
+    $routes->get('get_detail_account', 'PlController::getDetailAccount');
+    $routes->get('export_excel', 'PlController::exportExcel');
 });
 
 if (file_exists(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php')) {

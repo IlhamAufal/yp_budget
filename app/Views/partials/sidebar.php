@@ -10,8 +10,10 @@
       $currentGroup = 'CAPEX';
   } elseif (url_is('sales*')) {
       $currentGroup = 'Sales';
-  } elseif (url_is('new-head-account*')) {
+  } elseif (url_is('mpp*')) {
       $currentGroup = 'NewHeadAccount';
+  } elseif (url_is('monitoring*') || url_is('pl*')) {
+      $currentGroup = 'Dashboard';
   } elseif (url_is('master*')) {
       $currentGroup = 'MasterData';
   } elseif (url_is('sys-admin*')) {
@@ -30,10 +32,10 @@
   >
     <a href="<?= base_url('/') ?>">
       <span class="logo" :class="sidebarToggle ? 'hidden' : ''">
-        <img class="dark:hidden" src="<?= base_url('assets/images/logo/logo.svg') ?>" alt="Logo" />
+        <img class="dark:hidden" src="<?= base_url('assets/images/logo/logo-sidebar.svg') ?>" alt="Logo" />
         <img
           class="hidden dark:block"
-          src="<?= base_url('assets/images/logo/logo-dark.svg') ?>"
+          src="<?= base_url('assets/images/logo/logo-sidebar-dark.svg') ?>"
           alt="Logo"
         />
       </span>
@@ -77,10 +79,10 @@
 
           <li>
             <a
-              href="<?= base_url('/') ?>"
-              class="menu-item group <?= (url_is('/') || url_is('dashboard*')) ? 'menu-item-active' : 'menu-item-inactive' ?>"
+              href="<?= base_url('monitoring') ?>"
+              class="menu-item group <?= url_is('monitoring*') ? 'menu-item-active' : 'menu-item-inactive' ?>"
             >
-              <i class="fa-solid fa-gauge-high text-lg min-w-[24px] text-center <?= (url_is('/') || url_is('dashboard*')) ? 'text-brand-500 dark:text-brand-400' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300' ?>"></i>
+              <i class="fa-solid fa-clipboard-check text-lg min-w-[24px] text-center <?= url_is('monitoring*') ? 'text-brand-500 dark:text-brand-400' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300' ?>"></i>
               <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
                 Monitoring Progress Entry
               </span>
@@ -89,10 +91,10 @@
 
           <li>
             <a
-              href="<?= base_url('/') ?>"
-              class="menu-item group <?= (url_is('/') || url_is('dashboard*')) ? 'menu-item-active' : 'menu-item-inactive' ?>"
+              href="<?= base_url('pl') ?>"
+              class="menu-item group <?= url_is('pl*') ? 'menu-item-active' : 'menu-item-inactive' ?>"
             >
-              <i class="fa-solid fa-gauge-high text-lg min-w-[24px] text-center <?= (url_is('/') || url_is('dashboard*')) ? 'text-brand-500 dark:text-brand-400' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300' ?>"></i>
+              <i class="fa-solid fa-chart-pie text-lg min-w-[24px] text-center <?= url_is('pl*') ? 'text-brand-500 dark:text-brand-400' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300' ?>"></i>
               <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
                 1. PL
               </span>
@@ -454,12 +456,12 @@
             <a
               href="#"
               @click.prevent="selected = (selected === 'NewHeadAccount' ? '' : 'NewHeadAccount')"
-              class="menu-item group <?= url_is('new-head-account*') ? 'menu-item-active' : 'menu-item-inactive' ?>"
+              class="menu-item group <?= url_is('mpp*') ? 'menu-item-active' : 'menu-item-inactive' ?>"
               :class="selected === 'NewHeadAccount' ? 'menu-item-active' : ''"
             >
-              <i class="fa-solid fa-folder-plus text-lg min-w-[24px] text-center <?= url_is('new-head-account*') ? 'text-brand-500 dark:text-brand-400' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300' ?>" :class="selected === 'NewHeadAccount' ? 'text-brand-500 dark:text-brand-400' : ''"></i>
+              <i class="fa-solid fa-folder-plus text-lg min-w-[24px] text-center <?= url_is('mpp*') ? 'text-brand-500 dark:text-brand-400' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300' ?>" :class="selected === 'NewHeadAccount' ? 'text-brand-500 dark:text-brand-400' : ''"></i>
               <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                New Head Account
+                Man Power Planning
               </span>
               <i
                 class="fa-solid fa-chevron-down menu-item-arrow text-xs transition-transform duration-200"
@@ -478,18 +480,18 @@
               >
                 <li>
                   <a
-                    href="<?= base_url('new-head-account') ?>"
-                    class="menu-dropdown-item group <?= (url_is('new-head-account') || url_is('new-head-account/index')) ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
+                    href="<?= base_url('mpp/entry') ?>"
+                    class="menu-dropdown-item group <?= url_is('mpp/entry*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
                   >
-                    Daftar Pengajuan
+                    Entry Man Power Planning
                   </a>
                 </li>
                 <li>
                   <a
-                    href="<?= base_url('new-head-account/create') ?>"
-                    class="menu-dropdown-item group <?= url_is('new-head-account/create*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
+                    href="<?= base_url('mpp/summary') ?>"
+                    class="menu-dropdown-item group <?= url_is('mpp/summary*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
                   >
-                    Pengajuan Baru
+                    Summary Headcount
                   </a>
                 </li>
               </ul>

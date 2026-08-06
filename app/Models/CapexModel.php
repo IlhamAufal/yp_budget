@@ -232,4 +232,241 @@ class CapexModel extends Model
         $this->db->transComplete();
         return $this->db->transStatus();
     }
+
+    /* ============================================================
+     * Method tambahan untuk view TailAdmin (Phase wiring raw files)
+     * ============================================================ */
+
+    /**
+     * Master depresiasi (kategori aset) untuk dropdown Entry CAPEX.
+     */
+    public function getDepreciationMasters(): array
+    {
+        try {
+            return $this->db->table('yp_plan__master_amount_depreciation')
+                ->select('id, main_account, amount')
+                ->orderBy('main_account', 'ASC')
+                ->get()->getResultArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Daftar item CAPEX yang sudah di-entry pada tahun tertentu.
+     * Mapping ke kontrak view TailAdmin (asset_description, category_name, dll).
+     */
+    public function getCapexItems(string $year): array
+    {
+        $sql = "SELECT h.id,
+                       h.item_desc AS asset_description,
+                       COALESCE(c.cost_center_desc, CONCAT('MA ', h.main_account)) AS category_name,
+                       h.unit AS acquisition_month,
+                       COALESCE(CAST(h.remarks AS UNSIGNED), 0) AS useful_life_years,
+                       h.unit_price AS acquisition_cost,
+                       IFNULL(d.total, 0) AS monthly_depreciation,
+                       h.dept_id, h.main_account, h.cost_center
+                FROM yp_plan__trans_capex_entry_header h
+                LEFT JOIN yp_plan__trans_capex_entry_depreciation d ON d.id_header = h.id
+                LEFT JOIN gw_plan__master_coa c ON c.main_account = h.main_account
+                WHERE h.year_code = ?
+                ORDER BY h.id DESC";
+        try {
+            return $this->db->query($sql, [$year])->getResultArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Laporan per Departemen (Total Item, Nilai Akuisisi, Depresiasi/Tahun).
+     */
+    public function getDeptReports(string $year): array
+    {
+        $sql = "SELECT COALESCE(dp.dept_desc, '') AS department_name,
+                       COUNT(h.id) AS total_items,
+                       IFNULL(SUM(h.unit_price),0) AS total_acquisition,
+                       IFNULL(SUM(d.total),0) AS annual_depreciation
+                FROM yp_plan__trans_capex_entry_header h
+                LEFT JOIN gw_plan__master_department dp ON dp.dept_code = h.dept_id
+                LEFT JOIN yp_plan__trans_capex_entry_depreciation d ON d.id_header = h.id
+                WHERE h.year_code = ?
+                GROUP BY dp.dept_desc
+                ORDER BY dp.dept_desc";
+        try {
+            return $this->db->query($sql, [$year])->getResultArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Konsolidasi alokasi depresiasi ke akun OPEX/FOH (Jan-Jun & Jul-Des).
+     */
+    public function getTotalOpexSync(string $year): array
+    {
+        $sql = "SELECT COALESCE(c.cost_center_desc, d.id_coa) AS account_name,
+                       IFNULL(SUM(d.`1`)+SUM(d.`2`)+SUM(d.`3`)+SUM(d.`4`)+SUM(d.`5`)+SUM(d.`6`),0) AS h1_amount,
+                       IFNULL(SUM(d.`7`)+SUM(d.`8`)+SUM(d.`9`)+SUM(d.`10`)+SUM(d.`11`)+SUM(d.`12`),0) AS h2_amount,
+                       IFNULL(SUM(d.total),0) AS total_amount
+                FROM yp_plan__trans_capex_entry_depreciation d
+                LEFT JOIN gw_plan__master_coa c ON c.main_account = d.id_coa
+                WHERE d.year_code = ?
+                GROUP BY c.cost_center_desc, d.id_coa
+                ORDER BY d.id_coa";
+        try {
+            return $this->db->query($sql, [$year])->getResultArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Summary Eksekutif CAPEX (Total Anggaran, Unit Aset, Beban Depresiasi).
+     */
+    public function getSummaryData(string $year): array
+    {
+        try {
+            $totalCapex = $this->db->table('yp_plan__trans_capex_entry_header')
+                ->selectSum('unit_price', 'total')
+                ->where('year_code', $year)
+                ->get()->getRowArray();
+            $totalUnits = $this->db->table('yp_plan__trans_capex_entry_header')
+                ->selectSum('unit', 'total')
+                ->where('year_code', $year)
+                ->get()->getRowArray();
+            $totalDep = $this->db->table('yp_plan__trans_capex_entry_depreciation')
+                ->selectSum('total', 'total')
+                ->where('year_code', $year)
+                ->get()->getRowArray();
+
+            return [
+                'total_capex'       => (float) ($totalCapex['total'] ?? 0),
+                'total_units'       => (float) ($totalUnits['total'] ?? 0),
+                'total_depreciation'=> (float) ($totalDep['total'] ?? 0),
+            ];
+        } catch (\Throwable $e) {
+            return ['total_capex' => 0, 'total_units' => 0, 'total_depreciation' => 0];
+        }
+    }
+
+    /**
+     * Simpan 1 aset CAPEX dari form TailAdmin (asset_description, category_id,
+     * acquisition_month, acquisition_cost, useful_life_years, monthly_depreciation).
+     */
+    public function saveAssetCapex(array $post, string $year, $user): bool
+    {
+        $this->db->transStart();
+
+        $categoryId  = (int) ($post['category_id'] ?? 0);
+        $desc        = trim((string) ($post['asset_description'] ?? ''));
+        $acqMonth    = max(1, min(12, (int) ($post['acquisition_month'] ?? 1)));
+        $cost        = (float) ($post['acquisition_cost'] ?? 0);
+        $lifeYears   = max(1, (int) ($post['useful_life_years'] ?? 4));
+        $monthlyDep  = (float) ($post['monthly_depreciation'] ?? 0);
+        $deptId      = trim((string) ($post['dept_id'] ?? ''));
+
+        $mainAccount = (int) ($post['main_account'] ?? $categoryId);
+
+        $this->db->table('yp_plan__trans_capex_entry_header')->insert([
+            'main_account' => $mainAccount,
+            'id_coa'       => $categoryId,
+            'dept_id'      => $deptId,
+            'newlines'     => 0,
+            'item_desc'    => $desc,
+            'cost_center'  => (int) ($post['cost_center'] ?? 0),
+            'unit'         => 1,
+            'unit_price'   => $cost,
+            'remarks'      => $lifeYears . ' tahun',
+            'year_code'    => $year,
+        ]);
+        $headerId = $this->db->insertID();
+
+        if (! $monthlyDep && $cost > 0 && $lifeYears > 0) {
+            $monthlyDep = round($cost / ($lifeYears * 12), 2);
+        }
+
+        $total = 0;
+        $vals  = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $val = ($m >= $acqMonth) ? $monthlyDep : 0;
+            $vals[] = $val;
+            $total += $val;
+        }
+
+        // Kolom bulan bernomor 1..12 di-escape backtick (numeric identifier)
+        $sqlDet = 'INSERT INTO yp_plan__trans_capex_entry_detail
+                   (id_header, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`, `11`, `12`, total)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        $this->db->query($sqlDet, array_merge([$headerId], $vals, [$total]));
+
+        $depVals = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $depVals[] = ($m >= $acqMonth) ? $monthlyDep : 0;
+        }
+        $sqlDep = 'INSERT INTO yp_plan__trans_capex_entry_depreciation
+                   (id_header, id_coa, main_account, dept_id, year_code, master_amount, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`, `11`, `12`, total)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        $this->db->query($sqlDep, array_merge([$headerId, $categoryId, $mainAccount, $deptId, $year, $lifeYears], $depVals, [$total]));
+
+        $sqlTot = 'INSERT INTO yp_plan__trans_capex_entry_total
+                   (id_header, id_coa, main_account, dept_id, year_code, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`, `11`, `12`, total)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        $this->db->query($sqlTot, array_merge([$headerId, $categoryId, $mainAccount, $deptId, $year], $depVals, [$total]));
+
+        $this->db->transComplete();
+        return $this->db->transStatus();
+    }
+
+    /**
+     * Sync depresiasi CAPEX ke OPEX Engine (yp_plan__trans_budget_entry_data).
+     */
+    public function syncToOpex(string $year): bool
+    {
+        $this->db->transStart();
+
+        $rows = $this->db->table('yp_plan__trans_capex_entry_depreciation')
+            ->where('year_code', $year)
+            ->get()->getResultArray();
+
+        if (empty($rows)) {
+            $this->db->transComplete();
+            return $this->db->transStatus();
+        }
+
+        $userId = (int) (session()->get('user_id') ?? 0);
+        $batch  = [];
+        $coas   = [];
+        foreach ($rows as $r) {
+            $coas[] = (int) $r['id_coa'];
+        }
+        $coas = array_values(array_unique($coas));
+
+        $this->db->table('yp_plan__trans_budget_entry_data')
+            ->where('year_code', $year)
+            ->whereIn('id_coa', $coas)
+            ->delete();
+
+        foreach ($rows as $r) {
+            $row = [
+                'id_coa'      => (int) $r['id_coa'],
+                'id_dept'     => (int) ($r['dept_id'] ?: 0),
+                'total'       => (float) $r['total'],
+                'year_code'   => $year,
+                'created_by'  => $userId,
+                'created_date'=> date('Y-m-d H:i:s'),
+            ];
+            for ($m = 1; $m <= 12; $m++) {
+                $row[(string) $m] = (float) $r[(string) $m];
+            }
+            $batch[] = $row;
+        }
+
+        if (! empty($batch)) {
+            $this->db->table('yp_plan__trans_budget_entry_data')->insertBatch($batch);
+        }
+
+        $this->db->transComplete();
+        return $this->db->transStatus();
+    }
 }
