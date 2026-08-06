@@ -3,6 +3,8 @@
 namespace App\Controllers;
 
 use App\Models\ModelPl;
+use App\Libraries\ExcelExporter;
+use CodeIgniter\HTTP\ResponseInterface;
 
 /**
  * PlController — Halaman Monitoring Progress Entry (Phase 3.1)
@@ -62,17 +64,33 @@ class PlController extends BaseController
     }
 
     /**
-     * Halaman Laporan P/L Summary & Breakdown per Akun.
+     * Halaman Laporan P/L Summary & Breakdown per Akun + per Bagian.
      */
     public function summary()
     {
         $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+
+        $plSections = $this->modelPl->get_pl_sections($workingYear);
+        $plAdjs     = $this->modelPl->get_pl_adjs($workingYear);
+
+        // State Alpine untuk kolom Total / Adjustment per bagian
+        $rowState = [];
+        foreach ($plSections as $sec) {
+            $rowState[$sec['code']] = [
+                'total' => (float) $sec['total'],
+                'adj'   => (float) ($plAdjs[$sec['code']] ?? 0),
+            ];
+        }
 
         $data = [
             'title'       => 'Profit & Loss (P&L) Report',
             'workingYear' => $workingYear,
             'pl_summary'  => $this->modelPl->get_pl_summary($workingYear),
             'pl_details'  => $this->modelPl->get_pl_details($workingYear),
+            'pl_sections' => $plSections,
+            'pl_notes'    => $this->modelPl->get_pl_notes($workingYear),
+            'pl_adjs'     => $plAdjs,
+            'rowState'    => $rowState,
             'departments' => $this->modelPl->get_departments(),
         ];
 
@@ -95,10 +113,92 @@ class PlController extends BaseController
     }
 
     /**
-     * Export P/L ke Excel (placeholder — engine ExcelImporter/Exporter Phase 2.3).
+     * Endpoint AJAX: detail baris per akun untuk satu bagian P/L (modal).
      */
-    public function exportExcel()
+    public function getSectionDetail()
     {
-        return redirect()->back()->with('info', 'Export Excel P/L akan tersedia pada Phase 2.3 (Excel Engine terpusat).');
+        $section = strtoupper((string) ($this->request->getGet('section') ?? ''));
+        $year    = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+
+        $label = ModelPl::PL_SECTIONS[$section]['label'] ?? $section;
+
+        return $this->response->setJSON([
+            'success' => true,
+            'label'   => $label,
+            'items'   => $this->modelPl->get_pl_section_detail($year, $section),
+        ]);
+    }
+
+    /**
+     * Endpoint AJAX: simpan catatan per bagian P/L.
+     */
+    public function saveNotes(): ResponseInterface
+    {
+        if (! $this->request->isAJAX()) {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Invalid Request']);
+        }
+
+        $year   = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $userId = (int) (session()->get('user_id') ?? 0);
+        $code   = (string) ($this->request->getPost('code') ?? '');
+        $notes  = (string) ($this->request->getPost('notes') ?? '');
+
+        $ok = $this->modelPl->save_pl_note($year, $code, $notes, $userId);
+
+        return $this->response->setJSON([
+            'status'  => $ok ? 'success' : 'error',
+            'message' => $ok ? 'Catatan berhasil disimpan.' : 'Gagal menyimpan catatan.',
+        ]);
+    }
+
+    /**
+     * Endpoint AJAX: simpan adjustment manual per bagian P/L.
+     */
+    public function saveAdjs(): ResponseInterface
+    {
+        if (! $this->request->isAJAX()) {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Invalid Request']);
+        }
+
+        $year   = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $userId = (int) (session()->get('user_id') ?? 0);
+        $code   = (string) ($this->request->getPost('code') ?? '');
+        $value  = (float) str_replace(',', '', (string) ($this->request->getPost('value') ?? 0));
+
+        $ok = $this->modelPl->save_pl_adjs($year, $code, $value, $userId);
+
+        return $this->response->setJSON([
+            'status'  => $ok ? 'success' : 'error',
+            'message' => $ok ? 'Adjustment berhasil disimpan.' : 'Gagal menyimpan adjustment.',
+        ]);
+    }
+
+    /**
+     * Export P/L (format konsolidasi per bagian) ke .xlsx via ExcelExporter.
+     */
+    public function exportExcel(): ResponseInterface
+    {
+        $year      = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $sections  = $this->modelPl->get_pl_sections($year);
+        $adjs      = $this->modelPl->get_pl_adjs($year);
+
+        $months   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        $headers  = array_merge(['SEKSI P/L', 'KATEGORI'], $months, ['TOTAL', 'ADJUSTMENT', 'TOTAL ADJUSTED']);
+
+        $rows = [];
+        foreach ($sections as $sec) {
+            $line = [$sec['code'], $sec['label']];
+            foreach (range(1, 12) as $m) {
+                $line[] = (float) $sec['m' . $m];
+            }
+            $adj  = (float) ($adjs[$sec['code']] ?? 0);
+            $line[] = (float) $sec['total'];
+            $line[] = $adj;
+            $line[] = (float) $sec['total'] + $adj;
+
+            $rows[] = $line;
+        }
+
+        return ExcelExporter::export($headers, $rows, 'PL_Report_' . $year, 'P&L Report');
     }
 }

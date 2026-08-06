@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\CapexModel;
 use App\Models\CoaModel;
+use App\Libraries\AccessRestrict;
 use CodeIgniter\API\ResponseTrait;
 
 /**
@@ -128,6 +129,12 @@ class CapexController extends BaseController
     {
         $year = $this->session->get('year_code') ?? $this->session->get('working_year') ?? date('Y');
         $user = $this->session->get('user_id') ?? 0;
+
+        // PRD 1.7 — Concurrent Access Locking sebelum proses simpan
+        $lock = (new AccessRestrict())->checkLock((string) $user, 'capex/entry', (int) $year);
+        if (! $lock['allowed']) {
+            return $this->respond(['status' => 'error', 'message' => $lock['message']]);
+        }
 
         $post = $this->request->getPost();
 

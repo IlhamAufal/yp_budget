@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\OpexSellingModel;
 use App\Libraries\ExcelExporter;
 use App\Libraries\ExcelImporter;
+use App\Libraries\AccessRestrict;
 use CodeIgniter\HTTP\ResponseInterface;
 
 /**
@@ -88,6 +89,13 @@ class OpexSellingController extends BaseController
         $totiAa      = $this->request->getPost('toti_aa');
         $dept        = $this->request->getPost('dept');
         $year        = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+
+        // PRD 1.7 — Concurrent Access Locking sebelum proses simpan
+        $userId = (int) (session()->get('user_id') ?? 0);
+        $lock   = (new AccessRestrict())->checkLock((string) $userId, 'opex-selling/entry', (int) $year);
+        if (! $lock['allowed']) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $lock['message']]);
+        }
 
         if (! empty($mainAccount) && is_array($mainAccount)) {
             foreach ($mainAccount as $key => $account) {

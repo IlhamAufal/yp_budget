@@ -196,7 +196,7 @@ class MenuBuilder
         $html .= '</a>';
 
         $html .= '<div class="overflow-hidden transition-all duration-300" '
-            . ':class="(selected === ' . $keyJson . ') ? \'block\' : \'hidden\'">';
+            . ':class="(selected === ' . $jsKey . ') ? \'block\' : \'hidden\'">';
         $html .= '<ul :class="sidebarToggle ? \'lg:hidden\' : \'flex\'" class="flex flex-col gap-1 mt-2 menu-dropdown pl-9">';
 
         foreach ($children as $child) {

@@ -228,6 +228,9 @@ $routes->group('monitoring', ['filter' => 'auth'], function ($routes) {
 $routes->group('pl', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'PlController::summary');
     $routes->get('get_detail_account', 'PlController::getDetailAccount');
+    $routes->get('get_section_detail', 'PlController::getSectionDetail');
+    $routes->post('save_notes', 'PlController::saveNotes');
+    $routes->post('save_adjs', 'PlController::saveAdjs');
     $routes->get('export_excel', 'PlController::exportExcel');
 });
 

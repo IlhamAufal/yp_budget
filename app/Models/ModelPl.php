@@ -238,4 +238,351 @@ class ModelPl extends Model
             return [];
         }
     }
+
+    /* ------------------------------------------------------------------
+     * Phase 3.2 — P/L Report per Bagian (Sections) & Notes/Adjustment
+     * ------------------------------------------------------------------ */
+
+    /**
+     * Definisi bagian P/L (section) dan sumber datanya.
+     * type null = section khusus (SALES dari tabel transaksi sales).
+     */
+    public const PL_SECTIONS = [
+        'SALES'        => ['label' => 'Sales Revenue',               'type' => null],
+        'COGS'         => ['label' => 'COGS (Direct Labor)',         'type' => 'DL'],
+        'SELLING'      => ['label' => 'Selling Expense',             'type' => 'SELLING'],
+        'GENERAL'      => ['label' => 'General & Admin',             'type' => 'GA'],
+        'FOH'          => ['label' => 'Factory Overhead (FOH)',      'type' => 'FOH'],
+        'DEPRECIATION' => ['label' => 'Depreciation (CAPEX)',        'type' => 'CAPEX'],
+        'OTHER'        => ['label' => 'Other Expense / Income',      'type' => 'OE'],
+    ];
+
+    /** @var string[] Bulan bernomor 1..12 → nama kolom `{nama}_rev` di tabel sales. */
+    private const MONTH_NAMES = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+
+    /**
+     * Map tipe COA (gw_plan__master_coa.type) ke kode section P/L.
+     */
+    private function typeToSection(string $type): string
+    {
+        $map = [
+            'DL'      => 'COGS',
+            'SELLING' => 'SELLING',
+            'GA'      => 'GENERAL',
+            'FOH'     => 'FOH',
+            'CAPEX'   => 'DEPRECIATION',
+            'OE'      => 'OTHER',
+        ];
+
+        return $map[$type] ?? 'OTHER';
+    }
+
+    /**
+     * Ringkasan P/L per bagian: bulanan + total untuk seluruh section.
+     * Return: [ ['code','label','m1'..'m12','total'], ... ] urut sesuai definisi.
+     */
+    public function get_pl_sections(string $year): array
+    {
+        $sections = [];
+        foreach (self::PL_SECTIONS as $code => $def) {
+            $row = ['code' => $code, 'label' => $def['label']];
+            foreach (range(1, 12) as $m) {
+                $row['m' . $m] = 0.0;
+            }
+            $row['total'] = 0.0;
+            $sections[$code] = $row;
+        }
+
+        // 1) Bagian berbasis budget (COGS/SELLING/GENERAL/FOH/DEPRECIATION/OTHER)
+        $monthSelect = [];
+        foreach (range(1, 12) as $m) {
+            $monthSelect[] = "IFNULL(SUM(t.`{$m}`),0) AS m{$m}";
+        }
+        $monthSelectSql = implode(', ', $monthSelect);
+
+        $sql = "SELECT COALESCE(c.type, 'OE') AS sec, {$monthSelectSql}, IFNULL(SUM(t.total),0) AS total
+                FROM yp_plan__trans_budget_entry_data t
+                LEFT JOIN gw_plan__master_coa c ON c.main_account = t.id_coa
+                WHERE t.year_code = ?
+                GROUP BY c.type";
+
+        try {
+            $rows = $this->db->query($sql, [$year])->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'ModelPl::get_pl_sections(budget): ' . $e->getMessage());
+            $rows = [];
+        }
+
+        foreach ($rows as $row) {
+            $code = $this->typeToSection((string) $row['sec']);
+            if (! isset($sections[$code])) {
+                continue;
+            }
+            foreach (range(1, 12) as $m) {
+                $sections[$code]['m' . $m] = (float) ($row['m' . $m] ?? 0);
+            }
+            $sections[$code]['total'] = (float) ($row['total'] ?? 0);
+        }
+
+        // 2) Bagian SALES dari transaksi sales domestic + export
+        $salesRow = $this->getSalesSectionRow($year);
+        if ($salesRow !== null) {
+            $sections['SALES'] = array_merge($sections['SALES'], $salesRow);
+        }
+
+        return array_values($sections);
+    }
+
+    /**
+     * Total revenue bulanan dari trans_sales_domestic + trans_sales_export.
+     */
+    private function getSalesSectionRow(string $year): ?array
+    {
+        $selects = [];
+        foreach (self::MONTH_NAMES as $i => $name) {
+            $selects[] = "IFNULL(SUM({$name}_rev),0) AS m" . ($i + 1);
+        }
+        $selectSql = implode(', ', $selects);
+        $totalExpr = implode(' + ', array_map(fn ($name) => "IFNULL(SUM({$name}_rev),0)", self::MONTH_NAMES));
+
+        $sql = "SELECT {$selectSql}, ({$totalExpr}) AS total FROM yp_plan__trans_sales_domestic WHERE year_code = ?";
+        $sqlE = "SELECT {$selectSql}, ({$totalExpr}) AS total FROM yp_plan__trans_sales_export WHERE year_code = ?";
+
+        try {
+            $dom = $this->db->query($sql, [$year])->getRowArray() ?? [];
+            $exp = $this->db->query($sqlE, [$year])->getRowArray() ?? [];
+        } catch (\Throwable $e) {
+            log_message('error', 'ModelPl::getSalesSectionRow: ' . $e->getMessage());
+
+            return null;
+        }
+
+        $row = ['total' => 0.0];
+        foreach (range(1, 12) as $m) {
+            $row['m' . $m] = (float) ($dom['m' . $m] ?? 0) + (float) ($exp['m' . $m] ?? 0);
+            $row['total'] += $row['m' . $m];
+        }
+
+        return $row;
+    }
+
+    /**
+     * Detail baris per akun untuk satu bagian P/L (untuk modal AJAX).
+     * Return: account, account_desc, cost_center, m1..m12, total.
+     */
+    public function get_pl_section_detail(string $year, string $section): array
+    {
+        $code = strtoupper($section);
+        if (! isset(self::PL_SECTIONS[$code])) {
+            return [];
+        }
+
+        if ($code === 'SALES') {
+            return $this->getSalesSectionDetail($year);
+        }
+
+        $type = self::PL_SECTIONS[$code]['type'];
+        $monthSelect = [];
+        foreach (range(1, 12) as $m) {
+            $monthSelect[] = "IFNULL(t.`{$m}`,0) AS m{$m}";
+        }
+        $monthSelectSql = implode(', ', $monthSelect);
+
+        $sql = "SELECT t.id_coa AS account,
+                       COALESCE(c.cost_center_desc, '') AS account_desc,
+                       COALESCE(t.id_dept, '') AS cost_center,
+                       {$monthSelectSql},
+                       IFNULL(t.total,0) AS total
+                FROM yp_plan__trans_budget_entry_data t
+                LEFT JOIN gw_plan__master_coa c ON c.main_account = t.id_coa
+                WHERE t.year_code = ? AND c.type = ?
+                ORDER BY t.id_coa, t.id_dept";
+
+        try {
+            return $this->db->query($sql, [$year, $type])->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'ModelPl::get_pl_section_detail: ' . $e->getMessage());
+
+            return [];
+        }
+    }
+
+    /**
+     * Detail SALES: agregasi per channel (domestic) + export.
+     */
+    private function getSalesSectionDetail(string $year): array
+    {
+        $selects = [];
+        foreach (self::MONTH_NAMES as $i => $name) {
+            $selects[] = "IFNULL(SUM({$name}_rev),0) AS m" . ($i + 1);
+        }
+        $selectSql = implode(', ', $selects);
+        $totalExpr = implode(' + ', array_map(fn ($name) => "IFNULL(SUM({$name}_rev),0)", self::MONTH_NAMES));
+
+        $sqlD = "SELECT id_channel AS account, 'Domestic' AS origin, {$selectSql}, ({$totalExpr}) AS total
+                 FROM yp_plan__trans_sales_domestic WHERE year_code = ? GROUP BY id_channel ORDER BY id_channel";
+        $sqlE = "SELECT id_channel AS account, 'Export' AS origin, {$selectSql}, ({$totalExpr}) AS total
+                 FROM yp_plan__trans_sales_export WHERE year_code = ? GROUP BY id_channel ORDER BY id_channel";
+
+        try {
+            $dom = $this->db->query($sqlD, [$year])->getResultArray();
+            $exp = $this->db->query($sqlE, [$year])->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'ModelPl::getSalesSectionDetail: ' . $e->getMessage());
+
+            return [];
+        }
+
+        $items = [];
+        foreach (array_merge($dom, $exp) as $row) {
+            $items[] = [
+                'account'      => $row['account'] ?? '',
+                'account_desc' => $row['origin'] ?? '',
+                'cost_center'  => $row['account'] ?? '',
+                'm1'           => (float) ($row['m1'] ?? 0),
+                'm2'           => (float) ($row['m2'] ?? 0),
+                'm3'           => (float) ($row['m3'] ?? 0),
+                'm4'           => (float) ($row['m4'] ?? 0),
+                'm5'           => (float) ($row['m5'] ?? 0),
+                'm6'           => (float) ($row['m6'] ?? 0),
+                'm7'           => (float) ($row['m7'] ?? 0),
+                'm8'           => (float) ($row['m8'] ?? 0),
+                'm9'           => (float) ($row['m9'] ?? 0),
+                'm10'          => (float) ($row['m10'] ?? 0),
+                'm11'          => (float) ($row['m11'] ?? 0),
+                'm12'          => (float) ($row['m12'] ?? 0),
+                'total'        => (float) ($row['total'] ?? 0),
+            ];
+        }
+
+        return $items;
+    }
+
+    /**
+     * Peta catatan per section: [CODE => notes].
+     */
+    public function get_pl_notes(string $year): array
+    {
+        try {
+            $rows = $this->db->table('yp_plan__trans_notes_pl')
+                ->where('year_code', (int) $year)
+                ->get()
+                ->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'ModelPl::get_pl_notes: ' . $e->getMessage());
+
+            return [];
+        }
+
+        $map = [];
+        foreach ($rows as $r) {
+            $map[strtoupper((string) ($r['code_pl'] ?? ''))] = (string) ($r['notes'] ?? '');
+        }
+
+        return $map;
+    }
+
+    /**
+     * Simpan / update catatan section P/L (yp_plan__trans_notes_pl).
+     */
+    public function save_pl_note(string $year, string $code, string $notes, int $userId): bool
+    {
+        $code = strtoupper(trim($code));
+        if ($code === '') {
+            return false;
+        }
+
+        try {
+            $exists = $this->db->table('yp_plan__trans_notes_pl')
+                ->where('code_pl', $code)
+                ->where('year_code', (int) $year)
+                ->countAllResults();
+
+            $data = [
+                'notes'        => $notes,
+                'created_by'   => $userId,
+                'created_date' => date('Y-m-d H:i:s'),
+            ];
+
+            if ($exists > 0) {
+                return $this->db->table('yp_plan__trans_notes_pl')
+                    ->where('code_pl', $code)
+                    ->where('year_code', (int) $year)
+                    ->update($data);
+            }
+
+            $data['code_pl']   = $code;
+            $data['year_code'] = (int) $year;
+
+            return $this->db->table('yp_plan__trans_notes_pl')->insert($data);
+        } catch (\Throwable $e) {
+            log_message('error', 'ModelPl::save_pl_note: ' . $e->getMessage());
+
+            return false;
+        }
+    }
+
+    /**
+     * Peta adjustment manual per section: [CODE => nilai].
+     */
+    public function get_pl_adjs(string $year): array
+    {
+        try {
+            $rows = $this->db->table('yp_plan__trans_opex_adjs')
+                ->where('year_code', (int) $year)
+                ->get()
+                ->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'ModelPl::get_pl_adjs: ' . $e->getMessage());
+
+            return [];
+        }
+
+        $map = [];
+        foreach ($rows as $r) {
+            $map[strtoupper((string) ($r['code_adjs'] ?? ''))] = (float) ($r['values_adjs'] ?? 0);
+        }
+
+        return $map;
+    }
+
+    /**
+     * Simpan / update adjustment manual section P/L (yp_plan__trans_opex_adjs).
+     */
+    public function save_pl_adjs(string $year, string $code, float $value, int $userId): bool
+    {
+        $code = strtoupper(trim($code));
+        if ($code === '') {
+            return false;
+        }
+
+        try {
+            $exists = $this->db->table('yp_plan__trans_opex_adjs')
+                ->where('code_adjs', $code)
+                ->where('year_code', (int) $year)
+                ->countAllResults();
+
+            $data = [
+                'values_adjs'  => $value,
+                'created_by'   => $userId,
+                'created_date' => date('Y-m-d H:i:s'),
+            ];
+
+            if ($exists > 0) {
+                return $this->db->table('yp_plan__trans_opex_adjs')
+                    ->where('code_adjs', $code)
+                    ->where('year_code', (int) $year)
+                    ->update($data);
+            }
+
+            $data['code_adjs']  = $code;
+            $data['year_code']  = (int) $year;
+
+            return $this->db->table('yp_plan__trans_opex_adjs')->insert($data);
+        } catch (\Throwable $e) {
+            log_message('error', 'ModelPl::save_pl_adjs: ' . $e->getMessage());
+
+            return false;
+        }
+    }
 }

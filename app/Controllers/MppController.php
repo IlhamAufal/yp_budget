@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\MppModel;
+use App\Libraries\AccessRestrict;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class MppController extends BaseController
@@ -65,6 +66,13 @@ class MppController extends BaseController
 
         if (empty($idDept)) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menyimpan, Cost Center / Department kosong.']);
+        }
+
+        // PRD 1.7 — Concurrent Access Locking sebelum proses simpan
+        $userId = (int) (session()->get('user_id') ?? 0);
+        $lock   = (new AccessRestrict())->checkLock((string) $userId, 'mpp/entry', (int) $yearCode);
+        if (! $lock['allowed']) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $lock['message']]);
         }
 
         $success = $this->mppModel->saveMppBudget($yearCode, $idDept, $details, $isNewlines);
