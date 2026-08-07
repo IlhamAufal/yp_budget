@@ -57,11 +57,44 @@ class CoaModel extends Model
             $builder->where('status', $filters['status']);
         }
 
+        // Server-side pagination
+        if (! empty($filters['limit'])) {
+            $builder->limit((int) $filters['limit'], (int) ($filters['offset'] ?? 0));
+        } else {
+            $builder->limit(500);
+        }
+
         return $builder->orderBy('main_account', 'ASC')
             ->orderBy('id_cost_center', 'ASC')
-            ->limit(500)
             ->get()
             ->getResultArray();
+    }
+
+    public function countAll(array $filters = []): int
+    {
+        $builder = $this->builder();
+
+        if (! empty($filters['search'])) {
+            $like = trim($filters['search']);
+            $builder->groupStart()
+                ->like('main_account', $like)
+                ->orLike('id_acct_ext', $like)
+                ->orLike('cost_center_header', $like)
+                ->orLike('cost_center_sub', $like)
+                ->orLike('cost_center_desc', $like)
+                ->groupEnd();
+        }
+        if (! empty($filters['type'])) {
+            $builder->where('type', $filters['type']);
+        }
+        if (! empty($filters['year'])) {
+            $builder->where('year', (int) $filters['year']);
+        }
+        if (! empty($filters['status'])) {
+            $builder->where('status', $filters['status']);
+        }
+
+        return (int) $builder->countAllResults();
     }
 
     /**

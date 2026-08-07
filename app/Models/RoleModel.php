@@ -56,10 +56,33 @@ class RoleModel extends Model
             $builder->where('r.role_active', $filters['status']);
         }
 
+        if (! empty($filters['limit'])) {
+            $builder->limit((int) $filters['limit'], (int) ($filters['offset'] ?? 0));
+        }
+
         return $builder
             ->orderBy('r.role_id', 'ASC')
             ->get()
             ->getResultArray();
+    }
+
+    public function countAll(array $filters = []): int
+    {
+        $builder = $this->db->table('gw_sm__role r');
+
+        $search = trim($filters['search'] ?? '');
+        if ($search !== '') {
+            $builder->groupStart()
+                ->like('r.role_name_idn', $search)
+                ->orLike('r.role_name_eng', $search)
+            ->groupEnd();
+        }
+
+        if (($filters['status'] ?? '') !== '') {
+            $builder->where('r.role_active', $filters['status']);
+        }
+
+        return (int) $builder->countAllResults();
     }
 
     /**

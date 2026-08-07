@@ -140,10 +140,15 @@ class Foh extends BaseController
     {
         $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
         $dept = $this->request->getPost('dept') ?? '';
+        $page = max(1, (int) ($this->request->getPost('page') ?? 1));
+
+        $perPage = 10;
+        $all     = $this->fohModel->getActualData($year, $dept);
 
         return $this->response->setJSON([
             'status' => 'success',
-            'rows'   => $this->fohModel->getActualData($year, $dept),
+            'rows'   => array_slice($all, ($page - 1) * $perPage, $perPage),
+            'total'  => count($all),
         ]);
     }
 
@@ -158,10 +163,18 @@ class Foh extends BaseController
     {
         $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
 
+        $all     = $this->fohModel->getSummary($year);
+        $page    = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $perPage = 10;
+        $total   = count($all);
+
         return view('foh/summary', [
             'title'       => 'FOH - Summary',
             'workingYear' => $year,
-            'summary'     => $this->fohModel->getSummary($year),
+            'summary'     => array_slice($all, ($page - 1) * $perPage, $perPage),
+            'page'        => $page,
+            'perPage'     => $perPage,
+            'total'       => $total,
         ]);
     }
 

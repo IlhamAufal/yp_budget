@@ -29,12 +29,21 @@ class Menu extends BaseController
             'status' => $this->request->getGet('status') ?? '',
         ];
 
+        $page    = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $perPage = 10;
+        $filters['limit']  = $perPage;
+        $filters['offset'] = ($page - 1) * $perPage;
+        $total = $this->menuModel->countAll($filters);
+
         return view('sys-admin/menu', [
             'title'      => 'System Administration - Menu Configuration',
             'rows'       => $this->menuModel->getAll($filters),
             'groups'     => $this->menuModel->getGroups(),
             'parents'    => $this->menuModel->getParents(),
             'filters'    => $filters,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'total'      => $total,
             'has_filter' => ! empty(array_filter($this->request->getGet())),
             'flash'      => $this->consumeFlash(),
         ]);

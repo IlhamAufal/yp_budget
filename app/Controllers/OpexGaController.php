@@ -159,10 +159,15 @@ class OpexGaController extends BaseController
     {
         $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
         $dept = $this->request->getPost('dept') ?? '';
+        $page = max(1, (int) ($this->request->getPost('page') ?? 1));
+
+        $perPage = 10;
+        $all     = $this->opexModel->getActualData($year, $dept);
 
         return $this->response->setJSON([
             'status' => 'success',
-            'rows'   => $this->opexModel->getActualData($year, $dept),
+            'rows'   => array_slice($all, ($page - 1) * $perPage, $perPage),
+            'total'  => count($all),
         ]);
     }
 

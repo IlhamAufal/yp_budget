@@ -36,11 +36,20 @@ class User extends BaseController
             'status'  => $this->request->getGet('status') ?? '',
         ];
 
+        $page    = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $perPage = 10;
+        $filters['limit']  = $perPage;
+        $filters['offset'] = ($page - 1) * $perPage;
+        $total = $this->userModel->countUsers($filters);
+
         return view('sys-admin/user', [
             'title'      => 'System Administration - User Management',
             'rows'       => $this->userModel->getAllUsers($filters),
             'roles'      => $this->roleModel->getAll(['status' => 'Y']),
             'filters'    => $filters,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'total'      => $total,
             'has_filter' => ! empty(array_filter($this->request->getGet())),
             'flash'      => $this->consumeFlash(),
         ]);

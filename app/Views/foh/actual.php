@@ -86,7 +86,7 @@
             </tr>
           </template>
           <template x-for="(row, index) in rows" :key="row.id">
-            <tr x-show="isRowVisible(index)" class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+            <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
               <td class="py-2.5 px-4 font-mono font-semibold text-gray-900 dark:text-gray-100" x-text="row.id_coa"></td>
               <td class="py-2.5 px-4 text-gray-700 dark:text-gray-300" x-text="row.coa_desc || '-'"></td>
               <td class="py-2.5 px-2 text-right" x-text="fmt(row.jan)"></td>
@@ -110,51 +110,36 @@
 
     <!-- Table Footer / Pagination -->
     <div
-      x-show="rows.length > 0"
+      x-show="total > 0"
       class="border-t border-gray-100 dark:border-gray-800 p-5 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500 dark:text-gray-400"
     >
-      <div class="flex items-center gap-1.5 text-sm">
-        <span>Menampilkan</span>
-        <span class="font-bold text-gray-800 dark:text-gray-200" x-text="rows.length === 0 ? 0 : ((currentPage - 1) * perPage + 1)"></span>
-        <span>-</span>
-        <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(currentPage * perPage, rows.length)"></span>
-        <span>dari</span>
-        <span class="font-bold text-gray-800 dark:text-gray-200" x-text="rows.length"></span>
-        <span>data</span>
-      </div>
+      <span>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200" x-text="total === 0 ? 0 : ((currentPage - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(currentPage * perPage, total)"></span> dari <span class="font-bold text-gray-800 dark:text-gray-200" x-text="total"></span> data</span>
 
       <div class="flex items-center gap-2" x-show="totalPages > 1">
         <button
           type="button"
-          @click="prevPage()"
-          :disabled="currentPage === 1"
+          @click="goPage(currentPage - 1)"
+          :disabled="currentPage <= 1"
           class="h-9 px-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm font-semibold flex items-center gap-2"
         >
           <i class="fa-solid fa-chevron-left text-xs"></i>
           <span class="hidden sm:inline">Sebelumnya</span>
         </button>
 
-        <template x-for="(p, idx) in pageNumbers()" :key="idx">
-          <div>
-            <template x-if="p === '...'">
-              <span class="px-2 py-1 text-gray-400 font-bold">...</span>
-            </template>
-            <template x-if="p !== '...'">
-              <button
-                type="button"
-                @click="goToPage(p)"
-                :class="currentPage === p ? 'bg-brand-500 text-white font-bold shadow-xs' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
-                class="h-9 min-w-[36px] px-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center"
-                x-text="p"
-              ></button>
-            </template>
-          </div>
+        <template x-for="(p, idx) in pageNums()" :key="idx">
+          <button
+            type="button"
+            @click="goPage(p)"
+            :class="currentPage === p ? 'bg-brand-500 text-white font-bold shadow-xs' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
+            class="h-9 min-w-[36px] px-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center"
+            x-text="p"
+          ></button>
         </template>
 
         <button
           type="button"
-          @click="nextPage()"
-          :disabled="currentPage === totalPages"
+          @click="goPage(currentPage + 1)"
+          :disabled="currentPage >= totalPages"
           class="h-9 px-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm font-semibold flex items-center gap-2"
         >
           <span class="hidden sm:inline">Berikutnya</span>
@@ -173,55 +158,39 @@
       rows: [],
       loading: false,
 
-      // Pagination
+      // Pagination (server-side)
       currentPage: 1,
       perPage: 10,
+      total: 0,
       get totalPages() {
-        return Math.ceil(this.rows.length / this.perPage) || 1;
+        return Math.ceil(this.total / this.perPage) || 1;
       },
-      isRowVisible(index) {
-        return index >= (this.currentPage - 1) * this.perPage && index < this.currentPage * this.perPage;
-      },
-      goToPage(page) {
-        if (page >= 1 && page <= this.totalPages) {
-          this.currentPage = page;
-        }
-      },
-      prevPage() {
-        if (this.currentPage > 1) {
-          this.currentPage--;
-        }
-      },
-      nextPage() {
-        if (this.currentPage < this.totalPages) {
-          this.currentPage++;
-        }
-      },
-      pageNumbers() {
+      pageNums() {
         const total = this.totalPages;
         const current = this.currentPage;
         if (total <= 7) {
           return Array.from({ length: total }, (_, i) => i + 1);
         }
-        if (current <= 4) {
-          return [1, 2, 3, 4, 5, '...', total];
-        }
-        if (current >= total - 3) {
-          return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
-        }
-        return [1, '...', current - 1, current, current + 1, '...', total];
+        const start = Math.max(1, Math.min(current - 2, total - 4));
+        return Array.from({ length: 5 }, (_, i) => start + i);
+      },
+      goPage(page) {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.loadData(false);
       },
 
       fmt(v) {
         return Number(v || 0).toLocaleString('id-ID', { maximumFractionDigits: 0 });
       },
 
-      async loadData() {
+      async loadData(resetPage = true) {
+        if (resetPage) this.currentPage = 1;
         this.loading = true;
-        const res = await window.ypFetch('<?= base_url('foh/cariActualTable') ?>', { dept: this.dept });
+        const res = await window.ypFetch('<?= base_url('foh/cariActualTable') ?>', { dept: this.dept, page: this.currentPage });
         this.loading = false;
         this.rows = res.rows || [];
-        this.currentPage = 1;
+        this.total = res.total || 0;
       },
     };
   }

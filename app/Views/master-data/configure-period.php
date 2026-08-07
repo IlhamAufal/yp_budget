@@ -36,7 +36,7 @@
   </div>
 
   <?php
-    $totalYears  = count($rows ?? []);
+    $totalYears  = (int) ($total ?? 0);
     $activeYear  = null;
     $lockedCount = 0;
     foreach (($rows ?? []) as $r) {
@@ -314,21 +314,25 @@
       </table>
     </div>
 
+    <?php
+      $pages   = max(1, (int) ceil(($total ?? 0) / max(1, $perPage ?? 10)));
+      $from    = ($total ?? 0) > 0 ? (($page - 1) * $perPage + 1) : 0;
+      $to      = min($page * $perPage, $total ?? 0);
+      $winStart = max(1, min($page - 2, max(1, $pages - 4)));
+      $winEnd   = min($pages, $winStart + 4);
+    ?>
+    <?php if (($total ?? 0) > 0): ?>
     <div class="border-t border-gray-100 dark:border-gray-700 px-4 py-2.5 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
-      <div class="flex items-center gap-1.5">
-        <span>Showing</span>
-        <span class="font-bold text-gray-800 dark:text-gray-200" x-text="totalItems === 0 ? 0 : ((currentPage - 1) * perPage + 1)"></span>
-        <span>-</span>
-        <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(currentPage * perPage, totalItems)"></span>
-        <span>of</span>
-        <span class="font-bold text-gray-800 dark:text-gray-200"><?= number_format($totalYears) ?></span>
-        <span>entries</span>
-      </div>
-      <div class="flex items-center gap-1.5">
-        <span class="text-gray-500 dark:text-gray-400">Search:</span>
-        <input type="text" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-xs focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none w-40">
+      <span>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200"><?= $from ?></span> - <span class="font-bold text-gray-800 dark:text-gray-200"><?= $to ?></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= number_format($total) ?></span> tahun anggaran</span>
+      <div class="flex items-center gap-1">
+        <a href="?page=<?= max(1, $page - 1) ?>" class="h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 <?= $page <= 1 ? 'opacity-40 pointer-events-none' : '' ?> transition-colors text-xs font-semibold flex items-center gap-1"><i class="fa-solid fa-chevron-left text-[10px]"></i><span class="hidden sm:inline">Sebelumnya</span></a>
+        <?php for ($p = $winStart; $p <= $winEnd; $p++): ?>
+          <a href="?page=<?= $p ?>" class="h-8 min-w-[32px] px-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center <?= $p === $page ? 'bg-brand-500 text-white font-bold shadow-xs' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' ?>"><?= $p ?></a>
+        <?php endfor; ?>
+        <a href="?page=<?= min($pages, $page + 1) ?>" class="h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 <?= $page >= $pages ? 'opacity-40 pointer-events-none' : '' ?> transition-colors text-xs font-semibold flex items-center gap-1"><span class="hidden sm:inline">Berikutnya</span><i class="fa-solid fa-chevron-right text-[10px]"></i></a>
       </div>
     </div>
+    <?php endif; ?>
   </div>
 
 </div>
@@ -342,7 +346,7 @@ function periodPage() {
     savingUpload: false,
     currentPage: 1,
     perPage: 10,
-    totalItems: <?= (int)$totalYears ?>,
+    totalItems: <?= (int) ($total ?? 0) ?>,
 
     availableForms: [
       { val: 'OPEX_GA', label: 'OPEX - GA' },

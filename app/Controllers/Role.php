@@ -31,11 +31,20 @@ class Role extends BaseController
             'status' => $this->request->getGet('status') ?? '',
         ];
 
+        $page    = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $perPage = 10;
+        $filters['limit']  = $perPage;
+        $filters['offset'] = ($page - 1) * $perPage;
+        $total = $this->roleModel->countAll($filters);
+
         return view('sys-admin/role', [
             'title'      => 'System Administration - Role Management',
             'rows'       => $this->roleModel->getAll($filters),
             'menus'      => $this->menuModel->getAll(['status' => 'Y']),
             'filters'    => $filters,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'total'      => $total,
             'has_filter' => ! empty(array_filter($this->request->getGet())),
             'flash'      => $this->consumeFlash(),
         ]);

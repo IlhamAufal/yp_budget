@@ -58,11 +58,41 @@ class ProductModel extends Model
             $builder->where('status', $filters['status']);
         }
 
+        if (! empty($filters['limit'])) {
+            $builder->limit((int) $filters['limit'], (int) ($filters['offset'] ?? 0));
+        } else {
+            $builder->limit(1000);
+        }
+
         return $builder->orderBy('product_name', 'ASC')
             ->orderBy('id_product', 'DESC')
-            ->limit(1000)
             ->get()
             ->getResultArray();
+    }
+
+    public function countAll(array $filters = []): int
+    {
+        $builder = $this->builder();
+
+        if (! empty($filters['search'])) {
+            $like = trim($filters['search']);
+            $builder->groupStart()
+                ->like('product_name', $like)
+                ->orLike('mid_product', $like)
+                ->orLike('key_product', $like)
+                ->groupEnd();
+        }
+        if (! empty($filters['channel'])) {
+            $builder->where('id_channel', $filters['channel']);
+        }
+        if (! empty($filters['year'])) {
+            $builder->where('year', (int) $filters['year']);
+        }
+        if (! empty($filters['status'])) {
+            $builder->where('status', $filters['status']);
+        }
+
+        return (int) $builder->countAllResults();
     }
 
     /**

@@ -58,12 +58,21 @@ class Master extends BaseController
             'status' => $this->request->getGet('status') ?? 'A',
         ];
 
+        $page    = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $perPage = 10;
+        $filters['limit']  = $perPage;
+        $filters['offset'] = ($page - 1) * $perPage;
+        $total = $this->coa->countAll($filters);
+
         return view('master-data/chart-of-account', [
             'title'      => 'Master Data - Chart of Account (COA)',
             'rows'       => $this->coa->getAll($filters),
             'years'      => $years,
             'types'      => $this->coa->getTypes(),
             'filters'    => $filters,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'total'      => $total,
             'has_filter' => ! empty(array_filter($this->request->getGet())),
             'flash'      => $this->consumeFlash(),
         ]);
@@ -78,6 +87,12 @@ class Master extends BaseController
             'status' => $this->request->getGet('status') ?? 'A',
         ];
 
+        $page    = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $perPage = 10;
+        $filters['limit']  = $perPage;
+        $filters['offset'] = ($page - 1) * $perPage;
+        $total = $this->costCenter->countAll($filters);
+
         return view('master-data/cost-center', [
             'title'       => 'Master Data - Cost Center',
             'costCenters' => $this->costCenter->getAll($filters),
@@ -85,6 +100,9 @@ class Master extends BaseController
             'years'       => $this->costCenter->getYears(),
             'types'       => $this->costCenter->getTypes(),
             'filters'     => $filters,
+            'page'        => $page,
+            'perPage'     => $perPage,
+            'total'       => $total,
             'flash'       => $this->consumeFlash(),
         ]);
     }
@@ -96,10 +114,19 @@ class Master extends BaseController
             'status' => $this->request->getGet('status') ?? 'A',
         ];
 
+        $page    = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $perPage = 10;
+        $filters['limit']  = $perPage;
+        $filters['offset'] = ($page - 1) * $perPage;
+        $total = $this->department->countAll($filters);
+
         return view('master-data/departemen', [
             'title'      => 'Master Data - Departemen',
             'rows'       => $this->department->getAll($filters),
             'filters'    => $filters,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'total'      => $total,
             'has_filter' => ! empty(array_filter($this->request->getGet())),
             'flash'      => $this->consumeFlash(),
         ]);
@@ -114,12 +141,21 @@ class Master extends BaseController
             'status'  => $this->request->getGet('status') ?? 'A',
         ];
 
+        $page    = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $perPage = 10;
+        $filters['limit']  = $perPage;
+        $filters['offset'] = ($page - 1) * $perPage;
+        $total = $this->product->countAll($filters);
+
         return view('master-data/product', [
             'title'      => 'Master Data - Produk',
             'rows'       => $this->product->getAll($filters),
             'channels'   => $this->product->getChannels(),
             'years'      => $this->product->getYears(),
             'filters'    => $filters,
+            'page'       => $page,
+            'perPage'    => $perPage,
+            'total'      => $total,
             'has_filter' => ! empty(array_filter($this->request->getGet())),
             'flash'      => $this->consumeFlash(),
         ]);
@@ -135,6 +171,12 @@ class Master extends BaseController
             'status'  => $this->request->getGet('status') ?? 'A',
         ];
 
+        $page    = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $perPage = 10;
+        $filters['limit']  = $perPage;
+        $filters['offset'] = ($page - 1) * $perPage;
+        $total = $this->salaryMpp->countAll($filters);
+
         return view('master-data/salary-mpp', [
             'title'       => 'Master Data - Salary & MPP',
             'rows'        => $this->salaryMpp->getAll($filters),
@@ -142,6 +184,9 @@ class Master extends BaseController
             'mppTypes'    => $this->salaryMpp->getMppTypes(),
             'years'       => $this->salaryMpp->getYears(),
             'filters'     => $filters,
+            'page'        => $page,
+            'perPage'     => $perPage,
+            'total'       => $total,
             'has_filter'  => ! empty(array_filter($this->request->getGet())),
             'flash'       => $this->consumeFlash(),
         ]);
@@ -149,11 +194,20 @@ class Master extends BaseController
 
     public function configurePeriod()
     {
+        $years   = $this->period->getAllYears();
+        $page    = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $perPage = 10;
+        $total   = count($years);
+        $rows    = array_slice($years, ($page - 1) * $perPage, $perPage);
+
         return view('master-data/configure-period', [
-            'title' => 'Master Data - Configure Period (Tahun Anggaran)',
-            'rows'  => $this->period->getAllYears(),
-            'cc'    => $this->costCenter->getAll(['status' => 'A']),
-            'flash' => $this->consumeFlash(),
+            'title'   => 'Master Data - Configure Period (Tahun Anggaran)',
+            'rows'    => $rows,
+            'cc'      => $this->costCenter->getAll(['status' => 'A']),
+            'page'    => $page,
+            'perPage' => $perPage,
+            'total'   => $total,
+            'flash'   => $this->consumeFlash(),
         ]);
     }
 

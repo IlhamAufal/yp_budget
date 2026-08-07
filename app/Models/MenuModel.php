@@ -63,12 +63,39 @@ class MenuModel extends Model
         }
 
         // Kolom menu_group tidak ada di skema legacy — urutkan per level & order.
+        if (! empty($filters['limit'])) {
+            $builder->limit((int) $filters['limit'], (int) ($filters['offset'] ?? 0));
+        }
+
         return $builder
             ->orderBy('m.menu_level', 'ASC')
             ->orderBy('m.menu_order', 'ASC')
             ->orderBy('m.menu_id', 'ASC')
             ->get()
             ->getResultArray();
+    }
+
+    public function countAll(array $filters = []): int
+    {
+        $builder = $this->db->table('gw_sm__menu m')
+            ->selectCount('DISTINCT m.menu_id', 'c')
+            ->join('gw_sm__menu_structure s', 's.structure_child_menu_id = m.menu_id', 'left');
+
+        $search = trim($filters['search'] ?? '');
+        if ($search !== '') {
+            $builder->groupStart()
+                ->like('m.menu_name_idn', $search)
+                ->orLike('m.menu_name_eng', $search)
+                ->orLike('m.menu_link', $search)
+            ->groupEnd();
+        }
+
+        if (($filters['status'] ?? '') !== '') {
+            $builder->where('m.menu_active', $filters['status']);
+        }
+
+        $row = $builder->get()->getRowArray();
+        return (int) ($row['c'] ?? 0);
     }
 
     /**

@@ -118,6 +118,21 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Table Footer / Pagination -->
+    <div
+      x-show="total > 0"
+      class="border-t border-gray-100 dark:border-gray-800 p-5 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500 dark:text-gray-400"
+    >
+      <span>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200" x-text="total === 0 ? 0 : ((currentPage - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(currentPage * perPage, total)"></span> dari <span class="font-bold text-gray-800 dark:text-gray-200" x-text="total"></span> data</span>
+      <div class="flex items-center gap-2" x-show="totalPages > 1">
+        <button type="button" @click="goPage(currentPage - 1)" :disabled="currentPage <= 1" class="h-9 px-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-chevron-left text-xs"></i><span class="hidden sm:inline">Sebelumnya</span></button>
+        <template x-for="(p, idx) in pageNums()" :key="idx">
+          <button type="button" @click="goPage(p)" :class="currentPage === p ? 'bg-brand-500 text-white font-bold shadow-xs' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'" class="h-9 min-w-[36px] px-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center" x-text="p"></button>
+        </template>
+        <button type="button" @click="goPage(currentPage + 1)" :disabled="currentPage >= totalPages" class="h-9 px-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm font-semibold flex items-center gap-2"><span class="hidden sm:inline">Berikutnya</span><i class="fa-solid fa-chevron-right text-xs"></i></button>
+      </div>
+    </div>
   </div>
 
   <?= $this->include('opex_ga/upload_modal') ?>
@@ -130,16 +145,38 @@
       dept: '',
       rows: [],
       loading: false,
+      currentPage: 1,
+      perPage: 10,
+      total: 0,
+      get totalPages() {
+        return Math.ceil(this.total / this.perPage) || 1;
+      },
+      pageNums() {
+        const total = this.totalPages;
+        const current = this.currentPage;
+        if (total <= 7) {
+          return Array.from({ length: total }, (_, i) => i + 1);
+        }
+        const start = Math.max(1, Math.min(current - 2, total - 4));
+        return Array.from({ length: 5 }, (_, i) => start + i);
+      },
+      goPage(page) {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.loadData(false);
+      },
 
       fmt(v) {
         return Number(v || 0).toLocaleString('id-ID', { maximumFractionDigits: 0 });
       },
 
-      async loadData() {
+      async loadData(resetPage = true) {
+        if (resetPage) this.currentPage = 1;
         this.loading = true;
-        const res = await window.ypFetch('<?= base_url('opex-ga/getActualData') ?>', { dept: this.dept });
+        const res = await window.ypFetch('<?= base_url('opex-ga/getActualData') ?>', { dept: this.dept, page: this.currentPage });
         this.loading = false;
         this.rows = res.rows || [];
+        this.total = res.total || 0;
       },
     };
   }

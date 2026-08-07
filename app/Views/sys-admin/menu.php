@@ -195,58 +195,24 @@
 
     <!-- Table Footer / Pagination -->
     <?php
-      $totalRows = count($rows ?? []);
+      $pages   = max(1, (int) ceil(($total ?? 0) / max(1, $perPage ?? 10)));
+      $from    = ($total ?? 0) > 0 ? (($page - 1) * $perPage + 1) : 0;
+      $to      = min($page * $perPage, $total ?? 0);
+      $winStart = max(1, min($page - 2, max(1, $pages - 4)));
+      $winEnd   = min($pages, $winStart + 4);
     ?>
+    <?php if (($total ?? 0) > 0): ?>
     <div class="border-t border-gray-100 dark:border-gray-800 p-5 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500 dark:text-gray-400">
-      <div class="flex items-center gap-1.5 text-sm">
-        <span>Menampilkan</span>
-        <span class="font-bold text-gray-800 dark:text-gray-200" x-text="totalItems === 0 ? 0 : ((currentPage - 1) * perPage + 1)"></span>
-        <span>-</span>
-        <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(currentPage * perPage, totalItems)"></span>
-        <span>dari</span>
-        <span class="font-bold text-gray-800 dark:text-gray-200"><?= number_format($totalRows) ?></span>
-        <span>menu</span>
-      </div>
-
-      <div class="flex items-center gap-2" x-show="totalPages > 1">
-        <button
-          type="button"
-          @click="prevPage()"
-          :disabled="currentPage === 1"
-          class="h-9 px-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm font-semibold flex items-center gap-2"
-        >
-          <i class="fa-solid fa-chevron-left text-xs"></i>
-          <span class="hidden sm:inline">Sebelumnya</span>
-        </button>
-
-        <template x-for="(p, idx) in pageNumbers()" :key="idx">
-          <div>
-            <template x-if="p === '...'">
-              <span class="px-2 py-1 text-gray-400 font-bold">...</span>
-            </template>
-            <template x-if="p !== '...'">
-              <button
-                type="button"
-                @click="goToPage(p)"
-                :class="currentPage === p ? 'bg-brand-500 text-white font-bold shadow-xs' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
-                class="h-9 min-w-[36px] px-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center"
-                x-text="p"
-              ></button>
-            </template>
-          </div>
-        </template>
-
-        <button
-          type="button"
-          @click="nextPage()"
-          :disabled="currentPage === totalPages"
-          class="h-9 px-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm font-semibold flex items-center gap-2"
-        >
-          <span class="hidden sm:inline">Berikutnya</span>
-          <i class="fa-solid fa-chevron-right text-xs"></i>
-        </button>
+      <span>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200"><?= $from ?></span> - <span class="font-bold text-gray-800 dark:text-gray-200"><?= $to ?></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= number_format($total) ?></span> menu</span>
+      <div class="flex items-center gap-2">
+        <a href="?page=<?= max(1, $page - 1) ?>" class="h-9 px-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 <?= $page <= 1 ? 'opacity-40 pointer-events-none' : '' ?> transition-colors text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-chevron-left text-xs"></i><span class="hidden sm:inline">Sebelumnya</span></a>
+        <?php for ($p = $winStart; $p <= $winEnd; $p++): ?>
+          <a href="?page=<?= $p ?>" class="h-9 min-w-[36px] px-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center <?= $p === $page ? 'bg-brand-500 text-white font-bold shadow-xs' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' ?>"><?= $p ?></a>
+        <?php endfor; ?>
+        <a href="?page=<?= min($pages, $page + 1) ?>" class="h-9 px-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 <?= $page >= $pages ? 'opacity-40 pointer-events-none' : '' ?> transition-colors text-sm font-semibold flex items-center gap-2"><span class="hidden sm:inline">Berikutnya</span><i class="fa-solid fa-chevron-right text-xs"></i></a>
       </div>
     </div>
+    <?php endif; ?>
   </div>
 
   <!-- ============================================================ -->
@@ -475,7 +441,7 @@
       // Pagination
       currentPage: 1,
       perPage: 10,
-      totalItems: <?= (int)$totalRows ?>,
+      totalItems: <?= (int) ($total ?? 0) ?>,
       get totalPages() {
         return Math.ceil(this.totalItems / this.perPage) || 1;
       },

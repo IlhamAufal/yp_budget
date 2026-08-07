@@ -129,10 +129,45 @@ class UserModel extends Model
             $builder->where('u.user_active', $filters['status']);
         }
 
+        if (! empty($filters['limit'])) {
+            $builder->limit((int) $filters['limit'], (int) ($filters['offset'] ?? 0));
+        }
+
         return $builder
             ->orderBy('u.user_id', 'ASC')
             ->get()
             ->getResultArray();
+    }
+
+    /**
+     * Jumlah user sesuai filter (untuk server-side pagination).
+     */
+    public function countUsers(array $filters = []): int
+    {
+        $builder = $this->db->table('gw_sm__user u')
+            ->selectCount('DISTINCT u.user_id', 'c')
+            ->join('gw_sm__profile p', 'p.profile_user_id = u.user_id', 'left')
+            ->join('gw_sm__role r', 'r.role_id = p.profile_role_id AND r.role_active = \'Y\'', 'left');
+
+        $search = trim($filters['search'] ?? '');
+        if ($search !== '') {
+            $builder->groupStart()
+                ->like('u.user_username', $search)
+                ->orLike('u.user_name', $search)
+                ->orLike('u.user_email', $search)
+            ->groupEnd();
+        }
+
+        if (($filters['role_id'] ?? '') !== '') {
+            $builder->where('p.profile_role_id', (int) $filters['role_id']);
+        }
+
+        if (($filters['status'] ?? '') !== '') {
+            $builder->where('u.user_active', $filters['status']);
+        }
+
+        $row = $builder->get()->getRowArray();
+        return (int) ($row['c'] ?? 0);
     }
 
     /**

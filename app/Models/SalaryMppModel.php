@@ -61,12 +61,48 @@ class SalaryMppModel extends Model
             $builder->where('s.status', $filters['status']);
         }
 
+        if (! empty($filters['limit'])) {
+            $builder->limit((int) $filters['limit'], (int) ($filters['offset'] ?? 0));
+        } else {
+            $builder->limit(1000);
+        }
+
         return $builder->orderBy('s.year_code', 'DESC')
             ->orderBy('d.dept_code', 'ASC')
             ->orderBy('s.desc', 'ASC')
-            ->limit(1000)
             ->get()
             ->getResultArray();
+    }
+
+    public function countAll(array $filters = []): int
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table($this->table . ' s')
+            ->join('gw_plan__master_department d', 'd.id_dept = s.dept_id', 'left')
+            ->join('yp_plan__master_tipe_mpp t', 't.id_mpp = s.type', 'left');
+
+        if (! empty($filters['search'])) {
+            $like = trim($filters['search']);
+            $builder->groupStart()
+                ->like('s.desc', $like)
+                ->orLike('d.dept_desc', $like)
+                ->orLike('d.dept_code', $like)
+                ->groupEnd();
+        }
+        if (! empty($filters['dept_id'])) {
+            $builder->where('s.dept_id', (int) $filters['dept_id']);
+        }
+        if (! empty($filters['type'])) {
+            $builder->where('s.type', (int) $filters['type']);
+        }
+        if (! empty($filters['year'])) {
+            $builder->where('s.year_code', (int) $filters['year']);
+        }
+        if (! empty($filters['status'])) {
+            $builder->where('s.status', $filters['status']);
+        }
+
+        return (int) $builder->countAllResults();
     }
 
     /**
