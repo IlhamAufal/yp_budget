@@ -8,6 +8,10 @@ use CodeIgniter\Filters\DebugToolbar;
 use CodeIgniter\Filters\Honeypot;
 use CodeIgniter\Filters\InvalidChars;
 use CodeIgniter\Filters\SecureHeaders;
+use App\Filters\AuthFilter;
+use App\Filters\EnsureContextFilter;
+use App\Filters\RoleFilter;
+use App\Filters\PeriodLockFilter;
 
 class Filters extends BaseConfig
 {
@@ -23,6 +27,10 @@ class Filters extends BaseConfig
         'honeypot'      => Honeypot::class,
         'invalidchars'  => InvalidChars::class,
         'secureheaders' => SecureHeaders::class,
+        'auth'          => AuthFilter::class,
+        'ensureContext' => EnsureContextFilter::class,
+        'role'          => RoleFilter::class,
+        'periodLock'    => PeriodLockFilter::class,
     ];
 
     /**
@@ -33,23 +41,18 @@ class Filters extends BaseConfig
      */
     public $globals = [
         'before' => [
-            // 'honeypot',
-            // 'csrf',
-            // 'invalidchars',
+            'ensureContext',
+            'role',
+            'periodLock',
         ],
         'after' => [
             'toolbar',
-            // 'honeypot',
-            // 'secureheaders',
         ],
     ];
 
     /**
      * List of filter aliases that works on a
      * particular HTTP method (GET, POST, etc.).
-     *
-     * Example:
-     * 'post' => ['csrf', 'throttle']
      *
      * @var array
      */
@@ -58,9 +61,6 @@ class Filters extends BaseConfig
     /**
      * List of filter aliases that should run on any
      * before or after URI patterns.
-     *
-     * Example:
-     * 'isLoggedIn' => ['before' => ['account/*', 'profiles/*']]
      *
      * @var array
      */
