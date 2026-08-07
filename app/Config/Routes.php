@@ -58,12 +58,6 @@ $routes->group('master', ['filter' => 'auth'], function ($routes) {
     $routes->get('configure-period', 'Master::configurePeriod');
     $routes->get('period', 'Master::period');
 
-    // Master Assumption (Phase 3)
-    $routes->get('assumption', 'Master::assumption');
-    $routes->get('assumption/export/(:any)', 'Master::assumptionExport/$1');
-    $routes->post('assumption/upload', 'Master::assumptionUpload');
-    $routes->post('api/assumption/save', 'Master::assumptionSave');
-
     $routes->post('api/coa/save', 'Master::coaSave');
     $routes->post('api/coa/toggle', 'Master::coaToggle');
     $routes->post('api/coa/copy-year', 'Master::coaCopyYear');
@@ -124,9 +118,7 @@ $routes->group('mpp', ['filter' => 'auth'], function ($routes) {
 // CAPEX
 $routes->group('capex', ['filter' => 'auth'], function ($routes) {
     $routes->get('entry', 'CapexController::entry');
-    $routes->get('report', 'CapexController::report');
     $routes->get('summary', 'CapexController::summary');
-    $routes->get('manual_book', 'CapexController::manual_book');
 
     // AJAX Endpoints
     $routes->post('entry_budget_table', 'CapexController::entryBudgetTable');
@@ -141,11 +133,6 @@ $routes->group('opex-ga', ['filter' => 'auth'], function ($routes) {
     $routes->get('entry', 'OpexGaController::entryBudget');
     $routes->get('entry-budget', 'OpexGaController::entryBudget');
     $routes->get('actual', 'OpexGaController::actual');
-    $routes->get('report/department', 'OpexGaController::reportDepartment');
-    $routes->get('report/combine', 'OpexGaController::index');
-    $routes->get('manual_book', 'OpexGaController::manualBook');
-    $routes->get('manual-book', 'OpexGaController::manualBook');
-    $routes->post('cari_actual_table', 'OpexGaController::cariActualTable');
     $routes->get('export_template_opex_ga/(:num)', 'OpexGaController::exportTemplateOpexGa/$1');
     $routes->get('getEntryData', 'OpexGaController::getEntryData');
     $routes->post('save_budget', 'OpexGaController::saveBudget');
@@ -168,7 +155,6 @@ $routes->group('foh', ['filter' => 'auth'], function ($routes) {
     $routes->get('actual', 'Foh::actual');
     $routes->post('cariActualTable', 'Foh::cariActualTable');
     $routes->get('summary', 'Foh::summary');
-    $routes->get('report/department', 'Foh::summary');
     $routes->get('getDetailItems', 'Foh::getDetailItems');
     $routes->post('saveDetail', 'Foh::saveDetail');
     $routes->post('deleteDetail', 'Foh::deleteDetail');
@@ -183,8 +169,6 @@ $routes->group('opex_ga', ['filter' => 'auth'], function ($routes) {
     $routes->get('index', 'OpexGaController::index');
     $routes->get('entry', 'OpexGaController::entryBudget');
     $routes->get('actual', 'OpexGaController::actual');
-    $routes->get('report/department', 'OpexGaController::reportDepartment');
-    $routes->post('cari_actual_table', 'OpexGaController::cariActualTable');
 });
 
 // OPEX Selling
@@ -193,9 +177,7 @@ $routes->group('opex-selling', ['filter' => 'auth'], function ($routes) {
     $routes->get('entry', 'OpexSellingController::index');
     $routes->get('entry-budget', 'OpexSellingController::index');
     $routes->get('actual', 'OpexSellingController::actual');
-    $routes->get('report/department', 'OpexSellingController::reportDepartment');
     $routes->post('entryBudgetDetail', 'OpexSellingController::entryBudgetDetail');
-    $routes->post('cari_actual_table', 'OpexSellingController::cariActualTable');
     $routes->post('saveBudget', 'OpexSellingController::saveBudget');
     $routes->post('uploadActual', 'OpexSellingController::uploadActual');
     $routes->get('exportExcel', 'OpexSellingController::exportExcel');
@@ -207,9 +189,7 @@ $routes->group('opex_selling', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'OpexSellingController::index');
     $routes->get('entry', 'OpexSellingController::index');
     $routes->post('entryBudgetDetail', 'OpexSellingController::entryBudgetDetail');
-    $routes->post('cari_actual_table', 'OpexSellingController::cariActualTable');
     $routes->post('saveBudget', 'OpexSellingController::saveBudget');
-    $routes->get('report/department', 'OpexSellingController::reportDepartment');
     $routes->post('uploadActual', 'OpexSellingController::uploadActual');
     $routes->get('exportExcel', 'OpexSellingController::exportExcel');
     $routes->get('getDetailItems', 'OpexSellingController::getDetailItems');
@@ -220,11 +200,6 @@ $routes->group('opex_selling', ['filter' => 'auth'], function ($routes) {
 // Sales
 $routes->group('sales', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'SalesController::index');
-    $routes->get('summary', 'SalesController::index');
-    $routes->get('summary/domestic', 'SalesController::index');
-    $routes->get('summary/export', 'SalesController::index');
-    $routes->get('summary/country', 'SalesController::index');
-    $routes->get('summary/region', 'SalesController::index');
     $routes->get('domestic/entry', 'SalesController::entryDomestic');
     $routes->get('export/entry', 'SalesController::entryExport');
     $routes->get('simulation', 'SalesController::simulation');

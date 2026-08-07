@@ -26,29 +26,29 @@
   class="sidebar fixed left-0 top-0 z-9999 flex h-screen w-[290px] flex-col overflow-y-hidden border-r border-gray-200 bg-white px-5 dark:border-gray-800 dark:bg-black lg:static lg:translate-x-0"
 >
   <!-- SIDEBAR HEADER -->
-  <div
-    :class="sidebarToggle ? 'justify-center' : 'justify-between'"
-    class="flex items-center gap-2 pt-8 sidebar-header pb-7"
-  >
-    <a href="<?= base_url('/') ?>">
-      <span class="logo" :class="sidebarToggle ? 'hidden' : ''">
-        <img class="dark:hidden" src="<?= base_url('assets/images/logo/logo-sidebar.svg') ?>" alt="Logo" />
+  <div class="flex justify-center items-center py-8 sidebar-header">
+    <a href="<?= base_url('/') ?>" class="flex justify-center items-center">
         <img
-          class="hidden dark:block"
-          src="<?= base_url('assets/images/logo/logo-sidebar-dark.svg') ?>"
-          alt="Logo"
-          
+            v-show="!sidebarToggle"
+            class="dark:hidden"
+            src="<?= base_url('assets/images/logo/logo-sidebar.svg') ?>"
+            alt="Logo"
         />
-      </span>
 
-      <img
-        class="logo-icon"
-        :class="sidebarToggle ? 'lg:block' : 'hidden'"
-        src="<?= base_url('assets/images/logo/logo-icon.svg') ?>"
-        alt="Logo"
-      />
+        <img
+            v-show="!sidebarToggle"
+            class="hidden dark:block"
+            src="<?= base_url('assets/images/logo/logo-sidebar-dark.svg') ?>"
+            alt="Logo"
+        />
+
+        <img
+            v-show="sidebarToggle"
+            src="<?= base_url('assets/images/logo/logo-icon.svg') ?>"
+            alt="Logo"
+        />
     </a>
-  </div>
+</div>
   <!-- SIDEBAR HEADER -->
 
   <div
@@ -165,14 +165,6 @@
                     Summary
                   </a>
                 </li>
-                <li>
-                  <a
-                    href="<?= base_url('foh/report/department') ?>"
-                    class="menu-dropdown-item group <?= url_is('foh/report*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
-                  >
-                    Report Departemen
-                  </a>
-                </li>
               </ul>
             </div>
           </li>
@@ -218,30 +210,6 @@
                     class="menu-dropdown-item group <?= url_is('opex-ga/actual*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
                   >
                     Realisasi (Actual)
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="<?= base_url('opex-ga/report/department') ?>"
-                    class="menu-dropdown-item group <?= url_is('opex-ga/report/department*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
-                  >
-                    Report Departemen
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="<?= base_url('opex-ga/report/combine') ?>"
-                    class="menu-dropdown-item group <?= url_is('opex-ga/report/combine*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
-                  >
-                    Report Combined
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="<?= base_url('opex-ga/manual_book') ?>"
-                    class="menu-dropdown-item group <?= url_is('opex-ga/manual*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
-                  >
-                    Manual Book
                   </a>
                 </li>
               </ul>
@@ -291,14 +259,6 @@
                     Realisasi (Actual)
                   </a>
                 </li>
-                <li>
-                  <a
-                    href="<?= base_url('opex-selling/report/department') ?>"
-                    class="menu-dropdown-item group <?= url_is('opex-selling/report*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
-                  >
-                    Report Departemen
-                  </a>
-                </li>
               </ul>
             </div>
           </li>
@@ -346,22 +306,6 @@
                     Summary
                   </a>
                 </li>
-                <li>
-                  <a
-                    href="<?= base_url('capex/report') ?>"
-                    class="menu-dropdown-item group <?= url_is('capex/report*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
-                  >
-                    Report
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="<?= base_url('capex/manual_book') ?>"
-                    class="menu-dropdown-item group <?= url_is('capex/manual*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
-                  >
-                    Manual Book
-                  </a>
-                </li>
               </ul>
             </div>
           </li>
@@ -406,15 +350,7 @@
                     href="<?= base_url('sales/export/entry') ?>"
                     class="menu-dropdown-item group <?= url_is('sales/export/entry*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
                   >
-                    Entry Export
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="<?= base_url('sales/summary') ?>"
-                    class="menu-dropdown-item group <?= (url_is('sales/summary') && !url_is('sales/summary/*')) ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
-                  >
-                    Summary 
+                    Entry International
                   </a>
                 </li>
               </ul>
@@ -548,14 +484,6 @@
                     class="menu-dropdown-item group <?= url_is('master/salary-mpp*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
                   >
                     Master Salary MPP
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="<?= base_url('master/assumption') ?>"
-                    class="menu-dropdown-item group <?= url_is('master/assumption*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' ?>"
-                  >
-                    Master Assumption
                   </a>
                 </li>
                 <li>

@@ -155,53 +155,6 @@ class OpexSellingController extends BaseController
         return $this->response->setJSON(['status' => 'success', 'message' => 'Data Budget Selling berhasil disimpan!']);
     }
 
-    public function reportDepartment(): string
-    {
-        $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
-
-        return view('opex_selling/report_department', [
-            'title'       => 'OPEX Selling - Department Report',
-            'workingYear' => $workingYear,
-            'dept'        => $this->opexModel->getCostCenters(),
-        ]);
-    }
-
-    /**
-     * AJAX: data tabel budget selling per cost center (untuk report_department).
-     */
-    public function cariActualTable(): ResponseInterface
-    {
-        $dept = $this->request->getPost('dept') ?? '';
-        $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
-
-        $rows = [];
-        try {
-            $builder = $this->db->table('yp_plan__trans_budget_entry_data t')
-                ->select("COALESCE(NULLIF(c.id_acct_ext,\'\'), c.main_account, 0) AS main_account, COALESCE(c.cost_center_desc, '') AS cost_center_desc")
-                ->select("t.`1` AS isi_1, t.`2` AS isi_2, t.`3` AS isi_3, t.`4` AS isi_4, t.`5` AS isi_5, t.`6` AS isi_6")
-                ->select("t.`7` AS isi_7, t.`8` AS isi_8, t.`9` AS isi_9, t.`10` AS isi_10, t.`11` AS isi_11, t.`12` AS isi_12, t.total AS isi_tot")
-                ->join('gw_plan__master_coa c', 'c.main_account = t.id_coa', 'left')
-                ->where('t.year_code', $year);
-
-            if (\App\Libraries\DbCompat::hasEntrySource()) {
-                $builder->groupStart()
-                    ->where('t.source', 'SELLING')
-                    ->orWhere('t.source IS NULL')
-                ->groupEnd();
-            }
-
-            if (! empty($dept)) {
-                $builder->where('t.id_dept', $dept);
-            }
-
-            $rows = $builder->orderBy('t.id_coa', 'ASC')->get()->getResultArray();
-        } catch (\Throwable $e) {
-            $rows = [];
-        }
-
-        return $this->response->setJSON($rows);
-    }
-
     /* ------------------------------------------------------------------
      * Breakdown Sub-Detail COA (standar 1.5) — AJAX partial update
      * ------------------------------------------------------------------ */

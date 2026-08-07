@@ -98,7 +98,7 @@
             </template>
             <tr x-show="domesticMatrix.length === 0">
               <td colspan="4" class="py-10 text-center text-gray-400 dark:text-gray-500">
-                <i class="fa-solid fa-circle-info mr-1"></i>Belum ada asumsi domestic — isi di <a href="<?= base_url('master/assumption') ?>" class="font-bold text-brand-500 hover:underline">Master Assumption → Sales Domestic</a>.
+                <i class="fa-solid fa-circle-info mr-1"></i>Belum ada asumsi domestic — silakan input data asumsi pada entry sales domestic.
               </td>
             </tr>
             <tr class="bg-gray-50/75 dark:bg-gray-800/50 font-bold">
@@ -143,7 +143,7 @@
             </template>
             <tr x-show="exportMatrix.length === 0">
               <td colspan="5" class="py-10 text-center text-gray-400 dark:text-gray-500">
-                <i class="fa-solid fa-circle-info mr-1"></i>Belum ada asumsi export — isi di <a href="<?= base_url('master/assumption') ?>" class="font-bold text-brand-500 hover:underline">Master Assumption → Sales Export</a>.
+                <i class="fa-solid fa-circle-info mr-1"></i>Belum ada asumsi export — silakan input data asumsi pada entry sales international.
               </td>
             </tr>
             <tr class="bg-gray-50/75 dark:bg-gray-800/50 font-bold">

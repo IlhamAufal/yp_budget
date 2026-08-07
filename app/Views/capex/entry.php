@@ -9,6 +9,10 @@
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Input dan kelola rincian rencana alokasi belanja modal (CAPEX).</p>
         </div>
         <div class="flex items-center gap-3">
+            <button @click="openManualBook()" class="px-4.5 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl text-xs sm:text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center gap-2 border border-gray-200/60 dark:border-gray-700 cursor-pointer">
+                <i class="fa-solid fa-book-open"></i>
+                Manual Book
+            </button>
             <button @click="openModal = true" class="px-4.5 py-2.5 bg-primary text-white rounded-xl text-xs sm:text-sm font-semibold hover:bg-primary-dark active:scale-[0.98] transition-all shadow-xs flex items-center gap-2 cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 Tambah Aset CAPEX
@@ -134,6 +138,13 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL MANUAL BOOK (reusable partial) -->
+    <?= $this->include('partials/manual_book_modal', [
+        'mbTitle'     => 'Manual Book - Input CAPEX',
+        'mbPdfUrl'    => base_url('assets/docs/manual_book_capex.pdf'),
+        'mbPdfExists' => is_file(FCPATH . 'assets/docs/manual_book_capex.pdf'),
+    ]) ?>
 
 </div>
 

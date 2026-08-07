@@ -50,30 +50,6 @@ class CapexController extends BaseController
     }
 
     /**
-     * Report Page (TailAdmin view: working_year, dept_reports, total_opex_sync)
-     */
-    public function report()
-    {
-        $year = $this->session->get('year_code') ?? $this->session->get('working_year') ?? date('Y');
-        $user = $this->session->get('user_name') ?? 'System';
-
-        $uri     = $this->request->getUri();
-        $segment = $uri->getSegment(1) . '/' . $uri->getSegment(2);
-        $isValid = $this->capexModel->logAccess($user, $segment, $year);
-
-        $data = [
-            'validasi'      => $isValid ? 'OK' : 'NOPE',
-            'working_year'  => $year,
-            'namax'         => $user,
-            'dept_reports'  => $this->capexModel->getDeptReports($year),
-            'total_opex_sync' => $this->capexModel->getTotalOpexSync($year),
-            'deptx'         => $this->capexModel->getDepartments($this->getUserDeptList()),
-        ];
-
-        return view('capex/report', $data);
-    }
-
-    /**
      * Summary Page (TailAdmin view: working_year, summary_data)
      */
     public function summary()
@@ -171,25 +147,6 @@ class CapexController extends BaseController
         }
 
         return $this->failServerError('Gagal sinkronisasi depresiasi CAPEX ke OPEX.');
-    }
-
-    public function manual_book()
-    {
-        $pdfPath = FCPATH . 'assets/docs/manual_book_capex.pdf';
-
-        return view('capex/manual_book', [
-            'title'     => 'CAPEX - Manual Book & Documentation',
-            'pdfExists' => is_file($pdfPath),
-            'pdfUrl'    => base_url('assets/docs/manual_book_capex.pdf'),
-        ]);
-    }
-
-    /**
-     * PDF Manual Book Viewer
-     */
-    public function pdfReader()
-    {
-        return $this->manual_book();
     }
 
     /**

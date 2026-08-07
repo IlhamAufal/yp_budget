@@ -82,6 +82,7 @@ yp_budget_system_data.sql
 package-lock.json
 PRD_Budget_Planning_System_CI4.md
 PRD_CI4_MIGRATION.md
+role_vs_object.md
 PRD_Master_Migration_Blueprint_YP_Budget_CI4.md
 project_progress.md
 app/Database/Seeds/QaUserSeeder.php
@@ -91,6 +92,7 @@ test_*.php
 tmp_*.php
 cookies_*.txt
 *.sql
+manual_book_*.pdf
 
 
 # -----------------------------------------------------------------------

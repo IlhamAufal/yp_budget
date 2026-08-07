@@ -30,6 +30,14 @@
     <div class="flex flex-wrap items-center gap-3">
       <button
         type="button"
+        @click="openManualBook()"
+        class="inline-flex items-center gap-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-5 py-3 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+      >
+        <i class="fa-solid fa-book-open"></i>
+        <span>Manual Book</span>
+      </button>
+      <button
+        type="button"
         @click="submitBudget()"
         :disabled="submitting || rows.length === 0"
         class="inline-flex items-center gap-2 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 px-5 py-3 text-sm font-bold text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 disabled:opacity-50 transition-all"
@@ -206,6 +214,15 @@
       'bmListUrl'   => base_url('opex-ga/getDetailItems'),
       'bmSaveUrl'   => base_url('opex-ga/saveDetail'),
       'bmDeleteUrl' => base_url('opex-ga/deleteDetail'),
+  ]) ?>
+
+  <!-- ============================================================ -->
+  <!-- MODAL MANUAL BOOK (reusable partial)                         -->
+  <!-- ============================================================ -->
+  <?= $this->include('partials/manual_book_modal', [
+      'mbTitle'     => 'Manual Book - Input OPEX GA',
+      'mbPdfUrl'    => base_url('assets/docs/manual_book_opex_ga.pdf'),
+      'mbPdfExists' => is_file(FCPATH . 'assets/docs/manual_book_opex_ga.pdf'),
   ]) ?>
 
 </div>

@@ -197,7 +197,7 @@
                 <span class="text-xs font-medium text-gray-700 dark:text-gray-200 group-hover:text-purple-600">New MPP</span>
             </a>
 
-            <a href="<?= base_url('sales/summary') ?>" class="p-3.5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700/60 shadow-xs hover:border-teal-500 transition-all flex items-center gap-3 group">
+            <a href="<?= base_url('sales') ?>" class="p-3.5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700/60 shadow-xs hover:border-teal-500 transition-all flex items-center gap-3 group">
                 <div class="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center group-hover:scale-105 transition-transform">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 012 2h2a2 2 0 002-2z"/></svg>
                 </div>

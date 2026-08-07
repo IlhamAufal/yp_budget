@@ -49,32 +49,22 @@ class RbacSeeder extends Seeder
                 ['idn' => 'Entry Budget',              'eng' => 'Entry Budget',            'icon' => 'fa-regular fa-circle',    'link' => 'foh/entry',                  'level' => '2', 'order' => '1'],
                 ['idn' => 'Realisasi (Actual)',        'eng' => 'Actual',                  'icon' => 'fa-regular fa-circle',    'link' => 'foh/actual',                 'level' => '2', 'order' => '2'],
                 ['idn' => 'Summary',                   'eng' => 'Summary',                 'icon' => 'fa-regular fa-circle',    'link' => 'foh/summary',                'level' => '2', 'order' => '3'],
-                ['idn' => 'Report Departemen',         'eng' => 'Department Report',       'icon' => 'fa-regular fa-circle',    'link' => 'foh/report/department',      'level' => '2', 'order' => '4'],
             ]],
             ['id' => 9,  'group' => 'BUDGET & PLANNING',      'idn' => 'Opex GA',                   'eng' => 'Opex GA',                            'icon' => 'fa-solid fa-building',       'link' => '#',               'level' => '1', 'order' => '2',  'children' => [
                 ['idn' => 'Entry Budget',              'eng' => 'Entry Budget',            'icon' => 'fa-regular fa-circle',    'link' => 'opex-ga/entry',              'level' => '2', 'order' => '1'],
                 ['idn' => 'Realisasi (Actual)',        'eng' => 'Actual',                  'icon' => 'fa-regular fa-circle',    'link' => 'opex-ga/actual',             'level' => '2', 'order' => '2'],
-                ['idn' => 'Report Departemen',         'eng' => 'Department Report',       'icon' => 'fa-regular fa-circle',    'link' => 'opex-ga/report/department',  'level' => '2', 'order' => '3'],
-                ['idn' => 'Report Combined',           'eng' => 'Combined Report',         'icon' => 'fa-regular fa-circle',    'link' => 'opex-ga/report/combine',     'level' => '2', 'order' => '4'],
             ]],
             ['id' => 14, 'group' => 'BUDGET & PLANNING',      'idn' => 'Opex Selling',              'eng' => 'Opex Selling',                       'icon' => 'fa-solid fa-store',          'link' => '#',               'level' => '1', 'order' => '3',  'children' => [
                 ['idn' => 'Entry Budget',              'eng' => 'Entry Budget',            'icon' => 'fa-regular fa-circle',    'link' => 'opex-selling/entry',         'level' => '2', 'order' => '1'],
                 ['idn' => 'Realisasi (Actual)',        'eng' => 'Actual',                  'icon' => 'fa-regular fa-circle',    'link' => 'opex-selling/actual',        'level' => '2', 'order' => '2'],
-                ['idn' => 'Report Departemen',         'eng' => 'Department Report',       'icon' => 'fa-regular fa-circle',    'link' => 'opex-selling/report/department', 'level' => '2', 'order' => '3'],
             ]],
             ['id' => 18, 'group' => 'BUDGET & PLANNING',      'idn' => 'Capex',                     'eng' => 'CAPEX',                              'icon' => 'fa-solid fa-coins',          'link' => '#',               'level' => '1', 'order' => '4',  'children' => [
                 ['idn' => 'Entry CAPEX',               'eng' => 'Entry CAPEX',            'icon' => 'fa-regular fa-circle',    'link' => 'capex/entry',                'level' => '2', 'order' => '1'],
                 ['idn' => 'Summary',                   'eng' => 'Summary',                 'icon' => 'fa-regular fa-circle',    'link' => 'capex/summary',              'level' => '2', 'order' => '2'],
-                ['idn' => 'Report',                    'eng' => 'Report',                  'icon' => 'fa-regular fa-circle',    'link' => 'capex/report',               'level' => '2', 'order' => '3'],
             ]],
             ['id' => 22, 'group' => 'BUDGET & PLANNING',      'idn' => 'Sales',                     'eng' => 'Sales',                              'icon' => 'fa-solid fa-chart-line',     'link' => '#',               'level' => '1', 'order' => '5',  'children' => [
                 ['idn' => 'Entry Domestic',            'eng' => 'Domestic Entry',         'icon' => 'fa-regular fa-circle',    'link' => 'sales/domestic/entry',       'level' => '2', 'order' => '1'],
-                ['idn' => 'Entry Export',              'eng' => 'Export Entry',            'icon' => 'fa-regular fa-circle',    'link' => 'sales/export/entry',         'level' => '2', 'order' => '2'],
-                ['idn' => 'Summary Keseluruhan',       'eng' => 'Overall Summary',         'icon' => 'fa-regular fa-circle',    'link' => 'sales/summary',              'level' => '2', 'order' => '3'],
-                ['idn' => 'Summary Domestic',          'eng' => 'Domestic Summary',        'icon' => 'fa-regular fa-circle',    'link' => 'sales/summary/domestic',     'level' => '2', 'order' => '4'],
-                ['idn' => 'Summary Export',            'eng' => 'Export Summary',          'icon' => 'fa-regular fa-circle',    'link' => 'sales/summary/export',       'level' => '2', 'order' => '5'],
-                ['idn' => 'Summary per Negara',        'eng' => 'Summary by Country',      'icon' => 'fa-regular fa-circle',    'link' => 'sales/summary/country',      'level' => '2', 'order' => '6'],
-                ['idn' => 'Summary per Region',        'eng' => 'Summary by Region',       'icon' => 'fa-regular fa-circle',    'link' => 'sales/summary/region',       'level' => '2', 'order' => '7'],
+                ['idn' => 'Entry International',       'eng' => 'International Entry',     'icon' => 'fa-regular fa-circle',    'link' => 'sales/export/entry',         'level' => '2', 'order' => '2'],
             ]],
             ['id' => 30, 'group' => 'MASTER & PENGATURAN',    'idn' => 'Man Power Planning',        'eng' => 'Man Power Planning',                 'icon' => 'fa-solid fa-folder-plus',    'link' => '#',               'level' => '1', 'order' => '1',  'children' => [
                 ['idn' => 'Entry MPP',                 'eng' => 'MPP Entry',               'icon' => 'fa-regular fa-circle',    'link' => 'mpp/entry',                  'level' => '2', 'order' => '1'],
