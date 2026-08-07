@@ -30,6 +30,7 @@ $mbPdfExists = $mbPdfExists ?? false;
 <div
   x-data="manualBookModal('<?= esc($mbPdfUrl, 'js') ?>', <?= $mbPdfExists ? 'true' : 'false' ?>, '<?= esc($mbTitle, 'js') ?>')"
   x-cloak
+  x-teleport="body"
   @keydown.escape.window="open = false"
 >
   <!-- Overlay -->

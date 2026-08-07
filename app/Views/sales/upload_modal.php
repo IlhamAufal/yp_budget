@@ -2,7 +2,7 @@
      @open-upload-modal.window="open = true; uploadType = $event.detail.type"
      x-show="open" 
      class="fixed inset-0 flex items-center justify-center p-4" 
-     style="z-index: 999999; background-color: rgba(0,0,0,0.65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);"
+     style="z-index: 9999999; background-color: rgba(0,0,0,0.65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);"
      @click.self="open = false" 
      x-cloak>
 

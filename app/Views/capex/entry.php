@@ -77,7 +77,7 @@
     </div>
 
     <!-- Modal Dialog CAPEX -->
-    <div x-show="openModal" class="fixed inset-0 z-[9999999] overflow-y-auto" x-cloak>
+    <div x-show="openModal" x-teleport="body" class="fixed inset-0 z-[9999999] overflow-y-auto" x-cloak>
         <div class="fixed inset-0" style="background-color: rgba(0,0,0,0.65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);" @click="openModal = false"></div>
         <div class="relative flex min-h-full items-center justify-center p-4">
             <div class="relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 w-full max-w-md rounded-2xl shadow-xl overflow-hidden z-10">

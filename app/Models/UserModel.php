@@ -104,7 +104,10 @@ class UserModel extends Model
         $builder = $this->db->table('gw_sm__user u')
             ->select("u.*,
                 GROUP_CONCAT(DISTINCT r.role_name_idn ORDER BY r.role_id SEPARATOR ', ') AS role_names,
-                GROUP_CONCAT(DISTINCT r.role_id ORDER BY r.role_id SEPARATOR ',') AS role_ids")
+                GROUP_CONCAT(DISTINCT r.role_id ORDER BY r.role_id SEPARATOR ',') AS role_ids,
+                GROUP_CONCAT(DISTINCT CASE WHEN r.role_type = 'menu' THEN r.role_id END ORDER BY r.role_id SEPARATOR ',') AS menu_role_ids,
+                GROUP_CONCAT(DISTINCT CASE WHEN r.role_type = 'object' THEN r.role_id END ORDER BY r.role_id SEPARATOR ',') AS obj_role_ids,
+                GROUP_CONCAT(DISTINCT CASE WHEN r.role_type = 'object' THEN r.role_name_idn END ORDER BY r.role_id SEPARATOR ',') AS obj_role_names")
             ->join('gw_sm__profile p', 'p.profile_user_id = u.user_id', 'left')
             ->join('gw_sm__role r', 'r.role_id = p.profile_role_id AND r.role_active = \'Y\'', 'left')
             ->groupBy('u.user_id');

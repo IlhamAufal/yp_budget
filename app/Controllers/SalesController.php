@@ -24,19 +24,46 @@ class SalesController extends BaseController
     }
 
     /**
+     * Helper privat untuk mengambil tahun anggaran aktif secara konsisten.
+     */
+    private function getWorkingYear(): string
+    {
+        return (string) (session()->get('year_code') ?? session()->get('working_year') ?? date('Y'));
+    }
+
+    /**
      * 1. Sales Summary & Discount Allocation Page
+     *
+     * Menghadirkan kembali halaman "Sales Summary" sistem lama (dengan tab
+     * Summary / Domestic / International / Delivery & Claim / Reclass)
+     * dalam tata letak Tailwind yang konsisten dengan aplikasi baru.
      */
     public function index(): string
     {
-        $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $workingYear = $this->getWorkingYear();
 
-        return view('sales/summary', [
+        // Resolusi kurs aktif untuk tampilan nominal IDR.
+        $kurs = [];
+        try {
+            $kursRow = $this->db->table('yp_plan__assump_rate')
+                ->where('year_code', (int) $workingYear)
+                ->get()->getRow();
+            $kurs = is_object($kursRow) && $kursRow->usd ? ['usd' => (float) $kursRow->usd] : [];
+        } catch (\Throwable $e) {
+            // abaikan bila tabel kurs belum ada
+        }
+
+        return view('sales/index', [
             'title'       => 'Sales Summary & Discount Reclass',
             'workingYear' => $workingYear,
             'summary'     => $this->getSalesSummary($workingYear),
             'country'     => $this->getCountrySummary($workingYear),
             'region'      => $this->getRegionSummary($workingYear),
             'discount'    => $this->getDiscountReclass($workingYear),
+            'domestic'    => $this->getChannelSummary($workingYear, 'yp_plan__trans_sales_domestic'),
+            'export'      => $this->getChannelSummary($workingYear, 'yp_plan__trans_sales_export'),
+            'delivery'    => $this->getDeliveryAnnual($workingYear),
+            'kurs'        => $kurs,
         ]);
     }
 
@@ -45,7 +72,7 @@ class SalesController extends BaseController
      */
     public function entryDomestic(): string
     {
-        $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $workingYear = $this->getWorkingYear();
 
         return view('sales/entry_domestic', [
             'title'       => 'Entry Sales Domestic',
@@ -59,7 +86,7 @@ class SalesController extends BaseController
      */
     public function entryExport(): string
     {
-        $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $workingYear = $this->getWorkingYear();
 
         return view('sales/entry_export', [
             'title'       => 'Entry Sales Export',
@@ -70,15 +97,10 @@ class SalesController extends BaseController
 
     /**
      * 4. Sales Simulation Page (Revenue & Volume)
-     *
-     * Basis data berasal dari Master Assumption (Phase 3):
-     *   - KURS (USD/EUR) dari yp_plan__master_assumption
-     *   - Volume & ASP dari yp_plan__master_assumption_sales_domestic / _export
-     * Simulasi (what-if) dihitung client-side via Alpine.js.
      */
     public function simulation(): string
     {
-        $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $workingYear = $this->getWorkingYear();
         $assumption  = new AssumptionModel();
         $yearInt     = (int) $workingYear;
 
@@ -96,7 +118,7 @@ class SalesController extends BaseController
      */
     public function setupTarget(): string
     {
-        $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $workingYear = $this->getWorkingYear();
 
         return view('sales/setup_target', [
             'title'        => 'Target & Showcase Setup',
@@ -107,58 +129,57 @@ class SalesController extends BaseController
     }
 
     /**
-     * AJAX Actions & Form Processing
+     * AJAX Actions: Simpan alokasi diskon reclass.
+     * Mendukung data bertipe form-urlencoded maupun JSON payload.
      */
     public function saveDiscountReclass(): ResponseInterface
     {
         if (! $this->request->isAJAX()) {
-            return $this->response->setStatusCode(405)->setJSON(['status' => 'error', 'message' => 'Invalid method']);
+            return $this->response->setStatusCode(405)->setJSON(['status' => 'error', 'message' => 'Invalid request method']);
         }
 
-        $year   = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $year   = $this->getWorkingYear();
         $userId = (int) (session()->get('user_id') ?? 0);
 
-        // View mengirim via ypFetch (application/x-www-form-urlencoded) — pakai getPost,
-        // bukan getJSON (yang mem-parsing php://input sebagai JSON dan akan selalu kosong).
-        $post = $this->request->getPost() ?? [];
+        // Ambil payload baik dari Form Post maupun JSON body
+        $post = $this->request->getPost();
+        if (empty($post)) {
+            $post = $this->request->getJSON(true) ?? [];
+        }
 
-        // Bulan 1..12 (default 0)
-        $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-        $values = [];
-        $total  = 0;
+        // Bulan 1..12
+        $months     = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+        $insertData = [
+            'id_coa'       => null,
+            'id_dept'      => null,
+            'notes'        => 'DISCOUNT RECLASS',
+            'year_code'    => (int) $year,
+            'created_by'   => $userId,
+            'created_date' => date('Y-m-d H:i:s'),
+        ];
+
+        $total = 0;
         foreach ($months as $i => $mk) {
             $val = (float) ($post[$mk] ?? 0);
-            $values[(string) ($i + 1)] = $val;
+            $insertData[(string) ($i + 1)] = $val;
             $total += $val;
         }
+        $insertData['total'] = $total;
 
         try {
             $this->db->transStart();
 
-            // Hapus baris reclass existing utk tahun ini (mode replace)
+            // Replace data existing untuk tahun berjalan
             $this->db->table('yp_plan__master_reclass_monthly')
                 ->where('year_code', $year)
                 ->delete();
 
-            $sql = 'INSERT INTO yp_plan__master_reclass_monthly
-                    (id_coa, id_dept, total, notes, year_code, created_by, created_date,
-                     `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`, `11`, `12`)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-
-            $this->db->query($sql, array_merge([
-                null,                     // id_coa — reclass global (bukan per akun)
-                null,                     // id_dept
-                $total,
-                'DISCOUNT RECLASS',
-                (int) $year,
-                $userId,
-                date('Y-m-d H:i:s'),
-            ], array_values($values)));
+            $this->db->table('yp_plan__master_reclass_monthly')->insert($insertData);
 
             $this->db->transComplete();
 
             if ($this->db->transStatus() === false) {
-                return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menyimpan alokasi diskon.']);
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menyimpan alokasi diskon ke database.']);
             }
 
             AuditLog::saved('sales/saveDiscountReclass', "Discount reclass tahun {$year} disimpan (total {$total})");
@@ -169,27 +190,42 @@ class SalesController extends BaseController
                 'total'   => $total,
             ]);
         } catch (\Throwable $e) {
+            $this->db->transRollback();
             log_message('error', 'SalesController::saveDiscountReclass: ' . $e->getMessage());
 
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menyimpan alokasi diskon: ' . $e->getMessage()]);
+            return $this->response->setJSON([
+                'status'  => 'error', 
+                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+            ]);
         }
     }
 
     /**
-     * Upload Sales (.xlsx) — via ExcelImporter ke yp_plan__assump_sales.
-     * upload_type: 'domestic' → Domestic, 'export' → International.
+     * Upload Sales (.xlsx / .xls) via ExcelImporter.
      */
     public function processUpload()
     {
-        $type = $this->request->getPost('upload_type'); // 'domestic' atau 'export'
-        $file = $this->request->getFile('excel_file');
+        // Validasi file unggahan standar CI4
+        $rules = [
+            'upload_type' => 'required|in_list[domestic,export]',
+            'excel_file'  => [
+                'rules'  => 'uploaded[excel_file]|mime_in[excel_file,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv]|max_size[excel_file,10240]',
+                'errors' => [
+                    'uploaded' => 'Harap pilih berkas Excel terlebih dahulu.',
+                    'mime_in'  => 'Format berkas harus berupa Excel (.xls / .xlsx).',
+                    'max_size' => 'Ukuran berkas maksimal adalah 10MB.'
+                ]
+            ]
+        ];
 
-        if (! $file || ! $file->isValid() || $file->hasMoved()) {
-            return redirect()->back()->with('error', 'File tidak valid atau gagal diunggah.');
+        if (! $this->validate($rules)) {
+            return redirect()->back()->withInput()->with('error', $this->validator->listErrors());
         }
 
+        $type      = $this->request->getPost('upload_type');
+        $file      = $this->request->getFile('excel_file');
         $typeSales = strtolower((string) $type) === 'export' ? 'International' : 'Domestic';
-        $year      = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $year      = $this->getWorkingYear();
         $userId    = (int) (session()->get('user_id') ?? 0);
 
         try {
@@ -206,7 +242,6 @@ class SalesController extends BaseController
                 ));
 
                 if ($value === null || $value === 0.0) {
-                    // Fallback: kolom numerik pertama yang tidak kosong
                     foreach ($row as $cell) {
                         if (is_numeric($cell)) {
                             $value = (float) $cell;
@@ -216,11 +251,11 @@ class SalesController extends BaseController
                 }
 
                 $this->db->table('yp_plan__assump_sales')->insert([
-                    'type_sales'  => $typeSales,
-                    'value_text'  => $value,
-                    'year_code'   => $year,
-                    'created_by'  => $userId,
-                    'created_date'=> date('Y-m-d H:i:s'),
+                    'type_sales'   => $typeSales,
+                    'value_text'   => $value,
+                    'year_code'    => $year,
+                    'created_by'   => $userId,
+                    'created_date' => date('Y-m-d H:i:s'),
                 ]);
                 $saved++;
             }
@@ -235,6 +270,7 @@ class SalesController extends BaseController
 
             return redirect()->back()->with('success', "Data Sales {$typeSales} berhasil diimport ({$saved} baris).");
         } catch (\Throwable $e) {
+            $this->db->transRollback();
             log_message('error', 'Sales upload: ' . $e->getMessage());
 
             return redirect()->back()->with('error', 'Gagal membaca file Excel: ' . $e->getMessage());
@@ -242,11 +278,11 @@ class SalesController extends BaseController
     }
 
     /**
-     * Export data assumption sales ke .xlsx via ExcelExporter.
+     * Export data assumption sales ke .xlsx.
      */
     public function exportExcel(): ResponseInterface
     {
-        $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $year = $this->getWorkingYear();
 
         $rows = $this->getAssumptionData($year);
         $data = array_map(function ($r) {
@@ -268,11 +304,7 @@ class SalesController extends BaseController
     }
 
     /**
-     * Ringkasan sales nyata (IDR) per bulan dari tabel transaksi sales.
-     *
-     * Return: ['domestic' => [jan..dec,total], 'export' => [...], 'total' => [...]]
-     * Kolom revenue mengikuti format legacy `{bulan}_rev` di
-     * yp_plan__trans_sales_domestic & yp_plan__trans_sales_export.
+     * Ringkasan sales nyata (IDR) per bulan.
      */
     private function getSalesSummary(string $year): array
     {
@@ -281,23 +313,20 @@ class SalesController extends BaseController
         $build = function (string $table) use ($year, $months): array {
             $selects = [];
             foreach ($months as $mk) {
-                // Alias `dec` adalah reserved word — wajib escape backtick
-                $alias = $mk === 'dec' ? '`dec`' : $mk;
+                $alias     = $mk === 'dec' ? '`dec`' : $mk;
                 $selects[] = "IFNULL(SUM({$mk}_rev),0) AS {$alias}";
             }
             $totalExpr = implode(' + ', array_map(fn ($mk) => "IFNULL(SUM({$mk}_rev),0)", $months));
 
             try {
-                $row = $this->db->query(
+                return $this->db->query(
                     "SELECT " . implode(', ', $selects) . ", ({$totalExpr}) AS total FROM {$table} WHERE year_code = ?",
                     [$year]
                 )->getRowArray() ?? [];
             } catch (\Throwable $e) {
                 log_message('error', "SalesController::getSalesSummary({$table}): " . $e->getMessage());
-                $row = [];
+                return [];
             }
-
-            return $row;
         };
 
         $domestic = $build('yp_plan__trans_sales_domestic');
@@ -325,9 +354,68 @@ class SalesController extends BaseController
     }
 
     /**
-     * Agregasi revenue per country (domestic + export breakdown).
-     *
-     * Return: rows [label, jan..dec, total] diurut total DESC.
+     * Agregasi QTY & REVENUE per channel (baris produk) untuk tabel
+     * "Domestic" / "International" sistem lama. Sumber: trans_sales_*.
+     * Return: rows [id_channel, {m}_qty, {m}_rev, total_qty, total_rev].
+     */
+    private function getChannelSummary(string $year, string $table): array
+    {
+        $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+        $segments  = [];
+        $revExpr   = [];
+        $qtyExpr   = [];
+        foreach ($months as $m) {
+            $segments[] = "IFNULL(SUM({$m}_qty),0) AS {$m}_qty";
+            $segments[] = "IFNULL(SUM({$m}_rev),0) AS {$m}_rev";
+            $revExpr[]  = "SUM({$m}_rev)";
+            $qtyExpr[]  = "SUM({$m}_qty)";
+        }
+
+        $sql = "SELECT id_channel,
+                       " . implode(', ', $segments) . ",
+                       (" . implode(' + ', $revExpr) . ") AS total_rev,
+                       (" . implode(' + ', $qtyExpr) . ") AS total_qty
+                FROM {$table}
+                WHERE year_code = ?
+                GROUP BY id_channel
+                ORDER BY total_rev DESC";
+
+        try {
+            return $this->db->query($sql, [$year])->getResultArray() ?? [];
+        } catch (\Throwable $e) {
+            log_message('error', "SalesController::getChannelSummary({$table}): " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Data "Delivery Exp & Customer Claim" — per tipe & kategori.
+     * Sumber: yp_plan__trans_delivery_customer (kolom tahun_1..3 adalah
+     * ringkasan tahun anggaran sebelumnya / berjalan).
+     */
+    private function getDeliveryAnnual(string $year): array
+    {
+        $cols = ['tahun_1', 'tahun_2', 'tahun_3', 'tahun_4'];
+
+        $selects = array_map(fn ($c) => "IFNULL(SUM({$c}),0) AS {$c}", $cols);
+
+        $sql = "SELECT tipe, desc_value, " . implode(', ', $selects) . "
+                FROM yp_plan__trans_delivery_customer
+                WHERE year_code = ?
+                GROUP BY tipe, desc_value
+                ORDER BY tipe, desc_value";
+
+        try {
+            return $this->db->query($sql, [$year])->getResultArray() ?? [];
+        } catch (\Throwable $e) {
+            log_message('error', 'SalesController::getDeliveryAnnual: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Agregasi revenue per country.
      */
     private function getCountrySummary(string $year): array
     {
@@ -335,9 +423,7 @@ class SalesController extends BaseController
     }
 
     /**
-     * Agregasi revenue per region (domestic + export breakdown).
-     *
-     * Return: rows [label, jan..dec, total] diurut total DESC.
+     * Agregasi revenue per region.
      */
     private function getRegionSummary(string $year): array
     {
@@ -345,30 +431,35 @@ class SalesController extends BaseController
     }
 
     /**
-     * Query revenue per bulan dikelompokkan kolom tertentu (country/region)
-     * dari tabel breakdown domestic_region + export_country (UNION ALL).
+     * Query revenue per bulan dikelompokkan kolom tertentu dengan Whitelist Validation.
      */
     private function getGroupedSummary(string $groupCol, string $year): array
     {
+        // Validasi whitelist kolom pengelompokan untuk keamanan
+        $allowedCols = ['country', 'region'];
+        if (! in_array($groupCol, $allowedCols, true)) {
+            log_message('error', "SalesController::getGroupedSummary invalid column: {$groupCol}");
+            return [];
+        }
+
         $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
         $tables = ['yp_plan__trans_sales_domestic_region', 'yp_plan__trans_sales_export_country'];
 
         $selects = [];
         foreach ($months as $mk) {
-            // Alias `dec` reserved word — wajib escape backtick
-            $alias    = $mk === 'dec' ? '`dec`' : $mk;
+            $alias     = $mk === 'dec' ? '`dec`' : $mk;
             $selects[] = "IFNULL(SUM(t.{$mk}_rev),0) AS {$alias}";
         }
         $totalExpr = implode(' + ', array_map(fn ($mk) => "IFNULL(SUM(t.{$mk}_rev),0)", $months));
 
         $union = [];
         foreach ($tables as $t) {
-            $cols = implode(', ', array_map(fn ($mk) => "{$mk}_rev", $months));
+            $cols    = implode(', ', array_map(fn ($mk) => "{$mk}_rev", $months));
             $union[] = "SELECT {$groupCol}, {$cols} FROM {$t} WHERE year_code = ? AND {$groupCol} IS NOT NULL AND {$groupCol} <> ''";
         }
 
         try {
-            $rows = $this->db->query(
+            return $this->db->query(
                 "SELECT t.{$groupCol} AS label, " . implode(', ', $selects) . ", ({$totalExpr}) AS total
                  FROM (" . implode(' UNION ALL ', $union) . ") t
                  GROUP BY t.{$groupCol}
@@ -377,16 +468,12 @@ class SalesController extends BaseController
             )->getResultArray() ?? [];
         } catch (\Throwable $e) {
             log_message('error', "SalesController::getGroupedSummary({$groupCol}): " . $e->getMessage());
-            $rows = [];
+            return [];
         }
-
-        return $rows;
     }
 
     /**
-     * Alokasi discount reclass tahun berjalan dari yp_plan__master_reclass_monthly.
-     *
-     * Return: ['jan'..'dec' => float, 'total' => float]
+     * Alokasi discount reclass tahun berjalan.
      */
     private function getDiscountReclass(string $year): array
     {
@@ -394,11 +481,11 @@ class SalesController extends BaseController
     }
 
     /**
-     * AJAX: data alokasi discount reclass untuk tahun berjalan (dipakai view summary).
+     * AJAX: Get data alokasi discount reclass.
      */
     public function getDiscountReclassAjax(): ResponseInterface
     {
-        $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $year = $this->getWorkingYear();
 
         return $this->response->setJSON([
             'status'   => 'success',
@@ -407,17 +494,12 @@ class SalesController extends BaseController
     }
 
     /**
-     * Implementasi pengambilan alokasi discount reclass (dipakai index & AJAX).
-     *
-     * Return: ['jan'..'dec' => float, 'total' => float]
+     * Pengambilan data discount reclass dari database.
      */
     private function loadDiscountReclass(string $year): array
     {
         $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-        $out    = [];
-        foreach ($months as $mk) {
-            $out[$mk] = 0.0;
-        }
+        $out    = array_fill_keys($months, 0.0);
         $out['total'] = 0.0;
 
         try {
@@ -426,8 +508,7 @@ class SalesController extends BaseController
                 ->get()
                 ->getResultArray();
         } catch (\Throwable $e) {
-            log_message('error', 'SalesController::getDiscountReclass: ' . $e->getMessage());
-
+            log_message('error', 'SalesController::loadDiscountReclass: ' . $e->getMessage());
             return $out;
         }
 

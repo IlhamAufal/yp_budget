@@ -416,7 +416,7 @@
 
     <div x-show="detailModalOpen"
          class="fixed inset-0 flex items-center justify-center p-4 sm:p-6"
-         style="z-index: 999999; background-color: rgba(0,0,0,0.65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);"
+         style="z-index: 9999999; background-color: rgba(0,0,0,0.65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);"
          @click.self="detailModalOpen = false"
          x-cloak
          x-transition:enter="transition ease-out duration-200"
@@ -479,7 +479,7 @@
 
     <div x-show="sectionModalOpen"
          class="fixed inset-0 flex items-center justify-center p-4 sm:p-6"
-         style="z-index: 999999; background-color: rgba(0,0,0,0.65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);"
+         style="z-index: 9999999; background-color: rgba(0,0,0,0.65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);"
          @click.self="sectionModalOpen = false"
          x-cloak
          x-transition:enter="transition ease-out duration-200"

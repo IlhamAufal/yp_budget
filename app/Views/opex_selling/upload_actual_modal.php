@@ -1,6 +1,6 @@
 <div x-show="uploadModalOpen" 
-     class="fixed inset-0 z-[999999] flex items-center justify-center p-4" 
-     style="background-color: rgba(0, 0, 0, 0.65); backdrop-filter: blur(6px);" 
+     class="fixed inset-0 z-[9999999] flex items-center justify-center p-4"
+     style="background-color: rgba(0, 0, 0, 0.65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);"
      x-transition x-cloak>
 
     <div x-data="uploadActualSellingHandler()" 

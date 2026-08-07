@@ -109,6 +109,7 @@
             <th class="py-4 px-5 w-12 text-center">No.</th>
             <th class="py-4 px-5">User</th>
             <th class="py-4 px-5">Role</th>
+            <th class="py-4 px-5">Object</th>
             <th class="py-4 px-5 text-center">Status</th>
             <th class="py-4 px-5 text-right w-44">Action</th>
           </tr>
@@ -116,7 +117,7 @@
         <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-sm">
           <?php if (empty($rows)): ?>
             <tr>
-              <td colspan="5" class="py-20 text-center text-gray-400 dark:text-gray-500">
+              <td colspan="6" class="py-20 text-center text-gray-400 dark:text-gray-500">
                 <div class="flex flex-col items-center justify-center gap-4">
                   <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400">
                     <i class="fa-solid fa-users-gear text-2xl"></i>
@@ -129,7 +130,10 @@
           <?php else: ?>
             <?php foreach ($rows as $index => $r): ?>
               <?php
-                $userRoleIds = array_filter(array_map('intval', explode(',', $r['role_ids'] ?? '')));
+                $isAdminRole = (($r['user_admin'] ?? 'N') === 'Y');
+                $menuRoleIds = array_filter(array_map('intval', explode(',', $r['menu_role_ids'] ?? '')));
+                $objRoleIds  = array_filter(array_map('intval', explode(',', $r['obj_role_ids'] ?? '')));
+                $objRoleNames = array_values(array_filter(array_map('trim', explode(',', $r['obj_role_names'] ?? ''))));
               ?>
               <tr x-show="isRowVisible(<?= $index ?>)" class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
                 <td class="py-4 px-5 text-center text-gray-400 font-medium"><?= $index + 1 ?></td>
@@ -157,15 +161,12 @@
                   </div>
                 </td>
 
-                <!-- Role (mahkota bila role admin / user_admin) -->
+                <!-- Role (menu role) -->
                 <td class="py-4 px-5">
-                  <?php
-                    $isAdminFlag = (($r['user_admin'] ?? 'N') === 'Y');
-                  ?>
-                  <?php if (empty($userRoleIds)): ?>
-                    <?php if ($isAdminFlag): ?>
+                  <?php if (empty($menuRoleIds)): ?>
+                    <?php if ($isAdminRole): ?>
                       <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
-                        <i class="fa-solid text-[10px]"></i> Admin
+                        <i class="fa-solid fa-crown text-[10px]"></i> Admin
                       </span>
                     <?php else: ?>
                       <span class="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-500 dark:bg-gray-800 dark:text-gray-400">
@@ -175,7 +176,7 @@
                     <?php endif; ?>
                   <?php else: ?>
                     <div class="flex flex-wrap items-center gap-1.5">
-                      <?php foreach ($userRoleIds as $rid): ?>
+                      <?php foreach ($menuRoleIds as $rid): ?>
                         <?php
                           $roleName = '';
                           foreach (($roles ?? []) as $rl) {
@@ -184,15 +185,27 @@
                                   break;
                               }
                           }
-                          $isAdminRole = $isAdminFlag || (stripos($roleName, 'admin') !== false);
+                          $isMenuAdmin = $isAdminRole || (stripos($roleName, 'admin') !== false);
                         ?>
-                        <span class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold <?= $isAdminRole ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' : 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400' ?>">
-                          <?php if ($isAdminRole): ?>
-                            <i class="fa-solid text-[10px]"></i>
-                          <?php else: ?>
-                            <i class="fa-solid text-[10px]"></i>
-                          <?php endif; ?>
+                        <span class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold <?= $isMenuAdmin ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' : 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400' ?>">
+                          <i class="fa-solid rounded-full p-0.5 text-[8px] <?= $isMenuAdmin ? 'text-amber-500' : 'text-indigo-500' ?>"></i>
                           <?= esc($roleName ?: 'Role #' . $rid) ?>
+                        </span>
+                      <?php endforeach; ?>
+                    </div>
+                  <?php endif; ?>
+                </td>
+
+                <!-- Object (scope data) -->
+                <td class="py-4 px-5">
+                  <?php if (empty($objRoleIds)): ?>
+                    <span class="text-gray-300 dark:text-gray-600">—</span>
+                  <?php else: ?>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                      <?php foreach ($objRoleIds as $i => $oid): ?>
+                        <span class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400" title="Object role (scope data)">
+                          <i class="fa-solid text-[10px]"></i>
+                          <?= esc($objRoleNames[$i] ?? ('Obj #' . $oid)) ?>
                         </span>
                       <?php endforeach; ?>
                     </div>
@@ -232,7 +245,8 @@
                         'user_active'  => $r['user_active'],
                         'user_admin'   => $r['user_admin'],
                         'user_block'   => $r['user_block'],
-                        'role_ids'     => array_values($userRoleIds),
+                        'role_ids'     => array_values($menuRoleIds),
+                        'obj_role_ids' => array_values($objRoleIds),
                       ]), ENT_QUOTES, 'UTF-8') ?>)"
                       class="h-9 w-9 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-brand-500 hover:bg-brand-50 hover:border-brand-200 dark:hover:bg-brand-500/10 transition-colors flex items-center justify-center shadow-2xs"
                       title="Edit User"
@@ -486,7 +500,64 @@
               </div>
             </div>
           </div>
-          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">Pilih satu role untuk pengguna ini.</p>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">Pilih <strong>role menu</strong> (hak akses halaman) untuk pengguna ini.</p>
+        <!-- Object Role (scope data) -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
+            Object Role (Scope Data)
+          </label>
+          <div class="relative" @click.outside="objRoleDropdownOpen = false">
+            <button
+              type="button"
+              @click="objRoleDropdownOpen = !objRoleDropdownOpen"
+              class="w-full flex items-center justify-between gap-3 rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-left font-semibold text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+            >
+              <span class="flex items-center gap-2.5">
+                <i class="fa-solid fa-eye text-gray-400"></i>
+                <span x-text="objRoleLabel()" :class="form.role_id_obj ? '' : 'text-gray-400 dark:text-gray-500'"></span>
+              </span>
+              <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform" :class="objRoleDropdownOpen ? 'rotate-180' : ''"></i>
+            </button>
+
+            <div
+              x-show="objRoleDropdownOpen"
+              x-transition:enter="transition ease-out duration-150"
+              x-transition:enter-start="opacity-0 scale-95"
+              x-transition:enter-end="opacity-100 scale-100"
+              x-transition:leave="transition ease-in duration-150"
+              x-transition:leave-start="opacity-100 scale-100"
+              x-transition:leave-end="opacity-0 scale-95"
+              class="absolute z-20 mt-2 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl overflow-hidden"
+            >
+              <div class="relative border-b border-gray-100 dark:border-gray-800">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none"></i>
+                <input
+                  type="text"
+                  x-model="objRoleSearch"
+                  placeholder="Cari object role..."
+                  class="w-full bg-transparent py-3 pl-11 pr-4 text-sm text-gray-800 dark:text-white placeholder:text-gray-400 focus:outline-none"
+                />
+              </div>
+              <div class="max-h-56 overflow-y-auto py-1.5">
+                <template x-for="role in filteredObjRoles()" :key="role.role_id">
+                  <button
+                    type="button"
+                    @click="pickObjRole(role.role_id)"
+                    class="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-sm text-left transition-colors"
+                    :class="String(form.role_id_obj) === String(role.role_id) ? 'bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 font-semibold' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'"
+                  >
+                    <span class="flex items-center gap-2.5">
+                      <i class="fa-solid fa-eye text-xs text-gray-400"></i>
+                      <span x-text="role.role_name_idn"></span>
+                    </span>
+                    <i class="fa-solid fa-check text-xs" x-show="String(form.role_id_obj) === String(role.role_id)"></i>
+                  </button>
+                </template>
+                <p x-show="filteredObjRoles().length === 0" class="px-4 py-6 text-center text-xs text-gray-400">Tidak ada object role yang cocok.</p>
+              </div>
+            </div>
+          </div>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">Menentukan <strong>scope data</strong> (department / cost center) yang dapat diakses.</p>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -668,7 +739,8 @@
       saving: false,
       resetting: false,
 
-      roleOptions: <?= json_encode(array_map(fn($rl) => ['role_id' => (int) $rl['role_id'], 'role_name_idn' => $rl['role_name_idn']], $roles ?? [])) ?>,
+      roleOptions: <?= json_encode(array_values(array_filter(array_map(fn($rl) => array_merge(['role_id' => (int) $rl['role_id'], 'role_name_idn' => $rl['role_name_idn']], ['role_type' => ($rl['role_type'] ?? 'menu')]), $roles ?? []), fn($r) => $r['role_type'] === 'menu'))) ?>,
+      roleOptionsObj: <?= json_encode(array_values(array_filter(array_map(fn($rl) => array_merge(['role_id' => (int) $rl['role_id'], 'role_name_idn' => $rl['role_name_idn']], ['role_type' => ($rl['role_type'] ?? 'menu')]), $roles ?? []), fn($r) => $r['role_type'] === 'object'))) ?>,
 
       // Pagination
       currentPage: 1,
@@ -718,12 +790,15 @@
         user_password: '',
         user_active: 'Y',
         user_block: 'N',
-        role_id: ''
+        role_id: '',
+        role_id_obj: ''
       },
 
       // Dropdown role (searchable)
       roleDropdownOpen: false,
       roleSearch: '',
+      objRoleDropdownOpen: false,
+      objRoleSearch: '',
 
       resetForm: {
         userId: null,
@@ -740,9 +815,12 @@
           user_password: '',
           user_active: 'Y',
           user_block: 'N',
-          role_id: ''
+          role_id: '',
+          role_id_obj: ''
         };
         this.roleSearch = '';
+        this.objRoleSearch = '';
+        this.objRoleDropdownOpen = false;
         this.modalOpen = true;
       },
 
@@ -755,10 +833,12 @@
           user_password: '',
           user_active: row.user_active || 'Y',
           user_block: row.user_block || 'N',
-          // Single role: ambil role pertama milik user
-          role_id: Array.isArray(row.role_ids) && row.role_ids.length ? String(row.role_ids[0]) : ''
+          role_id: Array.isArray(row.role_ids) && row.role_ids.length ? String(row.role_ids[0]) : '',
+          role_id_obj: Array.isArray(row.obj_role_ids) && row.obj_role_ids.length ? String(row.obj_role_ids[0]) : ''
         };
         this.roleSearch = '';
+        this.objRoleSearch = '';
+        this.objRoleDropdownOpen = false;
         this.modalOpen = true;
       },
 
@@ -786,14 +866,38 @@
         this.roleSearch = '';
       },
 
+      objRoleLabel() {
+        if (!this.form.role_id_obj) {
+          return '— Pilih Object Role —';
+        }
+        const found = this.roleOptionsObj.find(r => String(r.role_id) === String(this.form.role_id_obj));
+        return found ? found.role_name_idn : 'Role #' + this.form.role_id_obj;
+      },
+
+      filteredObjRoles() {
+        const q = (this.objRoleSearch || '').toLowerCase().trim();
+        if (!q) {
+          return this.roleOptionsObj;
+        }
+        return this.roleOptionsObj.filter(r =>
+          String(r.role_name_idn || '').toLowerCase().includes(q)
+        );
+      },
+
+      pickObjRole(id) {
+        this.form.role_id_obj = String(id);
+        this.objRoleDropdownOpen = false;
+        this.objRoleSearch = '';
+      },
+
       async saveUser() {
         this.saving = true;
         try {
           const body = new URLSearchParams();
           body.append('has_role_ids', '1');
           for (const [key, value] of Object.entries(this.form)) {
-            // role_id dikirim terpisah sebagai role_ids[] agar cocok dengan backend
-            if (key === 'role_id') {
+            // role_id & role_id_obj dikirim terpisah sebagai role_ids[] agar cocok dengan backend
+            if (key === 'role_id' || key === 'role_id_obj') {
               continue;
             }
             if (value !== null && value !== undefined && value !== '') {
@@ -802,6 +906,9 @@
           }
           if (this.form.role_id) {
             body.append('role_ids[]', this.form.role_id);
+          }
+          if (this.form.role_id_obj) {
+            body.append('role_ids[]', this.form.role_id_obj);
           }
           const res = await window.ypFetch('<?= base_url('sys-admin/api/user/save') ?>', body);
           if (res.success) {
