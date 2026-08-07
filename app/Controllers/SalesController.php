@@ -42,28 +42,13 @@ class SalesController extends BaseController
     {
         $workingYear = $this->getWorkingYear();
 
-        // Resolusi kurs aktif untuk tampilan nominal IDR.
-        $kurs = [];
-        try {
-            $kursRow = $this->db->table('yp_plan__assump_rate')
-                ->where('year_code', (int) $workingYear)
-                ->get()->getRow();
-            $kurs = is_object($kursRow) && $kursRow->usd ? ['usd' => (float) $kursRow->usd] : [];
-        } catch (\Throwable $e) {
-            // abaikan bila tabel kurs belum ada
-        }
-
         return view('sales/index', [
-            'title'       => 'Sales Summary & Discount Reclass',
-            'workingYear' => $workingYear,
-            'summary'     => $this->getSalesSummary($workingYear),
-            'country'     => $this->getCountrySummary($workingYear),
-            'region'      => $this->getRegionSummary($workingYear),
-            'discount'    => $this->getDiscountReclass($workingYear),
-            'domestic'    => $this->getChannelSummary($workingYear, 'yp_plan__trans_sales_domestic'),
-            'export'      => $this->getChannelSummary($workingYear, 'yp_plan__trans_sales_export'),
-            'delivery'    => $this->getDeliveryAnnual($workingYear),
-            'kurs'        => $kurs,
+            'title'             => 'Sales Summary & Discount Reclass',
+            'workingYear'       => $workingYear,
+            'summary'           => $this->getSalesSummary($workingYear),
+            'domesticProducts'  => $this->getProductSummary($workingYear, 'yp_plan__trans_sales_domestic'),
+            'exportProducts'    => $this->getProductSummary($workingYear, 'yp_plan__trans_sales_export'),
+            'kurs'              => $this->getKurs($workingYear),
         ]);
     }
 
@@ -411,6 +396,72 @@ class SalesController extends BaseController
         } catch (\Throwable $e) {
             log_message('error', 'SalesController::getDeliveryAnnual: ' . $e->getMessage());
             return [];
+        }
+    }
+
+    /**
+     * Data per-produk (QTY, REVENUE, dan ASP per bulan) untuk tabel
+     * "Summary"/"Domestic"/"INTL" sistem lama. Sumber: trans_sales_*
+     * di-join dengan master_product untuk resolusi key_product & product_name.
+     * Return: rows [key_product, mid_product, product_name, id_channel,
+     *               {m}_qty, {m}_rev, ..., total_qty, total_rev].
+     */
+    private function getProductSummary(string $year, string $table): array
+    {
+        $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+        $segments = [];
+        $revExpr  = [];
+        $qtyExpr  = [];
+        foreach ($months as $m) {
+            $segments[] = "IFNULL(SUM(t.{$m}_qty),0) AS {$m}_qty";
+            $segments[] = "IFNULL(SUM(t.{$m}_rev),0) AS {$m}_rev";
+            $revExpr[]  = "SUM(t.{$m}_rev)";
+            $qtyExpr[]  = "SUM(t.{$m}_qty)";
+        }
+
+        $sql = "SELECT COALESCE(p.key_product, '')  AS key_product,
+                       COALESCE(p.product_name, '') AS product_name,
+                       t.id_channel,
+                       t.id_inv AS mid_product,
+                       " . implode(', ', $segments) . ",
+                       (" . implode(' + ', $revExpr) . ") AS total_rev,
+                       (" . implode(' + ', $qtyExpr) . ") AS total_qty
+                FROM {$table} t
+                LEFT JOIN gw_plan__master_product p
+                  ON t.id_inv = p.mid_product AND p.year = t.year_code
+                WHERE t.year_code = ?
+                GROUP BY t.id_channel, t.id_inv, p.key_product, p.product_name
+                ORDER BY total_rev DESC";
+
+        try {
+            return $this->db->query($sql, [$year])->getResultArray() ?? [];
+        } catch (\Throwable $e) {
+            log_message('error', "SalesController::getProductSummary({$table}): " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Kurs aktif (US$, Baht, Ringgit) untuk tab INTL (IDR).
+     * Sumber: yp_plan__assump_rate.
+     */
+    private function getKurs(string $year): array
+    {
+        $default = ['usd' => 0, 'baht' => 0, 'ringgit' => 0];
+
+        try {
+            $row = $this->db->table('yp_plan__assump_rate')
+                ->where('year_code', (int) $year)
+                ->get()->getRow();
+
+            return is_object($row) ? [
+                'usd'     => (float) ($row->usd ?? 0),
+                'baht'    => (float) ($row->baht ?? 0),
+                'ringgit' => (float) ($row->ringgit ?? 0),
+            ] : $default;
+        } catch (\Throwable $e) {
+            return $default;
         }
     }
 

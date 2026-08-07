@@ -95,6 +95,7 @@ $routes->group('sys-admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('api/role/menus/save', 'Role::saveMenus');
 
     $routes->get('user', 'User::index');
+    $routes->get('user/form', 'User::formModal');
     $routes->post('api/user/save', 'User::save');
     $routes->post('api/user/toggle', 'User::toggle');
     $routes->post('api/user/delete', 'User::delete');

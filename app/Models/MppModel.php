@@ -94,7 +94,7 @@ class MppModel extends Model
         return $this->db->transStatus();
     }
 
-    public function getSummaryWithSalary(string $yearCode, ?string $idDept = null): array
+    public function getSummaryWithSalary(string $yearCode, ?string $idDept = null, ?int $offset = null, ?int $perPage = null): array
     {
         $sql = "SELECT h.id_dept,
                        COALESCE(dp.dept_desc, '') AS department_name,
@@ -126,7 +126,42 @@ class MppModel extends Model
         $sql .= ' GROUP BY h.id_dept, dp.dept_desc, tm.desc_mpp, s.`desc`, s.salary
                   ORDER BY h.id_dept, tm.desc_mpp';
 
+        if ($perPage !== null) {
+            $sql .= ' LIMIT ' . (int) $perPage . ' OFFSET ' . (int) $offset;
+        }
+
         return $this->db->query($sql, $params)->getResultArray();
+    }
+
+    public function countSummaryWithSalary(string $yearCode, ?string $idDept = null): int
+    {
+        $sql = "SELECT COUNT(*) AS total FROM (
+                    SELECT h.id_dept,
+                           COALESCE(dp.dept_desc, '') AS department_name,
+                           COALESCE(tm.desc_mpp, '') AS employee_type,
+                           COALESCE(s.`desc`, '') AS coa_code,
+                           COALESCE(s.salary, 0) AS monthly_salary
+                    FROM yp_plan__trans_mpp_header h
+                    JOIN yp_plan__trans_mpp_detail d ON d.id_header = h.id
+                    LEFT JOIN gw_plan__master_department dp ON dp.id_dept = h.id_dept
+                    LEFT JOIN yp_plan__master_tipe_mpp tm ON tm.id_mpp = h.id_tipe
+                    LEFT JOIN yp_plan__master_mpp_salary s
+                           ON s.dept_id = h.id_dept AND s.type = h.id_tipe
+                          AND s.year_code = h.year_code AND s.status = 'A'
+                    WHERE h.year_code = ?";
+
+        $params = [$yearCode];
+
+        if (! empty($idDept)) {
+            $sql .= ' AND h.id_dept = ?';
+            $params[] = $idDept;
+        }
+
+        $sql .= ' GROUP BY h.id_dept, dp.dept_desc, tm.desc_mpp, s.`desc`, s.salary
+                ) AS sub';
+
+        $row = $this->db->query($sql, $params)->getRowArray();
+        return (int) (reset($row) ?? 0);
     }
 
     public function syncToOpex(string $yearCode): bool

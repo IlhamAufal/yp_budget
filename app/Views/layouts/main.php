@@ -39,6 +39,7 @@
   <?= $this->include('partials/preloader') ?>
   <?= $this->include('partials/toast') ?>
   <?= $this->include('partials/modal_select_year') ?>
+  <?= $this->include('partials/global_modal') ?>
   <?= $this->renderSection('modals') ?>
   <!-- ============================================================ -->
 

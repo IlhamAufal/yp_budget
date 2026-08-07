@@ -219,11 +219,6 @@
   <!-- ============================================================ -->
   <!-- MODAL MANUAL BOOK (reusable partial)                         -->
   <!-- ============================================================ -->
-  <?= $this->include('partials/manual_book_modal', [
-      'mbTitle'     => 'Manual Book - Input OPEX GA',
-      'mbPdfUrl'    => base_url('assets/docs/manual_book_opex_ga.pdf'),
-      'mbPdfExists' => is_file(FCPATH . 'assets/docs/manual_book_opex_ga.pdf'),
-  ]) ?>
 
 </div>
 
@@ -362,4 +357,13 @@
   }
 </script>
 
+<?= $this->endSection() ?>
+
+<?= $this->section('modals') ?>
+  <!-- MODAL MANUAL BOOK (reusable partial) — dirender di luar wrapper layout -->
+  <?= $this->include('partials/manual_book_modal', [
+      'mbTitle'     => 'Manual Book - Input OPEX GA',
+      'mbPdfUrl'    => base_url('assets/docs/manual_book_opex_ga.pdf'),
+      'mbPdfExists' => is_file(FCPATH . 'assets/docs/manual_book_opex_ga.pdf'),
+  ]) ?>
 <?= $this->endSection() ?>

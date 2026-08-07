@@ -82,6 +82,23 @@
             </table>
         </div>
 
+        <?php
+            $pages = max(1, (int) ceil(($total ?? 0) / max(1, $perPage ?? 10)));
+            $pg    = (int) ($page ?? 1);
+            $prev  = max(1, $pg - 1);
+            $nextP = min($pages, $pg + 1);
+        ?>
+        <div class="p-3 px-4 bg-gray-50 dark:bg-meta-4/30 border-t border-stroke dark:border-strokedark flex items-center justify-between text-xs text-gray-500">
+            <span>Halaman <?= $pg ?> dari <?= $pages ?></span>
+            <div class="flex items-center gap-1.5">
+                <button type="button" onclick="window.loadSellingBudgetPage &amp;&amp; window.loadSellingBudgetPage(<?= $prev ?>)" class="px-2.5 py-1 rounded-lg border border-stroke dark:border-strokedark hover:bg-white dark:hover:bg-meta-4 <?= $pg <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">Prev</button>
+                <?php for ($p = 1; $p <= $pages; $p++): ?>
+                    <button type="button" onclick="window.loadSellingBudgetPage &amp;&amp; window.loadSellingBudgetPage(<?= $p ?>)" class="px-2.5 py-1 rounded-lg border <?= $p === $pg ? 'bg-primary text-white font-bold' : 'border-stroke dark:border-strokedark hover:bg-white dark:hover:bg-meta-4' ?>"><?= $p ?></button>
+                <?php endfor; ?>
+                <button type="button" onclick="window.loadSellingBudgetPage &amp;&amp; window.loadSellingBudgetPage(<?= $nextP ?>)" class="px-2.5 py-1 rounded-lg border border-stroke dark:border-strokedark hover:bg-white dark:hover:bg-meta-4 <?= $pg >= $pages ? 'opacity-40 pointer-events-none' : '' ?>">Next</button>
+            </div>
+        </div>
+
         <div class="p-4 bg-gray-50 dark:bg-meta-4/30 border-t border-stroke dark:border-strokedark flex justify-end">
             <button type="submit" :disabled="isSaving" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-medium hover:bg-opacity-90 transition-all disabled:opacity-50">
                 <span x-text="isSaving ? 'Saving...' : 'Save Budget Selling Data'">Save Budget Selling Data</span>

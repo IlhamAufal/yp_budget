@@ -46,6 +46,55 @@ class User extends BaseController
         ]);
     }
 
+    /**
+     * Form partial untuk Global Modal — Tambah / Edit User.
+     *
+     * Endpoint: GET /sys-admin/form?id=xxx (optional)
+     * Hanya bisa diakses via AJAX. Mengembalikan partial view tanpa layout.
+     *
+     * @return string|ResponseInterface
+     */
+    public function formModal()
+    {
+        // Guard: hanya terima request AJAX
+        if (! $this->request->isAJAX()) {
+            return redirect()->to(base_url('sys-admin/user'));
+        }
+
+        $allRoles = $this->roleModel->getAll(['status' => 'Y']);
+
+        // Pisahkan role menu vs object
+        $roles    = array_values(array_filter($allRoles, fn($r) => ($r['role_type'] ?? 'menu') === 'menu'));
+        $rolesObj = array_values(array_filter($allRoles, fn($r) => ($r['role_type'] ?? 'menu') === 'object'));
+
+        // Format untuk frontend
+        $roles    = array_map(fn($r) => ['role_id' => (int) $r['role_id'], 'role_name_idn' => $r['role_name_idn']], $roles);
+        $rolesObj = array_map(fn($r) => ['role_id' => (int) $r['role_id'], 'role_name_idn' => $r['role_name_idn']], $rolesObj);
+
+        // Jika edit mode (id parameter ada)
+        $user = null;
+        $id   = (int) $this->request->getGet('id');
+        if ($id > 0) {
+            $users = $this->userModel->getAllUsers([]);
+            foreach ($users as $u) {
+                if ((int) $u['user_id'] === $id) {
+                    // Parse role_ids string ke array
+                    $u['role_ids']     = array_filter(explode(',', $u['menu_role_ids'] ?? ''));
+                    $u['obj_role_ids'] = array_filter(explode(',', $u['obj_role_ids'] ?? ''));
+                    $user = $u;
+                    break;
+                }
+            }
+        }
+
+        return view('sys-admin/user-form', [
+            'roles'    => $roles,
+            'rolesObj' => $rolesObj,
+            'user'     => $user,
+            'baseUrl'  => base_url(),
+        ]);
+    }
+
     public function save(): ResponseInterface
     {
         $data = $this->request->getPost();

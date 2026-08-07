@@ -1,14 +1,14 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div x-data="opexSellingEntryHandler()" @open-selling-breakdown.window="openDetail($event.detail.id)" class="p-4 md:p-6 lg:p-8 space-y-8 pb-12">
+<div x-data="opexSellingEntryHandler()" @open-selling-breakdown.window="openDetail($event.detail.id)" @opex-selling-page.window="goPage($event.detail.page)" class="p-4 md:p-6 lg:p-8 space-y-8 pb-12">
 
     <div class="p-6 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-3 w-full md:w-auto">
             <label for="deptSelect" class="text-xs md:text-sm font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">Department / Cost Center:</label>
             <select id="deptSelect" 
                     x-model="selectedDept" 
-                    @change="loadBudgetSummary()" 
+                    @change="currentPage = 1; loadBudgetSummary()" 
                     class="w-full sm:w-80 px-3.5 py-2 text-xs md:text-sm bg-gray-50 dark:bg-meta-4/40 border border-stroke dark:border-strokedark rounded-xl text-gray-900 dark:text-white focus:border-primary focus:outline-none">
                 <option value="">-- Pilih Cost Center Selling --</option>
                 <?php foreach ($dept as $d) : ?>
@@ -72,6 +72,7 @@ function opexSellingEntryHandler() {
         isLoading: false,
         tableHtml: '',
         uploadModalOpen: false,
+        currentPage: 1,
 
         loadBudgetSummary() {
             if (!this.selectedDept) return;
@@ -80,7 +81,7 @@ function opexSellingEntryHandler() {
             fetch('<?= base_url('opex_selling/entryBudgetDetail'); ?>', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
-                body: new URLSearchParams({ dept: this.selectedDept })
+                body: new URLSearchParams({ dept: this.selectedDept, page: this.currentPage })
             })
             .then(res => res.text())
             .then(html => {
@@ -91,10 +92,23 @@ function opexSellingEntryHandler() {
                 this.isLoading = false;
                 console.error(err);
             });
+        },
+
+        goPage(page) {
+            const p = parseInt(page, 10);
+            if (!p || p < 1) return;
+            this.currentPage = p;
+            this.loadBudgetSummary();
         }
     }
 }
+  
 
+// Pager tabel AJAX — di-forward ke Alpine scope via custom event.
+window.loadSellingBudgetPage = function (page) {
+    document.dispatchEvent(new CustomEvent('opex-selling-page', { detail: { page } }));
+};
+        
 // Handler breakdown dari tombol pada tabel yang di-inject via AJAX.
 // Tabel di-render server-side; tombol memanggil fungsi global ini,
 // lalu di-forward ke Alpine scope melalui custom event.

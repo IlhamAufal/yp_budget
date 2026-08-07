@@ -74,10 +74,25 @@
                 </tbody>
             </table>
         </div>
+
+        <?php $totalPages = max(1, (int) ceil(($total ?? 0) / max(1, $perPage ?? 10))); ?>
+        <?php if (($total ?? 0) > 0): ?>
+        <div class="flex items-center justify-between px-5 py-4 border-t border-gray-200/80 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 text-xs text-gray-500">
+            <span>Halaman <?= $page ?> dari <?= $totalPages ?></span>
+            <div class="flex items-center gap-1.5">
+                <a href="?page=<?= max(1, $page - 1) ?>" class="px-2.5 py-1 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 <?= $page <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">Prev</a>
+                <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+                    <a href="?page=<?= $p ?>" class="px-2.5 py-1 rounded-lg border <?= $p === $page ? 'bg-brand-500 text-white border-brand-500 font-bold' : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800' ?>"><?= $p ?></a>
+                <?php endfor; ?>
+                <a href="?page=<?= min($totalPages, $page + 1) ?>" class="px-2.5 py-1 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 <?= $page >= $totalPages ? 'opacity-40 pointer-events-none' : '' ?>">Next</a>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 
     <!-- Modal Dialog CAPEX -->
-    <div x-show="openModal" x-teleport="body" class="fixed inset-0 z-[9999999] overflow-y-auto" x-cloak>
+    <template x-teleport="body">
+    <div x-show="openModal" class="fixed inset-0 z-[9999999] overflow-y-auto" x-cloak>
         <div class="fixed inset-0" style="background-color: rgba(0,0,0,0.65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);" @click="openModal = false"></div>
         <div class="relative flex min-h-full items-center justify-center p-4">
             <div class="relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 w-full max-w-md rounded-2xl shadow-xl overflow-hidden z-10">
@@ -138,13 +153,7 @@
             </div>
         </div>
     </div>
-
-    <!-- MODAL MANUAL BOOK (reusable partial) -->
-    <?= $this->include('partials/manual_book_modal', [
-        'mbTitle'     => 'Manual Book - Input CAPEX',
-        'mbPdfUrl'    => base_url('assets/docs/manual_book_capex.pdf'),
-        'mbPdfExists' => is_file(FCPATH . 'assets/docs/manual_book_capex.pdf'),
-    ]) ?>
+    </template>
 
 </div>
 
@@ -195,4 +204,13 @@ function capexEntryHandler() {
     }
 }
 </script>
+<?= $this->endSection() ?>
+
+<?= $this->section('modals') ?>
+  <!-- MODAL MANUAL BOOK (reusable partial) — dirender di luar wrapper layout -->
+  <?= $this->include('partials/manual_book_modal', [
+      'mbTitle'     => 'Manual Book - Input CAPEX',
+      'mbPdfUrl'    => base_url('assets/docs/manual_book_capex.pdf'),
+      'mbPdfExists' => is_file(FCPATH . 'assets/docs/manual_book_capex.pdf'),
+  ]) ?>
 <?= $this->endSection() ?>

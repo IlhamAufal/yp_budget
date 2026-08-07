@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
 
-<div class="p-4 md:p-8 mx-auto max-w-(--breakpoint-2xl) space-y-6 md:space-y-8" x-data="userPage()">
+<div class="p-4 md:p-8 mx-auto max-w-(--breakpoint-2xl) space-y-6 md:space-y-8" x-data="userPage()" @modal-saved.window="if($event.detail.entity === 'user') setTimeout(() => location.reload(), 600)">
 
   <!-- ============================================================ -->
   <!-- BREADCRUMB & HEADER -->
@@ -33,7 +33,7 @@
     <div class="flex flex-wrap items-center gap-3">
       <button
         type="button"
-        @click="openCreateModal()"
+        @click="Modal.show({ url: '<?= base_url('sys-admin/user/form') ?>', title: 'Tambah User Baru', size: 'lg' })"
         class="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-5 py-3 text-sm font-bold text-white shadow-md hover:bg-brand-600 transition-all"
       >
         <i class="fa-solid fa-plus"></i>
@@ -237,17 +237,7 @@
                     </button>
                     <button
                       type="button"
-                      @click="openEditModal(<?= htmlspecialchars(json_encode([
-                        'user_id'      => (int) $r['user_id'],
-                        'user_username'=> $r['user_username'],
-                        'user_name'    => $r['user_name'],
-                        'user_email'   => $r['user_email'],
-                        'user_active'  => $r['user_active'],
-                        'user_admin'   => $r['user_admin'],
-                        'user_block'   => $r['user_block'],
-                        'role_ids'     => array_values($menuRoleIds),
-                        'obj_role_ids' => array_values($objRoleIds),
-                      ]), ENT_QUOTES, 'UTF-8') ?>)"
+                      @click="Modal.show({ url: '<?= base_url('sys-admin/user/form') ?>?id=<?= (int)$r['user_id'] ?>', title: 'Edit User', size: 'lg' })"
                       class="h-9 w-9 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-brand-500 hover:bg-brand-50 hover:border-brand-200 dark:hover:bg-brand-500/10 transition-colors flex items-center justify-center shadow-2xs"
                       title="Edit User"
                     >
@@ -335,288 +325,9 @@
   </div>
 
   <!-- ============================================================ -->
-  <!-- MODAL: TAMBAH / EDIT USER -->
+  <!-- MODAL: TAMBAH / EDIT USER                                   -->
+  <!-- MIGRATED → Global Modal (Modal.show) via sys-admin/user-form.php -->
   <!-- ============================================================ -->
-  <div
-    x-show="modalOpen"
-    x-transition:enter="transition ease-out duration-250"
-    x-transition:enter-start="opacity-0"
-    x-transition:enter-end="opacity-100"
-    x-transition:leave="transition ease-in duration-200"
-    x-transition:leave-start="opacity-100"
-    x-transition:leave-end="opacity-0"
-    class="fixed inset-0 flex items-center justify-center p-4"
-    style="z-index: 9999999; background-color: rgba(0,0,0,0.65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);"
-    @click.self="modalOpen = false"
-    x-cloak
-  >
-    <div
-      x-show="modalOpen"
-      x-transition:enter="transition ease-out duration-300"
-      x-transition:enter-start="opacity-0 scale-95 translate-y-3"
-      x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-      x-transition:leave="transition ease-in duration-150"
-      x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-      x-transition:leave-end="opacity-0 scale-95 translate-y-3"
-      class="relative w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-gray-900 border border-gray-100 dark:border-gray-800 overflow-hidden"
-    >
-      <!-- Modal Header -->
-      <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-        <div class="flex items-center gap-4">
-          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-400">
-            <i class="fa-solid fa-users-gear text-lg"></i>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white" x-text="form.id ? 'Edit User' : 'Tambah User Baru'"></h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400" x-text="form.id ? 'Perbarui detail akun pengguna' : 'Isi formulir untuk mendaftarkan pengguna baru'"></p>
-          </div>
-        </div>
-        <button
-          type="button"
-          @click="modalOpen = false"
-          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-        >
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-
-      <!-- Modal Form -->
-      <form @submit.prevent="saveUser()" class="p-6 space-y-6">
-        <input type="hidden" x-model="form.id" />
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
-              Username <span class="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              x-model="form.user_username"
-              required
-              maxlength="10"
-              placeholder="Contoh: budi01"
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-mono font-bold text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
-            />
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
-              Nama Lengkap <span class="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              x-model="form.user_name"
-              required
-              placeholder="Contoh: Budi Santoso"
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
-            />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              x-model="form.user_email"
-              placeholder="Contoh: budi@company.com"
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
-            />
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
-              Password <span class="text-red-500" x-show="!form.id">*</span>
-              <span class="normal-case font-medium" x-show="form.id">(kosongkan jika tidak diubah)</span>
-            </label>
-            <input
-              type="password"
-              x-model="form.user_password"
-              :required="!form.id"
-              minlength="6"
-              placeholder="<?= 'Minimal 6 karakter' ?>"
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-mono text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
-            />
-          </div>
-        </div>
-
-        <!-- Role Assignment (satu role per user) -->
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
-            Role Pengguna <span class="text-red-500">*</span>
-          </label>
-          <div class="relative" @click.outside="roleDropdownOpen = false">
-            <!-- Trigger -->
-            <button
-              type="button"
-              @click="roleDropdownOpen = !roleDropdownOpen"
-              class="w-full flex items-center justify-between gap-3 rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-left font-semibold text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
-            >
-              <span class="flex items-center gap-2.5">
-                <i class="fa-solid text-gray-400"></i>
-                <span x-text="roleLabel()" :class="form.role_id ? '' : 'text-gray-400 dark:text-gray-500'"></span>
-              </span>
-              <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform" :class="roleDropdownOpen ? 'rotate-180' : ''"></i>
-            </button>
-
-            <!-- Dropdown + Search (search muncul saat dropdown dibuka) -->
-            <div
-              x-show="roleDropdownOpen"
-              x-transition:enter="transition ease-out duration-150"
-              x-transition:enter-start="opacity-0 scale-95"
-              x-transition:enter-end="opacity-100 scale-100"
-              x-transition:leave="transition ease-in duration-100"
-              x-transition:leave-start="opacity-100 scale-100"
-              x-transition:leave-end="opacity-0 scale-95"
-              class="absolute z-20 mt-2 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl overflow-hidden"
-            >
-              <div class="relative border-b border-gray-100 dark:border-gray-800">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none"></i>
-                <input
-                  type="text"
-                  x-model="roleSearch"
-                  placeholder="Cari role..."
-                  class="w-full bg-transparent py-3 pl-11 pr-4 text-sm text-gray-800 dark:text-white placeholder:text-gray-400 focus:outline-none"
-                />
-              </div>
-              <div class="max-h-56 overflow-y-auto py-1.5">
-                <template x-for="role in filteredRoles()" :key="role.role_id">
-                  <button
-                    type="button"
-                    @click="pickRole(role.role_id)"
-                    class="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-sm text-left transition-colors"
-                    :class="String(form.role_id) === String(role.role_id) ? 'bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400 font-semibold' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'"
-                  >
-                    <span class="flex items-center gap-2.5">
-                      <i class="fa-solid text-xs text-gray-400"></i>
-                      <span x-text="role.role_name_idn"></span>
-                    </span>
-                    <i class="fa-solid fa-check text-xs" x-show="String(form.role_id) === String(role.role_id)"></i>
-                  </button>
-                </template>
-                <p x-show="filteredRoles().length === 0" class="px-4 py-6 text-center text-xs text-gray-400">Tidak ada role yang cocok.</p>
-              </div>
-            </div>
-          </div>
-          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">Pilih <strong>role menu</strong> (hak akses halaman) untuk pengguna ini.</p>
-        <!-- Object Role (scope data) -->
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
-            Object Role (Scope Data)
-          </label>
-          <div class="relative" @click.outside="objRoleDropdownOpen = false">
-            <button
-              type="button"
-              @click="objRoleDropdownOpen = !objRoleDropdownOpen"
-              class="w-full flex items-center justify-between gap-3 rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-left font-semibold text-gray-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
-            >
-              <span class="flex items-center gap-2.5">
-                <i class="fa-solid fa-eye text-gray-400"></i>
-                <span x-text="objRoleLabel()" :class="form.role_id_obj ? '' : 'text-gray-400 dark:text-gray-500'"></span>
-              </span>
-              <i class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform" :class="objRoleDropdownOpen ? 'rotate-180' : ''"></i>
-            </button>
-
-            <div
-              x-show="objRoleDropdownOpen"
-              x-transition:enter="transition ease-out duration-150"
-              x-transition:enter-start="opacity-0 scale-95"
-              x-transition:enter-end="opacity-100 scale-100"
-              x-transition:leave="transition ease-in duration-150"
-              x-transition:leave-start="opacity-100 scale-100"
-              x-transition:leave-end="opacity-0 scale-95"
-              class="absolute z-20 mt-2 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl overflow-hidden"
-            >
-              <div class="relative border-b border-gray-100 dark:border-gray-800">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none"></i>
-                <input
-                  type="text"
-                  x-model="objRoleSearch"
-                  placeholder="Cari object role..."
-                  class="w-full bg-transparent py-3 pl-11 pr-4 text-sm text-gray-800 dark:text-white placeholder:text-gray-400 focus:outline-none"
-                />
-              </div>
-              <div class="max-h-56 overflow-y-auto py-1.5">
-                <template x-for="role in filteredObjRoles()" :key="role.role_id">
-                  <button
-                    type="button"
-                    @click="pickObjRole(role.role_id)"
-                    class="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-sm text-left transition-colors"
-                    :class="String(form.role_id_obj) === String(role.role_id) ? 'bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 font-semibold' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'"
-                  >
-                    <span class="flex items-center gap-2.5">
-                      <i class="fa-solid fa-eye text-xs text-gray-400"></i>
-                      <span x-text="role.role_name_idn"></span>
-                    </span>
-                    <i class="fa-solid fa-check text-xs" x-show="String(form.role_id_obj) === String(role.role_id)"></i>
-                  </button>
-                </template>
-                <p x-show="filteredObjRoles().length === 0" class="px-4 py-6 text-center text-xs text-gray-400">Tidak ada object role yang cocok.</p>
-              </div>
-            </div>
-          </div>
-          <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">Menentukan <strong>scope data</strong> (department / cost center) yang dapat diakses.</p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <!-- Status -->
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
-              Status <span class="text-red-500">*</span>
-            </label>
-            <select
-              x-model="form.user_active"
-              required
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
-            >
-              <option value="Y">Aktif (Y)</option>
-              <option value="N">Non-Aktif (N)</option>
-            </select>
-          </div>
-
-          <!-- Block -->
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
-              Blokir Akun
-            </label>
-            <select
-              x-model="form.user_block"
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
-            >
-              <option value="N">Tidak (N)</option>
-              <option value="Y">Ya (Y)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 p-4 text-sm text-amber-800 dark:text-amber-300 flex items-start gap-3">
-          <i class="fa-solid fa-circle-info text-amber-500 mt-0.5 shrink-0"></i>
-          <span>Perubahan role baru berlaku saat pengguna <strong>login ulang</strong>.</span>
-        </div>
-
-        <!-- Form Actions -->
-        <div class="pt-6 flex items-center justify-end gap-3 border-t border-gray-100 dark:border-gray-800">
-          <button
-            type="button"
-            @click="modalOpen = false"
-            class="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-5 py-3 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-          >
-            Batal
-          </button>
-          <button
-            type="submit"
-            :disabled="saving"
-            class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-500 px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/40 disabled:opacity-50 transition-colors"
-          >
-            <i class="fa-solid fa-spinner fa-spin" x-show="saving"></i>
-            <span x-text="saving ? 'Menyimpan...' : (form.id ? 'Perbarui User' : 'Simpan User')"></span>
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
 
   <!-- ============================================================ -->
   <!-- MODAL: RESET PASSWORD -->
@@ -734,11 +445,12 @@
 <script>
   function userPage() {
     return {
+      // ─── Legacy props (kept to prevent Alpine errors) ───────────
       modalOpen: false,
-      resetModalOpen: false,
       saving: false,
       resetting: false,
 
+      // ─── Role data (still used by other parts if needed) ────────
       roleOptions: <?= json_encode(array_values(array_filter(array_map(fn($rl) => array_merge(['role_id' => (int) $rl['role_id'], 'role_name_idn' => $rl['role_name_idn']], ['role_type' => ($rl['role_type'] ?? 'menu')]), $roles ?? []), fn($r) => $r['role_type'] === 'menu'))) ?>,
       roleOptionsObj: <?= json_encode(array_values(array_filter(array_map(fn($rl) => array_merge(['role_id' => (int) $rl['role_id'], 'role_name_idn' => $rl['role_name_idn']], ['role_type' => ($rl['role_type'] ?? 'menu')]), $roles ?? []), fn($r) => $r['role_type'] === 'object'))) ?>,
 
@@ -782,147 +494,12 @@
         return [1, '...', current - 1, current, current + 1, '...', total];
       },
 
-      form: {
-        id: null,
-        user_username: '',
-        user_name: '',
-        user_email: '',
-        user_password: '',
-        user_active: 'Y',
-        user_block: 'N',
-        role_id: '',
-        role_id_obj: ''
-      },
-
-      // Dropdown role (searchable)
-      roleDropdownOpen: false,
-      roleSearch: '',
-      objRoleDropdownOpen: false,
-      objRoleSearch: '',
-
+      // Reset Password
+      resetModalOpen: false,
       resetForm: {
         userId: null,
         userName: '',
         user_password: ''
-      },
-
-      openCreateModal() {
-        this.form = {
-          id: null,
-          user_username: '',
-          user_name: '',
-          user_email: '',
-          user_password: '',
-          user_active: 'Y',
-          user_block: 'N',
-          role_id: '',
-          role_id_obj: ''
-        };
-        this.roleSearch = '';
-        this.objRoleSearch = '';
-        this.objRoleDropdownOpen = false;
-        this.modalOpen = true;
-      },
-
-      openEditModal(row) {
-        this.form = {
-          id: row.user_id,
-          user_username: row.user_username || '',
-          user_name: row.user_name || '',
-          user_email: row.user_email || '',
-          user_password: '',
-          user_active: row.user_active || 'Y',
-          user_block: row.user_block || 'N',
-          role_id: Array.isArray(row.role_ids) && row.role_ids.length ? String(row.role_ids[0]) : '',
-          role_id_obj: Array.isArray(row.obj_role_ids) && row.obj_role_ids.length ? String(row.obj_role_ids[0]) : ''
-        };
-        this.roleSearch = '';
-        this.objRoleSearch = '';
-        this.objRoleDropdownOpen = false;
-        this.modalOpen = true;
-      },
-
-      roleLabel() {
-        if (!this.form.role_id) {
-          return '— Pilih Role —';
-        }
-        const found = this.roleOptions.find(r => String(r.role_id) === String(this.form.role_id));
-        return found ? found.role_name_idn : 'Role #' + this.form.role_id;
-      },
-
-      filteredRoles() {
-        const q = (this.roleSearch || '').toLowerCase().trim();
-        if (!q) {
-          return this.roleOptions;
-        }
-        return this.roleOptions.filter(r =>
-          String(r.role_name_idn || '').toLowerCase().includes(q)
-        );
-      },
-
-      pickRole(id) {
-        this.form.role_id = String(id);
-        this.roleDropdownOpen = false;
-        this.roleSearch = '';
-      },
-
-      objRoleLabel() {
-        if (!this.form.role_id_obj) {
-          return '— Pilih Object Role —';
-        }
-        const found = this.roleOptionsObj.find(r => String(r.role_id) === String(this.form.role_id_obj));
-        return found ? found.role_name_idn : 'Role #' + this.form.role_id_obj;
-      },
-
-      filteredObjRoles() {
-        const q = (this.objRoleSearch || '').toLowerCase().trim();
-        if (!q) {
-          return this.roleOptionsObj;
-        }
-        return this.roleOptionsObj.filter(r =>
-          String(r.role_name_idn || '').toLowerCase().includes(q)
-        );
-      },
-
-      pickObjRole(id) {
-        this.form.role_id_obj = String(id);
-        this.objRoleDropdownOpen = false;
-        this.objRoleSearch = '';
-      },
-
-      async saveUser() {
-        this.saving = true;
-        try {
-          const body = new URLSearchParams();
-          body.append('has_role_ids', '1');
-          for (const [key, value] of Object.entries(this.form)) {
-            // role_id & role_id_obj dikirim terpisah sebagai role_ids[] agar cocok dengan backend
-            if (key === 'role_id' || key === 'role_id_obj') {
-              continue;
-            }
-            if (value !== null && value !== undefined && value !== '') {
-              body.append(key, value);
-            }
-          }
-          if (this.form.role_id) {
-            body.append('role_ids[]', this.form.role_id);
-          }
-          if (this.form.role_id_obj) {
-            body.append('role_ids[]', this.form.role_id_obj);
-          }
-          const res = await window.ypFetch('<?= base_url('sys-admin/api/user/save') ?>', body);
-          if (res.success) {
-            window.showToast('success', res.message || 'User berhasil disimpan');
-            this.modalOpen = false;
-            setTimeout(() => window.location.reload(), 600);
-          } else {
-            window.showToast('error', res.message || 'Gagal menyimpan user');
-          }
-        } catch (e) {
-          window.showToast('error', 'Terjadi kesalahan sistem');
-        } finally {
-          this.saving = false;
-        }
       },
 
       toggleStatus(id, actionText) {

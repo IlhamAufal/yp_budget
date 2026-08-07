@@ -37,13 +37,21 @@ class CapexController extends BaseController
         $segment = $uri->getSegment(1) . '/' . $uri->getSegment(2);
         $isValid = $this->capexModel->logAccess($user, $segment, $year);
 
+        $page    = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $perPage = 10;
+        $total   = $this->capexModel->countCapexItems($year);
+        $offset  = ($page - 1) * $perPage;
+
         $data = [
             'validasi'     => $isValid ? 'OK' : 'NOPE',
             'working_year' => $year,
             'namax'        => $user,
             'categories'   => $this->getAssetCategories(),
-            'capex_items'  => $this->capexModel->getCapexItems($year),
+            'capex_items'  => $this->capexModel->getCapexItems($year, $offset, $perPage),
             'deptx'        => $this->capexModel->getCostCenters($this->getUserDeptList()),
+            'page'         => $page,
+            'perPage'      => $perPage,
+            'total'        => $total,
         ];
 
         return view('capex/entry', $data);

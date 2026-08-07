@@ -257,7 +257,7 @@ class CapexModel extends Model
      * Daftar item CAPEX yang sudah di-entry pada tahun tertentu.
      * Mapping ke kontrak view TailAdmin (asset_description, category_name, dll).
      */
-    public function getCapexItems(string $year): array
+    public function getCapexItems(string $year, ?int $offset = null, ?int $perPage = null): array
     {
         $sql = "SELECT h.id,
                        h.item_desc AS asset_description,
@@ -273,10 +273,26 @@ class CapexModel extends Model
                 LEFT JOIN gw_plan__master_coa c ON c.main_account = h.main_account
                 WHERE h.year_code = ?
                 ORDER BY h.id DESC";
+
+        if ($perPage !== null) {
+            $sql .= ' LIMIT ' . (int) $perPage . ' OFFSET ' . (int) $offset;
+        }
+
         try {
             return $this->db->query($sql, [$year])->getResultArray();
         } catch (\Throwable $e) {
             return [];
+        }
+    }
+
+    public function countCapexItems(string $year): int
+    {
+        $sql = "SELECT COUNT(*) AS total FROM yp_plan__trans_capex_entry_header h WHERE h.year_code = ?";
+        try {
+            $row = $this->db->query($sql, [$year])->getRowArray();
+            return (int) ($row['total'] ?? 0);
+        } catch (\Throwable $e) {
+            return 0;
         }
     }
 

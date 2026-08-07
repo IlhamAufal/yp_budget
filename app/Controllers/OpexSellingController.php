@@ -73,13 +73,25 @@ class OpexSellingController extends BaseController
             $builder->where('t.id_dept', $dept);
         }
 
-        $query = $builder->orderBy('t.id_coa', 'ASC')->get()->getResultArray();
+        // Server-side pagination (specific: page via POST)
+        $page    = max(1, (int) ($this->request->getPost('page') ?? 1));
+        $perPage = 10;
+        $total   = (clone $builder)->countAllResults();
+        $offset  = ($page - 1) * $perPage;
+
+        $query = $builder->orderBy('t.id_coa', 'ASC')
+            ->limit($perPage, $offset)
+            ->get()
+            ->getResultArray();
 
         return view('opex_selling/entry_budget_table', [
-            'filex'  => $query,
-            'header' => $header,
-            'idx'    => $idx,
-            'dept'   => $dept,
+            'filex'   => $query,
+            'header'  => $header,
+            'idx'     => $idx,
+            'dept'    => $dept,
+            'page'    => $page,
+            'perPage' => $perPage,
+            'total'   => $total,
         ]);
     }
 

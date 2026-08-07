@@ -7,13 +7,18 @@
  * OPEX GA dan Entry CAPEX agar konsisten.
  *
  * Cara pakai di view pemanggil:
- *   1. Include partial ini di dalam halaman (boleh di dalam root
- *      Alpine component atau tidak):
- *        <?= $this->include('partials/manual_book_modal', [
- *            'mbTitle'     => 'Manual Book - Input OPEX GA',
- *            'mbPdfUrl'    => base_url('assets/docs/manual_book_opex_ga.pdf'),
- *            'mbPdfExists' => is_file(FCPATH . 'assets/docs/manual_book_opex_ga.pdf'),
- *        ]) ?>
+ *   1. Include partial ini di dalam SECTION 'modals' (WAJIB) agar dirender
+ *      di luar wrapper layout (layouts/main.php) — sama seperti
+ *      partials/modal_select_year.php. Kalau include di dalam section
+ *      'content', overlay modal hanya menutupi area konten dan tertutup
+ *      layer navbar/sidebar.
+ *        <?= $this->section('modals') ?>
+ *          <?= $this->include('partials/manual_book_modal', [
+ *              'mbTitle'     => 'Manual Book - Input OPEX GA',
+ *              'mbPdfUrl'    => base_url('assets/docs/manual_book_opex_ga.pdf'),
+ *              'mbPdfExists' => is_file(FCPATH . 'assets/docs/manual_book_opex_ga.pdf'),
+ *          ]) ?>
+ *        <?= $this->endSection() ?>
  *   2. Trigger dari tombol mana pun di halaman:
  *        <button type="button" @click="openManualBook()">Manual Book</button>
  * ===================================================================== */
@@ -30,7 +35,6 @@ $mbPdfExists = $mbPdfExists ?? false;
 <div
   x-data="manualBookModal('<?= esc($mbPdfUrl, 'js') ?>', <?= $mbPdfExists ? 'true' : 'false' ?>, '<?= esc($mbTitle, 'js') ?>')"
   x-cloak
-  x-teleport="body"
   @keydown.escape.window="open = false"
 >
   <!-- Overlay -->

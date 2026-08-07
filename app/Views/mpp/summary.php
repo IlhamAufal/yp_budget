@@ -53,6 +53,19 @@
                 </tbody>
             </table>
         </div>
+        <?php $totalPages = max(1, (int) ceil(($total ?? 0) / max(1, $perPage ?? 10))); ?>
+        <?php if (($total ?? 0) > 0): ?>
+        <div class="px-6 py-4 border-t border-gray-200/80 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20 flex items-center justify-between text-xs text-gray-500">
+            <span>Halaman <?= $page ?> dari <?= $totalPages ?></span>
+            <div class="flex items-center gap-1.5">
+                <a href="?page=<?= max(1, $page - 1) ?>" class="px-2.5 py-1 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 <?= $page <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">Prev</a>
+                <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+                    <a href="?page=<?= $p ?>" class="px-2.5 py-1 rounded-lg border <?= $p === $page ? 'bg-brand-500 text-white border-brand-500 font-bold' : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800' ?>"><?= $p ?></a>
+                <?php endfor; ?>
+                <a href="?page=<?= min($totalPages, $page + 1) ?>" class="px-2.5 py-1 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 <?= $page >= $totalPages ? 'opacity-40 pointer-events-none' : '' ?>">Next</a>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 

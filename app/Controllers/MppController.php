@@ -93,12 +93,20 @@ class MppController extends BaseController
     public function summary(): string
     {
         $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
-        
+
+        $page    = max(1, (int) ($this->request->getGet('page') ?? 1));
+        $perPage = 10;
+        $total   = $this->mppModel->countSummaryWithSalary($workingYear);
+        $offset  = ($page - 1) * $perPage;
+
         $data = [
             'title'       => 'Summary Headcount & Salary Integration',
             'workingYear' => $workingYear,
             'departments' => $this->getDepartmentList(),
-            'summary'     => $this->mppModel->getSummaryWithSalary($workingYear)
+            'summary'     => $this->mppModel->getSummaryWithSalary($workingYear, null, $offset, $perPage),
+            'page'        => $page,
+            'perPage'     => $perPage,
+            'total'       => $total,
         ];
 
         return view('mpp/summary', $data);
