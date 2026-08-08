@@ -238,6 +238,125 @@ class CapexModel extends Model
      * ============================================================ */
 
     /**
+     * Semua cost center aktif (untuk dropdown filter summary).
+     */
+    public function getAllCostCenters(): array
+    {
+        return $this->db->table('gw_plan__master_cost_center')
+            ->select("cost_center, COALESCE(NULLIF(cost_center_sap,''), CAST(cost_center AS CHAR)) AS cc_code, cost_desc, cost_center_sap")
+            ->where('status', 'A')
+            ->orderBy('cost_center', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * Summary View All — seluruh rincian transaksi CAPEX detail.
+     */
+    public function getSummaryViewAll(string $year, ?string $dept = null): array
+    {
+        $sql = "SELECT h.id,
+                       h.item_desc AS description,
+                       COALESCE(NULLIF(c.id_acct_ext,''), h.main_account, 0) AS account,
+                       h.dept_id AS cost_center,
+                       h.unit AS qty,
+                       h.unit_price,
+                       COALESCE(h.remarks, '') AS remarks,
+                       IFNULL(d.`1`,0) AS jan, IFNULL(d.`2`,0) AS feb, IFNULL(d.`3`,0) AS mar,
+                       IFNULL(d.`4`,0) AS apr, IFNULL(d.`5`,0) AS may, IFNULL(d.`6`,0) AS jun,
+                       IFNULL(d.`7`,0) AS jul, IFNULL(d.`8`,0) AS aug, IFNULL(d.`9`,0) AS sep,
+                       IFNULL(d.`10`,0) AS oct, IFNULL(d.`11`,0) AS nov, IFNULL(d.`12`,0) AS `dec`,
+                       IFNULL(d.total, 0) AS total
+                FROM yp_plan__trans_capex_entry_header h
+                LEFT JOIN yp_plan__trans_capex_entry_detail d ON d.id_header = h.id
+                LEFT JOIN gw_plan__master_coa c ON c.main_account = h.main_account
+                WHERE h.year_code = ?";
+
+        $params = [$year];
+
+        if (! empty($dept)) {
+            $sql .= ' AND h.dept_id = ?';
+            $params[] = $dept;
+        }
+
+        $sql .= ' ORDER BY h.id DESC';
+
+        try {
+            return $this->db->query($sql, $params)->getResultArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Summary Acquisition — GROUP BY kategori aset (main_account).
+     */
+    public function getSummaryAcquisition(string $year, ?string $dept = null): array
+    {
+        $sql = "SELECT COALESCE(NULLIF(c.id_acct_ext,''), h.main_account, 0) AS category_code,
+                       COALESCE(c.cost_center_desc, CONCAT('Asset ', h.main_account)) AS category_name,
+                       IFNULL(SUM(d.`1`),0) AS jan, IFNULL(SUM(d.`2`),0) AS feb, IFNULL(SUM(d.`3`),0) AS mar,
+                       IFNULL(SUM(d.`4`),0) AS apr, IFNULL(SUM(d.`5`),0) AS may, IFNULL(SUM(d.`6`),0) AS jun,
+                       IFNULL(SUM(d.`7`),0) AS jul, IFNULL(SUM(d.`8`),0) AS aug, IFNULL(SUM(d.`9`),0) AS sep,
+                       IFNULL(SUM(d.`10`),0) AS oct, IFNULL(SUM(d.`11`),0) AS nov, IFNULL(SUM(d.`12`),0) AS `dec`,
+                       IFNULL(SUM(d.total), 0) AS total
+                FROM yp_plan__trans_capex_entry_header h
+                LEFT JOIN yp_plan__trans_capex_entry_detail d ON d.id_header = h.id
+                LEFT JOIN gw_plan__master_coa c ON c.main_account = h.main_account
+                WHERE h.year_code = ?";
+
+        $params = [$year];
+
+        if (! empty($dept)) {
+            $sql .= ' AND h.dept_id = ?';
+            $params[] = $dept;
+        }
+
+        $sql .= ' GROUP BY h.main_account, c.id_acct_ext, c.cost_center_desc
+                  ORDER BY h.main_account ASC';
+
+        try {
+            return $this->db->query($sql, $params)->getResultArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Summary Depreciation — GROUP BY kategori aset, kalkulasi depresiasi.
+     */
+    public function getSummaryDepreciation(string $year, ?string $dept = null): array
+    {
+        $sql = "SELECT COALESCE(NULLIF(c.id_acct_ext,''), h.main_account, 0) AS category_code,
+                       COALESCE(c.cost_center_desc, CONCAT('Asset ', h.main_account)) AS category_name,
+                       IFNULL(SUM(dep.`1`),0) AS jan, IFNULL(SUM(dep.`2`),0) AS feb, IFNULL(SUM(dep.`3`),0) AS mar,
+                       IFNULL(SUM(dep.`4`),0) AS apr, IFNULL(SUM(dep.`5`),0) AS may, IFNULL(SUM(dep.`6`),0) AS jun,
+                       IFNULL(SUM(dep.`7`),0) AS jul, IFNULL(SUM(dep.`8`),0) AS aug, IFNULL(SUM(dep.`9`),0) AS sep,
+                       IFNULL(SUM(dep.`10`),0) AS oct, IFNULL(SUM(dep.`11`),0) AS nov, IFNULL(SUM(dep.`12`),0) AS `dec`,
+                       IFNULL(SUM(dep.total), 0) AS total
+                FROM yp_plan__trans_capex_entry_header h
+                LEFT JOIN yp_plan__trans_capex_entry_depreciation dep ON dep.id_header = h.id
+                LEFT JOIN gw_plan__master_coa c ON c.main_account = h.main_account
+                WHERE h.year_code = ?";
+
+        $params = [$year];
+
+        if (! empty($dept)) {
+            $sql .= ' AND h.dept_id = ?';
+            $params[] = $dept;
+        }
+
+        $sql .= ' GROUP BY h.main_account, c.id_acct_ext, c.cost_center_desc
+                  ORDER BY h.main_account ASC';
+
+        try {
+            return $this->db->query($sql, $params)->getResultArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    /**
      * Master depresiasi (kategori aset) untuk dropdown Entry CAPEX.
      */
     public function getDepreciationMasters(): array

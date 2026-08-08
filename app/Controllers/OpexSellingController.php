@@ -26,6 +26,10 @@ class OpexSellingController extends BaseController
         $this->db = \Config\Database::connect();
     }
 
+    /* ------------------------------------------------------------------
+     * Index & Entry Budget
+     * ------------------------------------------------------------------ */
+
     public function index(): string
     {
         $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
@@ -33,7 +37,7 @@ class OpexSellingController extends BaseController
         return view('opex_selling/entry_budget', [
             'title'       => 'OPEX Selling - Entry Budget',
             'workingYear' => $workingYear,
-            'dept'        => $this->opexModel->getCostCenters(),
+            'costCenters' => $this->opexModel->getCostCenters(),
         ]);
     }
 
@@ -41,60 +45,198 @@ class OpexSellingController extends BaseController
     {
         $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
 
-        return view('opex_selling/entry_budget', [
+        return view('opex_selling/actual_budget', [
             'title'       => 'OPEX Selling - Actual Data',
             'workingYear' => $workingYear,
-            'dept'        => $this->opexModel->getCostCenters(),
+            'costCenters' => $this->opexModel->getCostCenters(),
         ]);
     }
 
+    /**
+     * Halaman Detail Breakdown Entry Budget.
+     * Membaca parameter query GET: header, dept, idx.
+     */
     public function entryBudgetDetail(): string
     {
-        $header = $this->request->getPost('header') ?? '';
-        $idx    = $this->request->getPost('idx') ?? '';
-        $dept   = $this->request->getPost('dept') ?? '';
-        $year   = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $header = $this->request->getGet('header') ?? '';
+        $dept   = $this->request->getGet('dept') ?? '';
+        $idx    = $this->request->getGet('idx') ?? '1';
 
-        $builder = $this->db->table('yp_plan__trans_budget_entry_data t')
-            ->select('t.id, t.id_coa, COALESCE(NULLIF(c.id_acct_ext,\'\'), c.main_account, 0) AS main_account, COALESCE(c.cost_center_desc, \'\') AS cost_center_desc, t.id_dept AS cost_center_header')
-            ->select("t.`1` AS isi_1, t.`2` AS isi_2, t.`3` AS isi_3, t.`4` AS isi_4, t.`5` AS isi_5, t.`6` AS isi_6")
-            ->select("t.`7` AS isi_7, t.`8` AS isi_8, t.`9` AS isi_9, t.`10` AS isi_10, t.`11` AS isi_11, t.`12` AS isi_12, t.total AS isi_tot")
-            ->join('gw_plan__master_coa c', 'c.main_account = t.id_coa', 'left')
-            ->where('t.year_code', $year);
-
-        if (\App\Libraries\DbCompat::hasEntrySource()) {
-            $builder->groupStart()
-                ->where('t.source', 'SELLING')
-                ->orWhere('t.source IS NULL')
-            ->groupEnd();
-        }
-
-        if (! empty($dept)) {
-            $builder->where('t.id_dept', $dept);
-        }
-
-        // Server-side pagination (specific: page via POST)
-        $page    = max(1, (int) ($this->request->getPost('page') ?? 1));
-        $perPage = 10;
-        $total   = (clone $builder)->countAllResults();
-        $offset  = ($page - 1) * $perPage;
-
-        $query = $builder->orderBy('t.id_coa', 'ASC')
-            ->limit($perPage, $offset)
-            ->get()
-            ->getResultArray();
-
-        return view('opex_selling/entry_budget_table', [
-            'filex'   => $query,
-            'header'  => $header,
-            'idx'     => $idx,
-            'dept'    => $dept,
-            'page'    => $page,
-            'perPage' => $perPage,
-            'total'   => $total,
+        return view('opex_selling/entry_budget_detail', [
+            'title'         => 'Detail Budget OPEX Selling',
+            'workingYear'   => $workingYear,
+            'headerAccount' => $header,
+            'dept'          => $dept,
+            'idx'           => $idx,
+            'costCenters'   => $this->opexModel->getCostCenters(),
         ]);
     }
 
+    /* ------------------------------------------------------------------
+     * AJAX Entry Data
+     * ------------------------------------------------------------------ */
+
+    /**
+     * AJAX: header accounts OPEX Selling beserta total budget.
+     * Mengembalikan data dari DB, atau mock data fallback jika kosong.
+     */
+    public function getHeaderAccounts(): ResponseInterface
+    {
+        $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $dept = $this->request->getGet('dept') ?? '';
+
+        if (empty($dept)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Cost Center wajib dipilih.']);
+        }
+
+        $headers = $this->opexModel->getHeaderAccounts($year, $dept);
+
+        // Mock data fallback jika DB kosong
+        if (empty($headers)) {
+            $headers = [
+                [
+                    'id'         => 1,
+                    'id_coa'     => '5111000',
+                    'acct_code'  => '5111000',
+                    'coa_desc'   => 'Salaries & Wages',
+                    'id_dept'    => $dept,
+                    'total_budget' => 1440.00,
+                ],
+                [
+                    'id'         => 2,
+                    'id_coa'     => '5112000',
+                    'acct_code'  => '5112000',
+                    'coa_desc'   => 'Overtime & Allowance',
+                    'id_dept'    => $dept,
+                    'total_budget' => 720.00,
+                ],
+                [
+                    'id'         => 3,
+                    'id_coa'     => '5121000',
+                    'acct_code'  => '5121000',
+                    'coa_desc'   => 'Office Supplies',
+                    'id_dept'    => $dept,
+                    'total_budget' => 360.00,
+                ],
+            ];
+        }
+
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'headers' => $headers,
+        ]);
+    }
+
+    /**
+     * AJAX: data budget OPEX Selling tersimpan per cost center.
+     */
+    public function getEntryData(): ResponseInterface
+    {
+        $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $dept = $this->request->getGet('dept') ?? '';
+
+        if (empty($dept)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Cost Center wajib dipilih.']);
+        }
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'rows'   => $this->opexModel->getEntryData($year, $dept),
+        ]);
+    }
+
+    /**
+     * AJAX: data view dengan parent-child hierarchy untuk expandable row.
+     */
+    public function getViewData(): ResponseInterface
+    {
+        $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $dept = $this->request->getGet('dept') ?? '';
+
+        if (empty($dept)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Cost Center wajib dipilih.']);
+        }
+
+        $headers = $this->opexModel->getHeaderAccounts($year, $dept);
+        $viewData = [];
+
+        foreach ($headers as $h) {
+            $children = $this->opexModel->getDetailItems((int) ($h['id'] ?? 0));
+            $viewData[] = [
+                'id'          => $h['id'] ?? 0,
+                'account'     => $h['acct_code'] ?? $h['id_coa'],
+                'description' => $h['coa_desc'] ?? '',
+                'total'       => (float) ($h['total_budget'] ?? 0),
+                'children'    => array_map(function ($c) {
+                    return [
+                        'desc'  => $c['nama_barang'] ?? '',
+                        'jan'   => (float) ($c['jan'] ?? $c['1'] ?? 0),
+                        'feb'   => (float) ($c['feb'] ?? $c['2'] ?? 0),
+                        'mar'   => (float) ($c['mar'] ?? $c['3'] ?? 0),
+                        'apr'   => (float) ($c['apr'] ?? $c['4'] ?? 0),
+                        'may'   => (float) ($c['may'] ?? $c['5'] ?? 0),
+                        'jun'   => (float) ($c['jun'] ?? $c['6'] ?? 0),
+                        'jul'   => (float) ($c['jul'] ?? $c['7'] ?? 0),
+                        'aug'   => (float) ($c['aug'] ?? $c['8'] ?? 0),
+                        'sep'   => (float) ($c['sep'] ?? $c['9'] ?? 0),
+                        'oct'   => (float) ($c['oct'] ?? $c['10'] ?? 0),
+                        'nov'   => (float) ($c['nov'] ?? $c['11'] ?? 0),
+                        'dec'   => (float) ($c['dec'] ?? $c['12'] ?? 0),
+                        'total' => (float) ($c['total'] ?? 0),
+                    ];
+                }, $children),
+            ];
+        }
+
+        // Mock data fallback jika DB kosong
+        if (empty($viewData)) {
+            $viewData = [
+                [
+                    'id'          => 1,
+                    'account'     => '5111000',
+                    'description' => 'Salaries & Wages',
+                    'total'       => 1440.00,
+                    'children'    => [
+                        ['desc' => 'Basic Salary Staff', 'jan' => 50, 'feb' => 50, 'mar' => 50, 'apr' => 50, 'may' => 50, 'jun' => 50, 'jul' => 50, 'aug' => 50, 'sep' => 50, 'oct' => 50, 'nov' => 50, 'dec' => 50, 'total' => 600],
+                        ['desc' => 'Allowance Staff', 'jan' => 70, 'feb' => 70, 'mar' => 70, 'apr' => 70, 'may' => 70, 'jun' => 70, 'jul' => 70, 'aug' => 70, 'sep' => 70, 'oct' => 70, 'nov' => 70, 'dec' => 70, 'total' => 840],
+                    ],
+                ],
+            ];
+        }
+
+        return $this->response->setJSON([
+            'status'   => 'success',
+            'viewData' => $viewData,
+        ]);
+    }
+
+    /**
+     * AJAX: matrix budget + actual per sub-account untuk sebuah header.
+     */
+    public function getDetailMatrix(): ResponseInterface
+    {
+        $year   = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $dept   = $this->request->getGet('dept') ?? '';
+        $header = $this->request->getGet('header') ?? '';
+
+        if (empty($dept) || empty($header)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Parameter tidak lengkap.']);
+        }
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'matrix' => $this->opexModel->getDetailMatrix($year, $dept, $header),
+        ]);
+    }
+
+    /* ------------------------------------------------------------------
+     * Save Budget & Detail
+     * ------------------------------------------------------------------ */
+
+    /**
+     * AJAX: simpan budget OPEX Selling (dengan concurrent access lock).
+     */
     public function saveBudget(): ResponseInterface
     {
         if (! $this->request->isAJAX()) {
@@ -106,15 +248,12 @@ class OpexSellingController extends BaseController
         $dept        = $this->request->getPost('dept');
         $year        = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
 
-        // PRD 1.7 — Concurrent Access Locking sebelum proses simpan
         $userId = (int) (session()->get('user_id') ?? 0);
         $lock   = (new AccessRestrict())->checkLock((string) $userId, 'opex-selling/entry', (int) $year);
         if (! $lock['allowed']) {
             return $this->response->setJSON(['status' => 'error', 'message' => $lock['message']]);
         }
 
-        // Kolom source tidak ada di skema legacy → simpan di-nonaktifkan sementara
-        // (keputusan user 6 Agt 2026: jangan ubah struktur DB).
         if (! \App\Libraries\DbCompat::hasEntrySource()) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Penyimpanan budget OPEX Selling dinonaktifkan sementara (kolom source belum tersedia di skema DB legacy).']);
         }
@@ -138,7 +277,6 @@ class OpexSellingController extends BaseController
                     ->countAllResults();
 
                 if ($exists > 0) {
-                    // Update total SAJA — nilai bulanan (1..12) tetap dipertahankan
                     $this->db->table('yp_plan__trans_budget_entry_data')
                         ->where($match)
                         ->groupStart()
@@ -156,7 +294,7 @@ class OpexSellingController extends BaseController
                         'total'      => $total,
                         'year_code'  => $year,
                         'source'     => 'SELLING',
-                        'created_by' => (int) (session()->get('user_id') ?? 0),
+                        'created_by' => $userId,
                     ]);
                 }
             }
@@ -167,13 +305,103 @@ class OpexSellingController extends BaseController
         return $this->response->setJSON(['status' => 'success', 'message' => 'Data Budget Selling berhasil disimpan!']);
     }
 
+    /**
+     * POST: simpan detail breakdown dari modal entry detail.
+     * Menerima payload array: desc[], jan[], feb[], ..., dec[].
+     * Melakukan kalkulasi total otomatis di backend sebelum commit.
+     */
+    public function saveEntryDetail(): ResponseInterface
+    {
+        $header = $this->request->getPost('header') ?? '';
+        $dept   = $this->request->getPost('dept') ?? '';
+        $idx    = (int) $this->request->getPost('idx');
+        $year   = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $userId = (int) (session()->get('user_id') ?? 0);
+
+        $descs = $this->request->getPost('desc') ?? [];
+        $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+
+        if (empty($descs) || ! is_array($descs)) {
+            return redirect()->back()->with('error', 'Tidak ada data detail untuk disimpan.');
+        }
+
+        $saved = 0;
+        foreach ($descs as $i => $desc) {
+            $desc = trim((string) $desc);
+            if ($desc === '') {
+                continue;
+            }
+
+            $total = 0;
+            $values = [];
+            foreach ($months as $m) {
+                $val = (float) ($this->request->getPost($m)[$i] ?? 0);
+                $values[$m] = $val;
+                $total += $val;
+            }
+
+            // Simpan ke yp_plan__trans_budget_entry_detail
+            $this->db->table('yp_plan__trans_budget_entry_detail')->insert([
+                'entry_data_id' => $idx,
+                'id_coa'        => 0,
+                'id_dept'       => (int) $dept,
+                'year_code'     => (int) $year,
+                'nama_barang'   => $desc,
+                'total'         => $total,
+                'sort_order'    => $i + 1,
+                'created_by'    => $userId,
+                'jan'           => $values['jan'],
+                'feb'           => $values['feb'],
+                'mar'           => $values['mar'],
+                'apr'           => $values['apr'],
+                'may'           => $values['may'],
+                'jun'           => $values['jun'],
+                'jul'           => $values['jul'],
+                'aug'           => $values['aug'],
+                'sep'           => $values['sep'],
+                'oct'           => $values['oct'],
+                'nov'           => $values['nov'],
+                'dec'           => $values['dec'],
+            ]);
+            $saved++;
+        }
+
+        AuditLog::saved('opex-selling/saveEntryDetail', "Detail breakdown OPEX Selling disimpan ({$saved} item)");
+
+        return redirect()->back()->with('success', "Data detail berhasil disimpan ({$saved} baris).");
+    }
+
+    /**
+     * AJAX: simpan detail breakdown items (batch dari modal detail).
+     */
+    public function saveDetailItems(): ResponseInterface
+    {
+        if (! $this->request->isAJAX()) {
+            return $this->response->setStatusCode(405)->setJSON(['status' => 'error', 'message' => 'Invalid method']);
+        }
+
+        $userId      = (int) (session()->get('user_id') ?? 0);
+        $entryDataId = (int) $this->request->getPost('entry_data_id');
+        $itemsRaw    = $this->request->getPost('items');
+        $items       = is_string($itemsRaw) ? (array) json_decode($itemsRaw, true) : (array) $itemsRaw;
+
+        $result = $this->opexModel->saveDetailItemsBatch($entryDataId, $items, $userId);
+
+        if ($result['success']) {
+            AuditLog::saved('opex-selling/saveDetailItems', "Detail breakdown OPEX Selling entry_data_id={$entryDataId} disimpan ({$result['count']} item)");
+        }
+
+        return $this->response->setJSON([
+            'status'  => $result['success'] ? 'success' : 'error',
+            'message' => $result['message'],
+            'count'   => $result['count'] ?? 0,
+        ]);
+    }
+
     /* ------------------------------------------------------------------
      * Breakdown Sub-Detail COA (standar 1.5) — AJAX partial update
      * ------------------------------------------------------------------ */
 
-    /**
-     * AJAX: daftar item breakdown sebuah entry budget selling.
-     */
     public function getDetailItems(): ResponseInterface
     {
         $entryDataId = (int) $this->request->getVar('entry_data_id');
@@ -184,9 +412,6 @@ class OpexSellingController extends BaseController
         ]);
     }
 
-    /**
-     * AJAX: simpan item breakdown (modal Alpine, tanpa refresh).
-     */
     public function saveDetail(): ResponseInterface
     {
         $userId = (int) (session()->get('user_id') ?? 0);
@@ -203,9 +428,6 @@ class OpexSellingController extends BaseController
         ]);
     }
 
-    /**
-     * AJAX: hapus item breakdown.
-     */
     public function deleteDetail(): ResponseInterface
     {
         $id     = (int) $this->request->getPost('id');
@@ -221,13 +443,14 @@ class OpexSellingController extends BaseController
         ]);
     }
 
-    /**
-     * Upload Actual Selling (.xlsx) — via ExcelImporter ke yp_plan__trans_budget_actual.
-     */
+    /* ------------------------------------------------------------------
+     * Actual & Export
+     * ------------------------------------------------------------------ */
+
     public function uploadActual(): ResponseInterface
     {
-        $file = $this->request->getFile('file');
-        $type = $this->request->getPost('upload_type'); // 'regular' atau 'ap'
+        $file = $this->request->getFile('excel_file');
+        $type = $this->request->getPost('upload_type');
 
         if (! $file || ! $file->isValid() || $file->hasMoved()) {
             return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'File tidak valid atau gagal diunggah.']);
@@ -260,15 +483,13 @@ class OpexSellingController extends BaseController
         }
     }
 
-    /**
-     * Service Export — Export budget OPEX Selling ke .xlsx via ExcelExporter.
-     */
     public function exportExcel(): ResponseInterface
     {
         $year      = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $dept      = $this->request->getGet('cost_center') ?? $this->request->getGet('dept') ?? $this->request->getGet('cc') ?? '';
         $monthKeys = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
 
-        $rows = $this->opexModel->getEntryData($year);
+        $rows = $this->opexModel->getEntryData($year, $dept);
         $data = array_map(function ($r) use ($monthKeys) {
             $line = [$r['acct_code'] ?? $r['id_coa'], $r['coa_desc'] ?? '', $r['id_dept']];
             foreach ($monthKeys as $m) {
@@ -286,5 +507,51 @@ class OpexSellingController extends BaseController
         );
 
         return ExcelExporter::export($headers, $data, 'OPEX_Selling_Service_Export_' . $year, 'OPEX Selling');
+    }
+
+    /**
+     * Download template Excel untuk upload actual OPEX Selling.
+     * View actual_tab_download.php memanggil opex_selling/download_template.
+     */
+    public function downloadTemplate(): ResponseInterface
+    {
+        $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $dept = $this->request->getGet('cost_center') ?? $this->request->getGet('cc') ?? '';
+
+        $monthKeys = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+
+        $headers = array_merge(
+            ['ID COA', 'COST CENTER', 'DESKRIPSI'],
+            ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'],
+            ['TOTAL', 'NOTES']
+        );
+
+        // Ambil data actual existing sebagai dasar template
+        $existing = $this->opexModel->getActualData($year, $dept);
+        $data = array_map(function ($r) use ($monthKeys) {
+            $line = [$r['id_coa'] ?? '', $r['id_dept'] ?? '', $r['coa_desc'] ?? ''];
+            foreach ($monthKeys as $m) {
+                $line[] = (float) ($r[$m] ?? 0);
+            }
+            $line[] = (float) ($r['total'] ?? 0);
+            $line[] = $r['notes'] ?? '';
+
+            return $line;
+        }, $existing);
+
+        // Jika tidak ada data, buat baris kosong dari master COA
+        if (empty($data)) {
+            $coas = $this->opexModel->getCoas();
+            $data = array_map(function ($c) use ($dept) {
+                return [$c['main_account'], $dept, $c['cost_center_desc'], 0,0,0,0,0,0,0,0,0,0,0,0,0, ''];
+            }, $coas);
+        }
+
+        $timestamp = date('Ymd_His');
+        $filename  = $dept
+            ? "TEMPLATE_OPEX_SELLING_{$dept}_{$timestamp}"
+            : "TEMPLATE_OPEX_SELLING_ALL_{$timestamp}";
+
+        return ExcelExporter::export($headers, $data, $filename, 'Template Actual OPEX Selling');
     }
 }

@@ -2,204 +2,95 @@
 
 <?= $this->section('content') ?>
 
-<div x-data="fohSummaryPage()" class="p-4 md:p-8 mx-auto max-w-(--breakpoint-2xl) space-y-6 md:space-y-8">
+<div x-data="fohSummaryPage()" class="space-y-6 p-4 sm:p-6">
 
-  <!-- HEADER -->
-  <div>
-    <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-3">
-      <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-      <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-      <span>FOH</span>
-      <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-      <span class="text-brand-500 font-bold">Summary</span>
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Summary FOH</h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400">Konsolidasi data aktual dan anggaran Factory Overhead</p>
     </div>
-    <h1 class="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-4">
-      <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-500 dark:bg-sky-500/10 dark:text-sky-400">
-        <i class="fa-solid fa-table-cells-large text-xl"></i>
-      </span>
-      Summary FOH
-    </h1>
-    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-      Ringkasan budget Factory Overhead per Cost Center — Tahun Anggaran <span class="font-bold text-brand-500"><?= esc($workingYear) ?></span>
-    </p>
-  </div>
-
-  <!-- CARD TOTAL -->
-  <?php
-    $grandTotal = 0;
-    foreach (($summary ?? []) as $s) { $grandTotal += (float) ($s['total'] ?? 0); }
-  ?>
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-    <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs p-5 flex items-center gap-4">
-      <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-400"><i class="fa-solid fa-industry"></i></span>
-      <div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Cost Center</p>
-        <p class="text-2xl font-black text-gray-900 dark:text-white"><?= count($summary ?? []) ?></p>
-      </div>
-    </div>
-    <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs p-5 flex items-center gap-4">
-      <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10 dark:text-emerald-400"><i class="fa-solid fa-coins"></i></span>
-      <div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Budget FOH</p>
-        <p class="text-2xl font-black text-gray-900 dark:text-white"><?= number_format($grandTotal) ?></p>
-      </div>
-    </div>
-    <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs p-5 flex items-center gap-4">
-      <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-500 dark:bg-amber-500/10 dark:text-amber-400"><i class="fa-solid fa-paper-plane"></i></span>
-      <div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Sumber Data</p>
-        <p class="text-lg font-black text-gray-900 dark:text-white">OPEX Engine <span class="text-xs font-bold text-emerald-500">(source: FOH)</span></p>
-      </div>
+    <div class="flex items-center gap-2 text-sm text-gray-500">
+      <span class="font-medium text-brand-600">Budget Plan Year:</span>
+      <span class="rounded bg-brand-50 px-2.5 py-1 font-bold text-brand-700 dark:bg-brand-900/30 dark:text-brand-300">2027</span>
     </div>
   </div>
 
-  <!-- TABLE SUMMARY -->
-  <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="w-full text-left text-xs border-collapse min-w-[1000px]">
-        <thead>
-          <tr class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200/80 dark:border-gray-800 text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-            <th class="py-4 px-4">Cost Center</th>
-            <th class="py-4 px-4 min-w-[160px]">Deskripsi</th>
-            <th class="py-4 px-2 text-right">Jan</th>
-            <th class="py-4 px-2 text-right">Feb</th>
-            <th class="py-4 px-2 text-right">Mar</th>
-            <th class="py-4 px-2 text-right">Apr</th>
-            <th class="py-4 px-2 text-right">May</th>
-            <th class="py-4 px-2 text-right">Jun</th>
-            <th class="py-4 px-2 text-right">Jul</th>
-            <th class="py-4 px-2 text-right">Aug</th>
-            <th class="py-4 px-2 text-right">Sep</th>
-            <th class="py-4 px-2 text-right">Oct</th>
-            <th class="py-4 px-2 text-right">Nov</th>
-            <th class="py-4 px-2 text-right">Dec</th>
-            <th class="py-4 px-4 text-right bg-gray-100/70 dark:bg-gray-800">Total</th>
-            <th class="py-4 px-4 text-center">Status</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-          <template x-if="rows.length === 0">
-            <tr>
-              <td colspan="16" class="py-16 text-center text-gray-400 dark:text-gray-500">
-                <i class="fa-solid fa-folder-open text-2xl mb-3"></i>
-                <p class="font-semibold text-gray-600 dark:text-gray-300">Belum ada data budget FOH</p>
-                <p class="text-sm">Entry budget FOH melalui menu <strong>FOH → Entry Budget</strong> terlebih dahulu.</p>
-              </td>
-            </tr>
-          </template>
-          <template x-for="(row, index) in rows" :key="row.id_dept">
-            <tr x-show="isRowVisible(index)" class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
-              <td class="py-3 px-4 font-mono font-bold text-gray-900 dark:text-gray-100" x-text="row.id_dept"></td>
-              <td class="py-3 px-4 text-gray-700 dark:text-gray-300" x-text="row.cost_desc || '-'"></td>
-              <td class="py-3 px-2 text-right text-gray-600 dark:text-gray-300" x-text="fmt(row.jan)"></td>
-              <td class="py-3 px-2 text-right text-gray-600 dark:text-gray-300" x-text="fmt(row.feb)"></td>
-              <td class="py-3 px-2 text-right text-gray-600 dark:text-gray-300" x-text="fmt(row.mar)"></td>
-              <td class="py-3 px-2 text-right text-gray-600 dark:text-gray-300" x-text="fmt(row.apr)"></td>
-              <td class="py-3 px-2 text-right text-gray-600 dark:text-gray-300" x-text="fmt(row.may)"></td>
-              <td class="py-3 px-2 text-right text-gray-600 dark:text-gray-300" x-text="fmt(row.jun)"></td>
-              <td class="py-3 px-2 text-right text-gray-600 dark:text-gray-300" x-text="fmt(row.jul)"></td>
-              <td class="py-3 px-2 text-right text-gray-600 dark:text-gray-300" x-text="fmt(row.aug)"></td>
-              <td class="py-3 px-2 text-right text-gray-600 dark:text-gray-300" x-text="fmt(row.sep)"></td>
-              <td class="py-3 px-2 text-right text-gray-600 dark:text-gray-300" x-text="fmt(row.oct)"></td>
-              <td class="py-3 px-2 text-right text-gray-600 dark:text-gray-300" x-text="fmt(row.nov)"></td>
-              <td class="py-3 px-2 text-right text-gray-600 dark:text-gray-300" x-text="fmt(row.dec)"></td>
-              <td class="py-3 px-4 text-right font-bold text-brand-500 dark:text-brand-400 bg-gray-50/70 dark:bg-gray-800/50" x-text="fmt(row.total)"></td>
-              <td class="py-3 px-4 text-center">
-                <span x-show="row.submitted_rows > 0" class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 px-3 py-1 text-[10px] font-bold">
-                  <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span> SUBMITTED
-                </span>
-                <span x-show="!(row.submitted_rows > 0)" class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 px-3 py-1 text-[10px] font-bold">
-                  <span class="h-1.5 w-1.5 rounded-full bg-gray-400"></span> DRAFT
-                </span>
-              </td>
-            </tr>
-          </template>
-        </tbody>
-      </table>
+  <div class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+    
+    <div class="border-b border-gray-200 px-6 pt-4 dark:border-gray-800">
+      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+        <button 
+          @click="activeTab = 'view_data'"
+          :class="activeTab === 'view_data' ? 'border-brand-600 text-brand-600 dark:border-brand-400 dark:text-brand-400 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400'"
+          class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors">
+          View Data
+        </button>
+
+        <button 
+          @click="activeTab = 'by_cost_center'"
+          :class="activeTab === 'by_cost_center' ? 'border-brand-600 text-brand-600 dark:border-brand-400 dark:text-brand-400 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400'"
+          class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors">
+          Summary by Cost Center
+        </button>
+
+        <button 
+          @click="activeTab = 'by_account'"
+          :class="activeTab === 'by_account' ? 'border-brand-600 text-brand-600 dark:border-brand-400 dark:text-brand-400 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400'"
+          class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors">
+          Summary by Account
+        </button>
+      </nav>
     </div>
 
-    <!-- Table Footer / Pagination -->
-    <?php
-      $pages   = max(1, (int) ceil(($total ?? 0) / max(1, $perPage ?? 10)));
-      $from    = ($total ?? 0) > 0 ? (($page - 1) * $perPage + 1) : 0;
-      $to      = min($page * $perPage, $total ?? 0);
-      $winStart = max(1, min($page - 2, max(1, $pages - 4)));
-      $winEnd   = min($pages, $winStart + 4);
-    ?>
-    <?php if (($total ?? 0) > 0): ?>
-    <div class="border-t border-gray-100 dark:border-gray-800 p-5 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500 dark:text-gray-400">
-      <span>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200"><?= $from ?></span> - <span class="font-bold text-gray-800 dark:text-gray-200"><?= $to ?></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= number_format($total) ?></span> cost center</span>
-      <div class="flex items-center gap-2">
-        <a href="?page=<?= max(1, $page - 1) ?>" class="h-9 px-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 <?= $page <= 1 ? 'opacity-40 pointer-events-none' : '' ?> transition-colors text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-chevron-left text-xs"></i><span class="hidden sm:inline">Sebelumnya</span></a>
-        <?php for ($p = $winStart; $p <= $winEnd; $p++): ?>
-          <a href="?page=<?= $p ?>" class="h-9 min-w-[36px] px-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center <?= $p === $page ? 'bg-brand-500 text-white font-bold shadow-xs' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' ?>"><?= $p ?></a>
-        <?php endfor; ?>
-        <a href="?page=<?= min($pages, $page + 1) ?>" class="h-9 px-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 <?= $page >= $pages ? 'opacity-40 pointer-events-none' : '' ?> transition-colors text-sm font-semibold flex items-center gap-2"><span class="hidden sm:inline">Berikutnya</span><i class="fa-solid fa-chevron-right text-xs"></i></a>
+    <div class="p-6">
+      <div x-show="activeTab === 'view_data'" x-cloak>
+        <?= $this->include('foh/partials/summary_tab_view_data') ?>
+      </div>
+
+      <div x-show="activeTab === 'by_cost_center'" x-cloak>
+        <?= $this->include('foh/partials/summary_tab_by_cost_center') ?>
+      </div>
+
+      <div x-show="activeTab === 'by_account'" x-cloak>
+        <?= $this->include('foh/partials/summary_tab_by_account') ?>
       </div>
     </div>
-    <?php endif; ?>
-  </div>
 
+  </div>
 </div>
 
 <script>
-  function fohSummaryPage() {
-    return {
-      rows: <?= json_encode(array_map(fn($r) => [
-        'id_dept'        => $r['id_dept'] ?? '',
-        'cost_desc'      => $r['cost_desc'] ?? '',
-        'jan' => (float) $r['jan'], 'feb' => (float) $r['feb'], 'mar' => (float) $r['mar'],
-        'apr' => (float) $r['apr'], 'may' => (float) $r['may'], 'jun' => (float) $r['jun'],
-        'jul' => (float) $r['jul'], 'aug' => (float) $r['aug'], 'sep' => (float) $r['sep'],
-        'oct' => (float) $r['oct'], 'nov' => (float) $r['nov'], 'dec' => (float) $r['dec'],
-        'total'          => (float) $r['total'],
-        'submitted_rows' => (int) ($r['submitted_rows'] ?? 0),
-      ], $summary ?? [])) ?>,
+function fohSummaryPage() {
+  return {
+    activeTab: 'view_data',
+    
+    // Sub-Tab 1 States
+    selectedCostCenter: 'ALL',
+    costCenterList: [
+      { id: 'ALL', label: '[All Cost Center] Include New Lines' },
+      { id: '630', label: '[630] FG Warehouse Department' },
+      { id: '636', label: '[636] FG Warehouse Department - KRG' },
+      { id: '810', label: '[810] Production Director' },
+      { id: '820', label: '[820] PPIC Department' }
+    ],
 
-      fmt(v) {
-        return Number(v || 0).toLocaleString('id-ID', { maximumFractionDigits: 0 });
-      },
+    // Sub-Tab 2 States
+    selectedCCViewMode: 'By Cost Center (Existing)',
+    ccViewModes: ['By Cost Center (Existing)', 'By Cost Center (New Line)', 'All'],
 
-      // Pagination
-      currentPage: 1,
-      perPage: 10,
-      get totalPages() {
-        return Math.ceil(this.rows.length / this.perPage) || 1;
-      },
-      isRowVisible(index) {
-        return index >= (this.currentPage - 1) * this.perPage && index < this.currentPage * this.perPage;
-      },
-      goToPage(page) {
-        if (page >= 1 && page <= this.totalPages) {
-          this.currentPage = page;
-        }
-      },
-      prevPage() {
-        if (this.currentPage > 1) {
-          this.currentPage--;
-        }
-      },
-      nextPage() {
-        if (this.currentPage < this.totalPages) {
-          this.currentPage++;
-        }
-      },
-      pageNumbers() {
-        const total = this.totalPages;
-        const current = this.currentPage;
-        if (total <= 7) {
-          return Array.from({ length: total }, (_, i) => i + 1);
-        }
-        if (current <= 4) {
-          return [1, 2, 3, 4, 5, '...', total];
-        }
-        if (current >= total - 3) {
-          return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
-        }
-        return [1, '...', current - 1, current, current + 1, '...', total];
-      },
-    };
+    // Sub-Tab 3 States
+    selectedAccountViewMode: 'By Account (Existing)',
+    accountViewModes: ['By Account (Existing)', 'By Account (New Line)', 'All'],
+
+    // Helper Functions
+    exportDataExcel() {
+      window.location.href = `<?= base_url('foh/summary/export') ?>?cc=` + this.selectedCostCenter;
+    },
+
+    formatNumber(val) {
+      return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val || 0);
+    }
   }
+}
 </script>
-
 <?= $this->endSection() ?>
