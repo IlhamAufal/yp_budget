@@ -437,7 +437,8 @@ class FohModel extends Model
 
             // Budget data
             $budget = $this->db->table('yp_plan__trans_budget_entry_data t')
-                ->select("IFNULL(t.`1`,0) AS b1, IFNULL(t.`2`,0) AS b2, IFNULL(t.`3`,0) AS b3,
+                ->select("t.id AS entry_data_id,
+                         IFNULL(t.`1`,0) AS b1, IFNULL(t.`2`,0) AS b2, IFNULL(t.`3`,0) AS b3,
                          IFNULL(t.`4`,0) AS b4, IFNULL(t.`5`,0) AS b5, IFNULL(t.`6`,0) AS b6,
                          IFNULL(t.`7`,0) AS b7, IFNULL(t.`8`,0) AS b8, IFNULL(t.`9`,0) AS b9,
                          IFNULL(t.`10`,0) AS b10, IFNULL(t.`11`,0) AS b11, IFNULL(t.`12`,0) AS b12,
@@ -467,9 +468,29 @@ class FohModel extends Model
                 ->get()
                 ->getRowArray();
 
+            // Simulated actual from entry detail breakdown
+            $simulated = null;
+            $entryDataId = (int) ($budgetRow['entry_data_id'] ?? 0);
+            if ($entryDataId > 0) {
+                $simulated = $this->db->table('yp_plan__trans_budget_entry_detail')
+                    ->select("IFNULL(SUM(jan),0) AS a1, IFNULL(SUM(feb),0) AS a2, IFNULL(SUM(mar),0) AS a3,
+                             IFNULL(SUM(apr),0) AS a4, IFNULL(SUM(may),0) AS a5, IFNULL(SUM(jun),0) AS a6,
+                             IFNULL(SUM(jul),0) AS a7, IFNULL(SUM(aug),0) AS a8, IFNULL(SUM(sep),0) AS a9,
+                             IFNULL(SUM(oct),0) AS a10, IFNULL(SUM(nov),0) AS a11, IFNULL(SUM(`dec`),0) AS a12,
+                             (IFNULL(SUM(jan),0)+IFNULL(SUM(feb),0)+IFNULL(SUM(mar),0)+IFNULL(SUM(apr),0)+
+                              IFNULL(SUM(may),0)+IFNULL(SUM(jun),0)+IFNULL(SUM(jul),0)+IFNULL(SUM(aug),0)+
+                              IFNULL(SUM(sep),0)+IFNULL(SUM(oct),0)+IFNULL(SUM(nov),0)+IFNULL(SUM(`dec`),0)) AS atotal")
+                    ->where('entry_data_id', $entryDataId)
+                    ->get()
+                    ->getRowArray();
+            }
+
             $result[] = array_merge($sub, [
+                // ID entry budget (parent) — dipakai modal detail untuk simpan breakdown.
+                'entry_data_id' => (int) ($budgetRow['entry_data_id'] ?? 0),
                 'budget' => $budgetRow ?: array_fill_keys(['b1','b2','b3','b4','b5','b6','b7','b8','b9','b10','b11','b12','btotal'], 0),
                 'actual' => $actual ?: array_fill_keys(['a1','a2','a3','a4','a5','a6','a7','a8','a9','a10','a11','a12','atotal'], 0),
+                'simulated' => $simulated ?: array_fill_keys(['a1','a2','a3','a4','a5','a6','a7','a8','a9','a10','a11','a12','atotal'], 0),
             ]);
         }
 
@@ -479,22 +500,83 @@ class FohModel extends Model
     /**
      * Simpan detail breakdown items (batch) — dipanggil dari modal detail.
      *
-     * @param array  $items  [{ name, monthly: {1:val,...,12:val}, sort_order }]
-     * @param int    $entryDataId ID dari yp_plan__trans_budget_entry_data
+     * Kolom bulan di yp_plan__trans_budget_entry_detail bernama jan..dec
+     * (bukan numerik 1..12), konsisten dengan BudgetBreakdownTrait.
+     *
+     * Bila parent entry budget belum ada (entry_data_id = 0 atau tidak
+     * ditemukan), parent dibuat otomatis dari $parentHint
+     * (id_coa / id_dept / year_code) sehingga modal detail tetap bisa
+     * dipakai walau budget sub-account belum pernah disimpan.
+     *
+     * @param array  $items      [{ nama_barang, jan..dec, sort_order }]
+     * @param int    $entryDataId ID dari yp_plan__trans_budget_entry_data (0 bila belum ada)
+     * @param array  $parentHint [id_coa, id_dept, year_code] untuk auto-create parent
      */
-    public function saveDetailItemsBatch(int $entryDataId, array $items, int $userId): array
+    public function saveDetailItemsBatch(int $entryDataId, array $items, int $userId, array $parentHint = []): array
     {
-        $parent = $this->db->table('yp_plan__trans_budget_entry_data')
-            ->where('id', $entryDataId)
-            ->get()->getRowArray();
-
-        if (! $parent) {
-            return ['success' => false, 'message' => 'Entry budget tidak ditemukan.', 'count' => 0];
+        // Validasi kelengkapan hint lebih awal (sebelum transaksi) untuk
+        // kasus entry_data_id = 0, agar tidak membuka transaksi kosong.
+        if ($entryDataId <= 0) {
+            $idCoa  = (int) ($parentHint['id_coa'] ?? 0);
+            $idDept = (int) ($parentHint['id_dept'] ?? 0);
+            $year   = (int) ($parentHint['year_code'] ?? 0);
+            if ($idCoa <= 0 || $idDept <= 0 || $year <= 0) {
+                return ['success' => false, 'message' => 'Entry budget tidak ditemukan dan data parent tidak lengkap.', 'count' => 0];
+            }
         }
 
         $this->db->transStart();
 
-        // Hapus item lama
+        $parent = ($entryDataId > 0)
+            ? $this->db->table('yp_plan__trans_budget_entry_data')->where('id', $entryDataId)->get()->getRowArray()
+            : null;
+
+        if (! $parent) {
+            // Auto-create parent dari hint agar detail bisa disimpan tanpa
+            // harus mengisi budget terlebih dahulu.
+            $idCoa  = (int) ($parentHint['id_coa'] ?? 0);
+            $idDept = (int) ($parentHint['id_dept'] ?? 0);
+            $year   = (int) ($parentHint['year_code'] ?? 0);
+
+            if ($idCoa <= 0 || $idDept <= 0 || $year <= 0) {
+                $this->db->transComplete();
+
+                return ['success' => false, 'message' => 'Entry budget tidak ditemukan dan data parent tidak lengkap.', 'count' => 0];
+            }
+
+            // Cegah duplikat bila parent ternyata sudah ada — kunci baris
+            // (SELECT ... FOR UPDATE) agar aman dari race antar user.
+            $existing = $this->db->query(
+                'SELECT * FROM yp_plan__trans_budget_entry_data
+                 WHERE id_coa = ? AND id_dept = ? AND year_code = ? LIMIT 1 FOR UPDATE',
+                [$idCoa, $idDept, $year]
+            )->getRowArray();
+
+            if ($existing) {
+                $parent      = $existing;
+                $entryDataId = (int) $existing['id'];
+            } else {
+                $insertData = [
+                    'id_coa'       => $idCoa,
+                    'id_dept'      => $idDept,
+                    'year_code'    => $year,
+                    'total'        => 0,
+                    'created_by'   => $userId,
+                    'created_date' => date('Y-m-d H:i:s'),
+                ];
+
+                if (\App\Libraries\DbCompat::hasEntrySource()) {
+                    $insertData['source']        = 'FOH';
+                    $insertData['submit_status'] = 'DRAFT';
+                }
+
+                $this->db->table('yp_plan__trans_budget_entry_data')->insert($insertData);
+                $entryDataId = (int) $this->db->insertID();
+                $parent      = array_merge(['id' => $entryDataId], $insertData);
+            }
+        }
+
+        // Hapus item lama (mode replace)
         $this->db->table('yp_plan__trans_budget_entry_detail')
             ->where('entry_data_id', $entryDataId)
             ->delete();
@@ -502,36 +584,34 @@ class FohModel extends Model
         $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
         $saved = 0;
 
-        $sql = 'INSERT INTO yp_plan__trans_budget_entry_detail
-                (entry_data_id, id_coa, id_dept, year_code, nama_barang, total, sort_order, created_by,
-                 `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`, `11`, `12`)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        foreach ($items as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
 
-        foreach ($items as $idx => $item) {
-            $nama = trim((string) ($item['name'] ?? ''));
+            $nama = trim((string) ($item['nama_barang'] ?? ''));
             if ($nama === '') {
                 continue;
             }
 
-            $total = 0;
-            $vals  = [];
-            $monthly = $item['monthly'] ?? [];
-            for ($m = 1; $m <= 12; $m++) {
-                $val = (float) ($monthly[$m] ?? 0);
-                $vals[] = $val;
-                $total += $val;
+            $total  = 0;
+            $fields = [];
+            foreach ($months as $mk) {
+                $val         = (float) ($item[$mk] ?? 0);
+                $fields[$mk] = $val;
+                $total      += $val;
             }
 
-            $this->db->query($sql, array_merge([
-                $entryDataId,
-                (int) ($parent['id_coa'] ?? 0),
-                (int) ($parent['id_dept'] ?? 0),
-                (int) ($parent['year_code'] ?? 0),
-                $nama,
-                $total,
-                (int) ($item['sort_order'] ?? ($idx + 1)),
-                $userId,
-            ], $vals));
+            $this->db->table('yp_plan__trans_budget_entry_detail')->insert(array_merge([
+                'entry_data_id' => $entryDataId,
+                'id_coa'        => (int) ($parent['id_coa'] ?? 0),
+                'id_dept'       => (int) ($parent['id_dept'] ?? 0),
+                'year_code'     => (int) ($parent['year_code'] ?? 0),
+                'nama_barang'   => $nama,
+                'total'         => $total,
+                'sort_order'    => (int) ($item['sort_order'] ?? ($saved + 1)),
+                'created_by'    => $userId,
+            ], $fields));
             $saved++;
         }
 

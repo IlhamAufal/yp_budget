@@ -41,15 +41,15 @@
         <thead>
           <tr class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200/80 dark:border-gray-800 text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
             <th rowspan="2" class="py-4 px-4 text-center w-12 border-r">DETAIL</th>
-            <th rowspan="2" class="py-4 px-4 min-w-[240px] border-r">ID ACCT EXT</th>
+            <th rowspan="2" class="py-4 px-4 min-w-[240px] border-r">Main Acount</th>
             <th colspan="12" class="py-2 px-4 text-center bg-blue-50/60 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border-r">BUDGET (DALAM JUTAAN)</th>
-            <th colspan="5" class="py-2 px-4 text-center bg-gray-100/60 dark:bg-gray-800/60 border-r">ACTUAL (DALAM JUTAAN)</th>
+            <th colspan="12" class="py-2 px-4 text-center bg-gray-100/60 dark:bg-gray-800/60 border-r">ACTUAL (DALAM JUTAAN)</th>
           </tr>
           <tr class="bg-gray-50 dark:bg-gray-800/50 border-b text-gray-500 dark:text-gray-400">
             <template x-for="m in months" :key="m">
               <th class="py-2 px-2 text-right font-semibold border-r" x-text="m"></th>
             </template>
-            <template x-for="m in ['JAN','FEB','MAR','APR','MAY']" :key="'act_'+m">
+            <template x-for="m in months" :key="'act_'+m">
               <th class="py-2 px-2 text-right font-semibold text-gray-400 border-r" x-text="m"></th>
             </template>
           </tr>
@@ -57,7 +57,7 @@
         <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
           <template x-if="matrixRows.length === 0 && !loading">
             <tr>
-              <td colspan="19" class="py-20 px-8 text-center text-gray-400 dark:text-gray-500">
+              <td colspan="26" class="py-20 px-8 text-center text-gray-400 dark:text-gray-500">
                 <div class="flex flex-col items-center gap-5">
                   <i class="fa-solid fa-file-circle-question text-3xl text-gray-300 dark:text-gray-600"></i>
                   <p class="font-semibold text-gray-600 dark:text-gray-300">Belum ada data sub-account</p>
@@ -67,7 +67,7 @@
           </template>
           <template x-if="loading">
             <tr>
-              <td colspan="19" class="py-16 text-center text-gray-400 dark:text-gray-500">
+              <td colspan="26" class="py-16 text-center text-gray-400 dark:text-gray-500">
                 <i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i>
                 <p class="font-semibold text-gray-600 dark:text-gray-300">Memuat data matriks...</p>
               </td>
@@ -76,7 +76,7 @@
           <template x-for="(row, idx) in matrixRows" :key="idx">
             <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
               <td class="py-3 px-4 text-center border-r">
-                <button @click="openModalDetail(row, idx)" class="inline-flex items-center justify-center rounded-lg bg-blue-600 p-1.5 text-white shadow hover:bg-blue-700 active:scale-[0.98] transition-all">
+                <button @click="openModalDetail(row, idx)" title="Edit Detail Item" class="inline-flex items-center justify-center rounded-lg bg-blue-600 p-1.5 text-white shadow hover:bg-blue-700 active:scale-[0.98] transition-all">
                   <i class="fa-solid fa-pen-to-square text-[11px]"></i>
                 </button>
               </td>
@@ -84,8 +84,10 @@
               <template x-for="m in 12" :key="m">
                 <td class="py-3 px-2 text-right font-mono border-r" x-text="formatNumber(row.budget['b'+m] || 0)"></td>
               </template>
-              <template x-for="m in 5" :key="'act_'+m">
-                <td class="py-3 px-2 text-right font-mono text-gray-400 border-r" x-text="formatNumber(row.actual['a'+m] || 0)"></td>
+              <template x-for="m in 12" :key="'act_'+m">
+                <td class="py-3 px-2 text-right font-mono border-r"
+                    :class="hasActual(row) ? 'text-gray-700 dark:text-gray-300' : 'text-blue-500 dark:text-blue-400 italic'"
+                    x-text="formatNumber(getActualValue(row, m))"></td>
               </template>
             </tr>
           </template>
@@ -130,11 +132,11 @@
                 <td class="p-1.5">
                   <input type="text" x-model="item.name" placeholder="Nama Detail Item..." class="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-brand-500 focus:ring-1 focus:ring-brand-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                 </td>
-                <template x-for="m in 12" :key="m">
+                <template x-for="m in monthKeys" :key="m">
                   <td class="p-1.5">
                     <input type="number" step="0.01"
                       @paste="handlePaste($event, i, m)"
-                      x-model.number="item.monthly[m]"
+                      x-model.number="item[m]"
                       class="w-full text-right rounded border border-gray-300 px-1 py-1 text-xs focus:border-brand-500 focus:ring-1 focus:ring-brand-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white font-mono">
                   </td>
                 </template>
@@ -176,6 +178,7 @@ function fohDetailEntry() {
     headerName: '',
     deptLabel: '',
     months: ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'],
+    monthKeys: ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'],
     matrixRows: [],
     loading: false,
     isModalOpen: false,
@@ -217,26 +220,54 @@ function fohDetailEntry() {
     openModalDetail(row, idx) {
       this.activeRow = row;
       this.activeRowIndex = idx;
+      // Reset dulu agar tidak menampilkan data baris sebelumnya saat fetch
+      this.detailItems = [this.newItemRow()];
 
-      // Load existing detail items from DB
+      // Load existing detail items dari DB. Bila parent budget belum ada,
+      // modal tetap terbuka — parent akan dibuat otomatis saat Simpan Detail.
       this.loadDetailItems(row);
 
       this.isModalOpen = true;
     },
 
     async loadDetailItems(row) {
-      // For now, initialize with one empty row
-      // In full integration, this would fetch from getDetailItems endpoint
-      this.detailItems = [
-        { name: '', monthly: {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0, 11:0, 12:0} }
-      ];
+      const entryDataId = row.entry_data_id;
+
+      if (!entryDataId) {
+        this.detailItems = [this.newItemRow()];
+        return;
+      }
+
+      try {
+        const res = await fetch(`<?= base_url('foh/getDetailItems') ?>?entry_data_id=${entryDataId}`, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await res.json();
+
+        // Abaikan response lama bila user sudah membuka baris lain
+        if (this.activeRow?.entry_data_id !== entryDataId) return;
+
+        const items = (data.items || []).map(it => {
+          const mapped = { name: it.nama_barang || '' };
+          this.monthKeys.forEach(k => { mapped[k] = Number(it[k] || 0); });
+          return mapped;
+        });
+
+        this.detailItems = items.length > 0 ? items : [this.newItemRow()];
+      } catch (e) {
+        console.error('Gagal memuat detail items:', e);
+        this.detailItems = [this.newItemRow()];
+      }
+    },
+
+    newItemRow() {
+      const row = { name: '' };
+      this.monthKeys.forEach(k => { row[k] = 0; });
+      return row;
     },
 
     addItemRow() {
-      this.detailItems.push({
-        name: '',
-        monthly: {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0, 11:0, 12:0}
-      });
+      this.detailItems.push(this.newItemRow());
     },
 
     removeItemRow(i) {
@@ -247,9 +278,10 @@ function fohDetailEntry() {
 
     /**
      * Handle paste dari Excel: 13 kolom (Detail Item + 12 Bulan).
-     * Bisa paste beberapa baris sekaligus.
+     * Bisa paste beberapa baris sekaligus. Kolom bulan dipetakan ke
+     * nama bulan (jan..dec) sesuai kolom tabel entry_detail.
      */
-    handlePaste(event, itemIdx, monthIdx) {
+    handlePaste(event, itemIdx, monthKey) {
       event.preventDefault();
       const clipboardData = event.clipboardData || window.clipboardData;
       const pastedText = clipboardData.getData('text');
@@ -266,12 +298,12 @@ function fohDetailEntry() {
 
       // Jika hanya 1 kolom (tanpa tab), isi cell biasa
       if (firstCols.length <= 1) {
-        this.detailItems[itemIdx].monthly[monthIdx] = parseFloat(firstCols[0]) || 0;
+        this.detailItems[itemIdx][monthKey] = parseFloat(firstCols[0]) || 0;
         return;
       }
 
       // Multi-column paste: isi dari baris yang sesuai
-      // Kolom pertama = nama item, kolom 2-13 = 12 bulan
+      // Kolom pertama = nama item, kolom 2-13 = 12 bulan (Jan..Dec)
       for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
         const cols = lines[lineIdx].split('\t');
         if (cols.length < 2) continue;
@@ -291,43 +323,69 @@ function fohDetailEntry() {
         // Kolom 1-12 = 12 bulan
         for (let c = 1; c <= 12 && c < cols.length; c++) {
           const val = parseFloat(cols[c].replace(/,/g, '')) || 0;
-          this.detailItems[targetIdx].monthly[c] = val;
+          this.detailItems[targetIdx][this.monthKeys[c - 1]] = val;
         }
       }
     },
 
     async saveDetailItems() {
-      // Filter items yang memiliki nama
-      const validItems = this.detailItems.filter(item => item.name && item.name.trim());
+      const entryDataId = this.activeRow?.entry_data_id || 0;
+
+      // Filter items yang memiliki nama, lalu petakan ke format DB
+      // (nama_barang + bulan jan..dec)
+      const validItems = this.detailItems
+        .filter(item => item.name && item.name.trim())
+        .map(item => {
+          const payload = { nama_barang: item.name.trim() };
+          this.monthKeys.forEach(k => { payload[k] = Number(item[k]) || 0; });
+          return payload;
+        });
 
       if (validItems.length === 0) {
-        alert('Tidak ada item untuk disimpan.');
+        window.showToast('error', 'Tidak ada item untuk disimpan.');
         return;
       }
 
-      // Cari entry_data_id dari matrix row
-      // Untuk sekarang kita gunakan alert sebagai placeholder
-      // Dalam integrasi penuh, ini akan POST ke saveDetailItems endpoint
       try {
         const res = await window.ypFetch('<?= base_url('foh/saveDetailItems') ?>', {
-          entry_data_id: this.activeRow?.entry_data_id || 0,
+          entry_data_id: entryDataId,
+          id_coa: this.activeRow?.main_account || 0,
+          dept: this.dept,
           items: JSON.stringify(validItems)
         });
 
         if (res.status === 'success') {
-          alert('Detail item berhasil disimpan!');
+          window.showToast('success', res.message || 'Detail item berhasil disimpan!');
           this.isModalOpen = false;
+          // Refresh matriks agar entry_data_id parent terbaru tampil
+          this.loadMatrix();
         } else {
-          alert('Gagal menyimpan: ' + (res.message || 'Unknown error'));
+          window.showToast('error', res.message || 'Gagal menyimpan detail item.');
         }
       } catch (e) {
         console.error('Error saving:', e);
-        alert('Gagal menyimpan detail item.');
+        window.showToast('error', 'Gagal menyimpan detail item.');
       }
     },
 
     formatNumber(val) {
       return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 }).format(val || 0);
+    },
+
+    hasActual(row) {
+      // Check if actual data from yp_plan__trans_budget_actual has any non-zero value
+      for (let m = 1; m <= 12; m++) {
+        if (parseFloat(row.actual['a'+m]) !== 0) return true;
+      }
+      return false;
+    },
+
+    getActualValue(row, m) {
+      // Use actual if available, otherwise use simulated from entry_detail
+      if (this.hasActual(row)) {
+        return row.actual['a'+m] || 0;
+      }
+      return row.simulated ? (row.simulated['a'+m] || 0) : 0;
     }
   }
 }

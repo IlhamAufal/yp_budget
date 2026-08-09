@@ -1,4 +1,4 @@
-<div x-show="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" x-cloak>
+<div x-show="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" x-cloak>
   <div @click.outside="isModalOpen = false" class="w-full max-w-5xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800 space-y-4">
     
     <div class="flex items-center justify-between border-b pb-3 dark:border-gray-700">
@@ -27,9 +27,9 @@
               <td class="p-1.5">
                 <input type="text" x-model="item.name" placeholder="Nama Detail Item..." class="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-brand-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white">
               </td>
-              <template x-for="m in 12" :key="m">
+              <template x-for="m in monthKeys" :key="m">
                 <td class="p-1.5">
-                  <input type="number" step="0.01" x-model="item.monthly[m]" class="w-full text-right rounded border border-gray-300 px-1 py-1 text-xs focus:border-brand-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white font-mono">
+                  <input type="number" step="0.01" x-model="item[m]" class="w-full text-right rounded border border-gray-300 px-1 py-1 text-xs focus:border-brand-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white font-mono">
                 </td>
               </template>
               <td class="p-1.5 text-center">
@@ -49,7 +49,7 @@
       </button>
       <div class="flex gap-2">
         <button @click="isModalOpen = false" class="rounded-lg border border-gray-300 px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">Batal</button>
-        <button @click="saveDetailItems()" class="rounded-lg bg-brand-600 px-4 py-2 text-xs font-medium text-white hover:bg-brand-700 shadow transition-colors">💾 Simpan Detail</button>
+        <button @click="saveDetailItems()" class="rounded-lg bg-brand-00 px-4 py-2 text-xs font-medium text-white shadow transition-colors">💾 Simpan Detail</button>
       </div>
     </div>
 
