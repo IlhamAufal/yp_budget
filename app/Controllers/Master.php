@@ -83,19 +83,25 @@ class Master extends BaseController
         $filters = [
             'search' => $this->request->getGet('search') ?? '',
             'type'   => $this->request->getGet('type') ?? '',
-            'year'   => $this->request->getGet('year') ?: session()->get('year_code'),
-            'status' => $this->request->getGet('status') ?? 'A',
+            'year'   => $this->request->getGet('year') ?? '',
+            'status' => $this->request->getGet('status') ?? '',
         ];
 
         $page    = max(1, (int) ($this->request->getGet('page') ?? 1));
-        $perPage = 10;
+        $perPage = 20;
         $filters['limit']  = $perPage;
         $filters['offset'] = ($page - 1) * $perPage;
         $total = $this->costCenter->countAll($filters);
 
+        // Ensure cost_center_sap fallback
+        $costCenters = array_map(function ($cc) {
+            $cc['cost_center_sap'] = !empty($cc['cost_center_sap']) ? $cc['cost_center_sap'] : (string) ($cc['cost_center'] ?? '');
+            return $cc;
+        }, $this->costCenter->getAll($filters));
+
         return view('master-data/cost-center', [
             'title'       => 'Master Data - Cost Center',
-            'costCenters' => $this->costCenter->getAll($filters),
+            'costCenters' => $costCenters,
             'departments' => $this->department->getAll(['status' => 'A']),
             'years'       => $this->costCenter->getYears(),
             'types'       => $this->costCenter->getTypes(),

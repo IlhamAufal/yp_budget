@@ -46,15 +46,16 @@ class CapexController extends BaseController
         $offset  = ($page - 1) * $perPage;
 
         $data = [
-            'validasi'     => $isValid ? 'OK' : 'NOPE',
-            'working_year' => $year,
-            'namax'        => $user,
-            'categories'   => $this->getAssetCategories(),
-            'capex_items'  => $this->capexModel->getCapexItems($year, $offset, $perPage),
-            'deptx'        => $this->capexModel->getCostCenters($this->getUserDeptList()),
-            'page'         => $page,
-            'perPage'      => $perPage,
-            'total'        => $total,
+            'validasi'           => $isValid ? 'OK' : 'NOPE',
+            'working_year'       => $year,
+            'namax'              => $user,
+            'categories'         => $this->getAssetCategories(),
+            'capex_items'        => $this->capexModel->getCapexItems($year, $offset, $perPage),
+            'deptx'              => $this->capexModel->getCostCenters($this->getUserDeptList()),
+            'cost_center_options' => $this->getCostCenterOptions(),
+            'page'               => $page,
+            'perPage'            => $perPage,
+            'total'              => $total,
         ];
 
         return view('capex/entry', $data);
@@ -86,20 +87,68 @@ class CapexController extends BaseController
     }
 
     /* ------------------------------------------------------------------
+     * AJAX: Data Entry (tab_entry_capex) per Cost Center
+     * ------------------------------------------------------------------ */
+
+    public function getEntryData()
+    {
+        $year = $this->workingYear;
+        $dept = $this->request->getGet('dept') ?? '';
+
+        if (empty($dept)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Cost Center wajib dipilih.']);
+        }
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'rows'   => $this->capexModel->getEntryDataByCategory($year, $dept),
+        ]);
+    }
+
+    /* ------------------------------------------------------------------
+     * AJAX: Save Form CAPEX (modal form) — per kategori aset
+     * ------------------------------------------------------------------ */
+
+    public function saveFormCapex()
+    {
+        if (! $this->request->isAJAX()) {
+            return $this->response->setStatusCode(405)->setJSON(['status' => 'error', 'message' => 'Invalid method']);
+        }
+
+        $year   = $this->workingYear;
+        $userId = (string) ($this->session->get('user_id') ?? 0);
+
+        $mainAccount = (string) $this->request->getPost('main_account');
+        $dept        = (string) $this->request->getPost('dept');
+        $rowsRaw     = $this->request->getPost('rows');
+        $rows        = is_string($rowsRaw) ? (array) json_decode($rowsRaw, true) : (array) ($rowsRaw ?? []);
+
+        if (empty($mainAccount) || empty($dept) || empty($rows)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Parameter tidak lengkap.']);
+        }
+
+        $lock = (new AccessRestrict())->checkLock((string) $userId, 'capex/entry', (int) $year);
+        if (! $lock['allowed']) {
+            return $this->response->setJSON(['status' => 'error', 'message' => $lock['message']]);
+        }
+
+        $saved = $this->capexModel->saveCapexFormData($rows, $mainAccount, $dept, $year, $userId);
+
+        if ($saved) {
+            AuditLog::saved('capex/saveFormCapex', "Proposal CAPEX {$year} kategori {$mainAccount} CC {$dept} disimpan");
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Data CAPEX berhasil disimpan.']);
+        }
+
+        return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menyimpan data CAPEX.']);
+    }
+
+    /* ------------------------------------------------------------------
      * AJAX: Cost Centers Dropdown
      * ------------------------------------------------------------------ */
 
     public function getCostCenters()
     {
-        $costCenters = $this->capexModel->getAllCostCenters();
-
-        $options = [['id' => 'ALL', 'name' => 'ALL COST CENTER']];
-        foreach ($costCenters as $cc) {
-            $options[] = [
-                'id'   => $cc['cost_center'],
-                'name' => '[' . ($cc['cc_code'] ?? $cc['cost_center']) . '] ' . $cc['cost_desc'],
-            ];
-        }
+        $options = array_merge([['id' => 'ALL', 'name' => 'ALL COST CENTER']], $this->getCostCenterOptions());
 
         return $this->response->setJSON(['status' => 'success', 'options' => $options]);
     }
@@ -414,15 +463,29 @@ class CapexController extends BaseController
      * Private Helpers
      * ------------------------------------------------------------------ */
 
+    /**
+     * Semua cost center aktif (master) dalam format {id, name} untuk dropdown.
+     * Nama memakai cost_center_sap bila tersedia (fallback ke cost_center).
+     */
+    private function getCostCenterOptions(): array
+    {
+        $options = [];
+        foreach ($this->capexModel->getAllCostCenters() as $cc) {
+            $options[] = [
+                'id'   => $cc['cost_center'],
+                'name' => '[' . ($cc['cc_code'] ?? $cc['cost_center']) . '] ' . $cc['cost_desc'],
+            ];
+        }
+        return $options;
+    }
+
     private function getAssetCategories(): array
     {
-        $rows = $this->capexModel->getDepreciationMasters();
         $cats = [];
-        foreach ($rows as $r) {
+        foreach ($this->capexModel->getCapexCategories() as $r) {
             $cats[] = [
-                'id'            => (int) $r['id'],
-                'main_account'  => (int) $r['main_account'],
-                'category_name' => ($r['acct_code'] ?? $r['main_account']) . ' (' . $r['amount'] . ' th)',
+                'code' => (string) $r['main_account'],
+                'name' => $r['category_name'] ?? ('Asset ' . $r['main_account']),
             ];
         }
         return $cats;

@@ -35,7 +35,7 @@ class MppController extends BaseController
             'title'           => 'Man Power Planning - Form Entry',
             'workingYear'     => $workingYear,
             'departments'     => $this->getDepartmentList(),
-            'costCenterList'  => $this->mppModel->getCostCentersActive(),
+            'costCenterList'  => $this->getCostCenterSapList(),
             'periodInfo'      => $periodInfo,
         ];
 
@@ -43,25 +43,16 @@ class MppController extends BaseController
     }
 
     /**
-     * Halaman Summary Headcount & Kalkulasi OPEX
+     * Halaman Summary Headcount
      */
     public function summary(): string
     {
         $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
 
-        $page    = max(1, (int) ($this->request->getGet('page') ?? 1));
-        $perPage = 10;
-        $total   = $this->mppModel->countSummaryWithSalary($workingYear);
-        $offset  = ($page - 1) * $perPage;
-
         $data = [
-            'title'       => 'Summary Headcount & Salary Integration',
-            'workingYear' => $workingYear,
-            'departments' => $this->getDepartmentList(),
-            'summary'     => $this->mppModel->getSummaryWithSalary($workingYear, null, $offset, $perPage),
-            'page'        => $page,
-            'perPage'     => $perPage,
-            'total'       => $total,
+            'title'          => 'Man Power Planning - Summary Headcount',
+            'workingYear'    => $workingYear,
+            'costCenterList' => $this->getCostCenterSapList(),
         ];
 
         return view('mpp/summary', $data);
@@ -128,7 +119,7 @@ class MppController extends BaseController
     }
 
     /**
-     * AJAX: Detail breakdown 12 bulan per kategori (tipe_mpp)
+     * AJAX: Detail breakdown per posisi untuk sebuah kategori (tipe_mpp)
      */
     public function getMppBreakdown(): ResponseInterface
     {
@@ -140,16 +131,16 @@ class MppController extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Parameter tidak lengkap.']);
         }
 
-        $detail = $this->mppModel->getMppCategoryDetail($yearCode, (string) $idDept, $tipeId);
+        $data = $this->mppModel->getPositionsByTipe($yearCode, (string) $idDept, $tipeId);
 
         return $this->response->setJSON([
             'status' => 'success',
-            'data'   => $detail,
+            'data'   => $data,
         ]);
     }
 
     /**
-     * AJAX: Simpan data MPP per kategori dengan transaksi
+     * AJAX: Simpan data MPP multi-posisi per kategori
      */
     public function saveMppBreakdown(): ResponseInterface
     {
@@ -158,15 +149,11 @@ class MppController extends BaseController
 
         $idDept = $json['id_dept'] ?? null;
         $tipeId = (int) ($json['tipe_id'] ?? 0);
-        $months = $json['months'] ?? [];
+        $rows   = $json['rows'] ?? [];
         $note   = $json['note'] ?? '';
 
         if (empty($idDept) || $tipeId <= 0) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Parameter tidak lengkap.']);
-        }
-
-        if (count($months) !== 12) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Data bulan harus 12 kolom.']);
         }
 
         // Concurrent Access Locking
@@ -176,10 +163,10 @@ class MppController extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => $lock['message']]);
         }
 
-        $success = $this->mppModel->saveMppCategory($yearCode, (string) $idDept, $tipeId, $months, $note);
+        $success = $this->mppModel->saveMppPositions($yearCode, (string) $idDept, $tipeId, $rows, $note);
 
         if ($success) {
-            AuditLog::saved('mpp/saveMppBreakdown', "MPP {$yearCode} CC {$idDept} Tipe {$tipeId} disimpan");
+            AuditLog::saved('mpp/saveMppBreakdown', "MPP {$yearCode} CC {$idDept} Tipe {$tipeId} disimpan (" . count($rows) . " posisi)");
 
             return $this->response->setJSON([
                 'status'  => 'success',
@@ -237,5 +224,19 @@ class MppController extends BaseController
             ->where('status', 'A')
             ->orderBy('dept_code', 'ASC')
             ->get()->getResultArray();
+    }
+
+    /**
+     * Helper: Cost Center list dari gw_plan__master_cost_center dengan cost_center_sap
+     */
+    private function getCostCenterSapList(): array
+    {
+        $db = \Config\Database::connect();
+        return $db->table('gw_plan__master_cost_center')
+            ->select("cost_center, COALESCE(NULLIF(cost_center_sap,''), CAST(cost_center AS CHAR)) AS cost_center_sap, cost_desc")
+            ->where('status', 'A')
+            ->orderBy('cost_center', 'ASC')
+            ->get()
+            ->getResultArray();
     }
 }

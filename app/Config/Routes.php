@@ -131,6 +131,10 @@ $routes->group('capex', ['filter' => 'auth'], function ($routes) {
     $routes->post('save_capex', 'CapexController::saveCapex');
     $routes->post('sync_to_opex', 'CapexController::syncToOpex');
 
+    // Entry Form AJAX Endpoints
+    $routes->get('getEntryData', 'CapexController::getEntryData');
+    $routes->post('saveFormCapex', 'CapexController::saveFormCapex');
+
     // Summary AJAX Endpoints
     $routes->get('getSummaryViewAll', 'CapexController::getSummaryViewAll');
     $routes->get('getSummaryAcquisition', 'CapexController::getSummaryAcquisition');

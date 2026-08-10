@@ -17,8 +17,8 @@
             </label>
             <div class="flex-1 flex gap-2">
                 <select x-model="selectedCostCenter" class="w-full rounded border border-stroke bg-gray-5 py-2.5 px-4 text-sm text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary">
-                    <template x-for="item in costCenterList" :key="item.id_dept">
-                        <option :value="String(item.id_dept)" x-text="`[${item.dept_code}] ${item.dept_desc}`"></option>
+                    <template x-for="(item, idx) in costCenterList" :key="item.cost_center">
+                        <option :value="String(item.cost_center)" x-text="`${idx + 1}. [${item.cost_center_sap}]${item.cost_desc}`"></option>
                     </template>
                 </select>
                 <button type="button" @click="loadMatrixData()" class="inline-flex items-center justify-center rounded bg-primary px-4 py-2.5 text-white hover:bg-opacity-90 transition">

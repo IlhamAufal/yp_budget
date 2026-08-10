@@ -1,7 +1,7 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div x-data="capexEntryApp()" class="mx-auto max-w-7xl p-4 md:p-6 2xl:p-10">
+<div x-data="capexEntryApp()" x-init="loadEntryData()" class="mx-auto max-w-7xl p-4 md:p-6 2xl:p-10">
     <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h2 class="text-title-md2 font-bold text-black dark:text-white">Entry Form Capex</h2>
@@ -48,33 +48,37 @@
 function capexEntryApp() {
     return {
         activeSubTab: 'entry',
-        selectedCostCenter: '1000GP1100',
-        viewCostCenter: '1000KA1004',
+        selectedCostCenter: <?= json_encode($cost_center_options[0]['id'] ?? '1000GP1100', JSON_HEX_TAG) ?>,
+        viewCostCenter: <?= json_encode($cost_center_options[1]['id'] ?? ($cost_center_options[0]['id'] ?? '1000KA1004'), JSON_HEX_TAG) ?>,
         manualBookOpen: false,
         formCapexOpen: false,
         activeCategory: { code: '', name: '' },
+        saving: false,
 
-        // Mock Cost Centers
-        costCenters: [
-            { id: '1000GP1100', name: '1. [1000GP1100] President Director' },
-            { id: '1000KA1004', name: '1. [1000KA1004] Project Jateng Line 9' },
-            { id: '1000KA1007', name: '2. [1000KA1007] Project Sungkono KRG' },
-            { id: '1000KAF001', name: '3. [1000KAF001] Accounting KRG' },
-            { id: '1000GPF004', name: '4. [1000GPF004] IT Department' },
-            { id: '1000KAF002', name: '5. [1000KAF002] IT Dept. KRG' }
-        ],
+        // Semua cost center aktif dari master (format sesuai cost_center_sap)
+        costCenters: <?= json_encode($cost_center_options ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
 
-        // Mock Categories
-        categories: [
-            { code: '7710000', name: 'Land' },
-            { code: '7710202', name: 'Building And Facility' },
-            { code: '7710203', name: 'Machinery Equipment' },
-            { code: '7710204', name: 'Office Equipment' },
-            { code: '7710205', name: 'Transportation Equipment' },
-            { code: '7710206', name: 'Laboratory Equipment' }
-        ],
+        // Kategori aset dari master depresiasi (bukan mock)
+        categories: <?= json_encode($categories ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
+
+        // Data tersimpan per kategori (dari DB) untuk tabel tab_entry_capex
+        entryData: {},
+        loadingEntry: false,
+        monthKeys: ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'],
 
         // Modal Form Rows State
+        emptyRow() {
+            return {
+                description: '',
+                costCenter: '',
+                newLines: 'Tidak',
+                qty: 0,
+                unitPrice: 0,
+                remarks: '',
+                jan: 0, feb: 0, mar: 0, apr: 0, may: 0, jun: 0, jul: 0, aug: 0, sep: 0, oct: 0, nov: 0, dec: 0
+            };
+        },
+
         formRows: [
             {
                 description: '',
@@ -87,21 +91,40 @@ function capexEntryApp() {
             }
         ],
 
+        async loadEntryData() {
+            if (!this.selectedCostCenter) return;
+            this.loadingEntry = true;
+            try {
+                const res = await fetch(`<?= base_url('capex/getEntryData') ?>?dept=${encodeURIComponent(this.selectedCostCenter)}`);
+                const json = await res.json();
+                const map = {};
+                (json.rows || []).forEach(r => { map[r.category_code] = r; });
+                this.entryData = map;
+            } catch (e) {
+                this.entryData = {};
+            } finally {
+                this.loadingEntry = false;
+            }
+        },
+
+        // Nilai satu bulan utk satu kategori (fallback 0 bila belum ada data)
+        catVal(cat, key) {
+            const d = this.entryData[cat.code];
+            return d ? (parseFloat(d[key]) || 0) : 0;
+        },
+
+        catTotal(cat) {
+            return this.monthKeys.reduce((sum, m) => sum + this.catVal(cat, m), 0);
+        },
+
         openFormCapex(cat) {
             this.activeCategory = cat;
+            this.formRows = [this.emptyRow()];
             this.formCapexOpen = true;
         },
 
         addRow() {
-            this.formRows.push({
-                description: '',
-                costCenter: '',
-                newLines: 'Tidak',
-                qty: 0,
-                unitPrice: 0,
-                remarks: '',
-                jan: 0, feb: 0, mar: 0, apr: 0, may: 0, jun: 0, jul: 0, aug: 0, sep: 0, oct: 0, nov: 0, dec: 0
-            });
+            this.formRows.push(this.emptyRow());
         },
 
         removeRow(index) {
@@ -110,9 +133,59 @@ function capexEntryApp() {
             }
         },
 
-        saveFormCapex() {
-            alert('Data CAPEX berhasil disimpan!');
-            this.formCapexOpen = false;
+        rowTotal(row) {
+            return ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']
+                .reduce((sum, m) => sum + (parseFloat(row[m]) || 0), 0);
+        },
+
+        columnTotal(key) {
+            return this.formRows.reduce((sum, row) => sum + (parseFloat(row[key]) || 0), 0);
+        },
+
+        totalColumn() {
+            return this.formRows.reduce((sum, row) => sum + this.rowTotal(row), 0);
+        },
+
+        fmtNumber(val) {
+            return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(val) || 0);
+        },
+
+        async saveFormCapex() {
+            if (this.saving) return;
+
+            const rows = this.formRows.filter(r => (r.description || '').trim() !== '');
+            if (rows.length === 0) {
+                alert('Isi minimal satu item dengan DESCRIPTION.');
+                return;
+            }
+
+            this.saving = true;
+            try {
+                const body = new FormData();
+                body.append('main_account', this.activeCategory.code);
+                body.append('dept', this.selectedCostCenter);
+                body.append('rows', JSON.stringify(rows));
+
+                const res = await fetch(`<?= base_url('capex/saveFormCapex') ?>`, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: body
+                });
+                const json = await res.json();
+
+                if (json.status === 'success') {
+                    alert(json.message || 'Data CAPEX berhasil disimpan!');
+                    this.formCapexOpen = false;
+                    this.formRows = [this.emptyRow()];
+                    await this.loadEntryData();
+                } else {
+                    alert(json.message || 'Gagal menyimpan data.');
+                }
+            } catch (e) {
+                alert('Terjadi kesalahan saat menyimpan data.');
+            } finally {
+                this.saving = false;
+            }
         }
     }
 }

@@ -29,13 +29,17 @@
                 <table class="w-full text-left text-xs border-collapse">
                     <thead>
                         <tr class="bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300 font-semibold border-b border-gray-200 dark:border-gray-800">
-                            <th class="p-2 w-10 text-center">#</th>
-                            <th class="p-2 min-w-[150px]">DESCRIPTION</th>
-                            <th class="p-2 min-w-[150px]">COST CENTER</th>
-                            <th class="p-2 min-w-[100px]">NEW LINES</th>
-                            <th class="p-2 w-16 text-right">QTY</th>
-                            <th class="p-2 min-w-[120px] text-right">UNIT PRICE (IN IDR MIO)</th>
-                            <th class="p-2 min-w-[120px]">REMARKS</th>
+                            <th rowspan="2" class="p-2 w-10 text-center">#</th>
+                            <th rowspan="2" class="p-2 min-w-[150px]">DESCRIPTION</th>
+                            <th rowspan="2" class="p-2 min-w-[150px]">COST CENTER</th>
+                            <th rowspan="2" class="p-2 min-w-[100px]">NEW LINES</th>
+                            <th rowspan="2" class="p-2 w-16 text-right">QTY</th>
+                            <th rowspan="2" class="p-2 min-w-[120px] text-right">UNIT PRICE (IN IDR MIO)</th>
+                            <th rowspan="2" class="p-2 min-w-[120px]">REMARKS</th>
+                            <th colspan="12" class="p-2 text-center border-x border-gray-200 dark:border-gray-800 bg-blue-50/60 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300">ACQUISITION PERIOD</th>
+                            <th rowspan="2" class="p-2 w-20 text-right">TOTAL</th>
+                        </tr>
+                        <tr class="bg-gray-50 dark:bg-gray-900/80 text-gray-600 dark:text-gray-400 font-semibold border-b border-gray-200 dark:border-gray-800 text-[10px]">
                             <th class="p-2 w-16 text-right">JAN</th>
                             <th class="p-2 w-16 text-right">FEB</th>
                             <th class="p-2 w-16 text-right">MAR</th>
@@ -48,7 +52,6 @@
                             <th class="p-2 w-16 text-right">OCT</th>
                             <th class="p-2 w-16 text-right">NOV</th>
                             <th class="p-2 w-16 text-right">DEC</th>
-                            <th class="p-2 w-20 text-right">TOTAL</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
@@ -89,10 +92,26 @@
                                 <td class="p-1"><input type="number" x-model.number="row.oct" class="w-full text-right rounded border border-gray-300 dark:border-gray-700 px-1 py-1 bg-white dark:bg-gray-900"></td>
                                 <td class="p-1"><input type="number" x-model.number="row.nov" class="w-full text-right rounded border border-gray-300 dark:border-gray-700 px-1 py-1 bg-white dark:bg-gray-900"></td>
                                 <td class="p-1"><input type="number" x-model.number="row.dec" class="w-full text-right rounded border border-gray-300 dark:border-gray-700 px-1 py-1 bg-white dark:bg-gray-900"></td>
-                                <td class="p-2 text-right font-bold">0.00</td>
+                                <td class="p-2 text-right font-bold font-mono" x-text="fmtNumber(rowTotal(row))"></td>
                             </tr>
                         </template>
                     </tbody>
+                    <tfoot class="bg-gray-50 dark:bg-gray-900/80 font-bold text-black dark:text-white">
+                        <tr>
+                            <td colspan="7" class="p-2 border-t border-r border-gray-200 dark:border-gray-800 uppercase text-xs">Total Land</td>
+                            <template x-for="m in ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']" :key="'tl_'+m">
+                                <td class="p-2 text-right border-t border-r border-gray-200 dark:border-gray-800 font-mono" x-text="fmtNumber(columnTotal(m))"></td>
+                            </template>
+                            <td class="p-2 text-right border-t border-gray-200 dark:border-gray-800 font-mono" x-text="fmtNumber(totalColumn())"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="7" class="p-2 border-t border-r border-gray-200 dark:border-gray-800 uppercase text-xs">Land Depreciation</td>
+                            <template x-for="m in ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']" :key="'ld_'+m">
+                                <td class="p-2 text-right border-t border-r border-gray-200 dark:border-gray-800 font-mono" x-text="fmtNumber(columnTotal(m))"></td>
+                            </template>
+                            <td class="p-2 text-right border-t border-gray-200 dark:border-gray-800 font-mono" x-text="fmtNumber(totalColumn())"></td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>

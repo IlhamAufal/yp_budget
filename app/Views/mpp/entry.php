@@ -79,7 +79,7 @@ function mppEntry() {
         isModalOpen: false,
         modalCategory: '',
         modalTipeId: 0,
-        modalMonths: [0,0,0,0,0,0,0,0,0,0,0,0],
+        modalPositions: [],
         modalNote: '',
         modalLoading: false,
 
@@ -94,7 +94,7 @@ function mppEntry() {
 
         init() {
             if (this.costCenterList.length > 0) {
-                this.selectedCostCenter = String(this.costCenterList[0].id_dept);
+                this.selectedCostCenter = String(this.costCenterList[0].cost_center);
             }
             this.$watch('selectedCostCenter', () => {
                 if (this.selectedCostCenter) {
@@ -135,7 +135,7 @@ function mppEntry() {
         async openFormModal(category, tipeId) {
             this.modalCategory = category;
             this.modalTipeId = tipeId;
-            this.modalMonths = [0,0,0,0,0,0,0,0,0,0,0,0];
+            this.modalPositions = [];
             this.modalNote = '';
             this.isModalOpen = true;
             this.modalLoading = true;
@@ -146,7 +146,14 @@ function mppEntry() {
                 });
                 const result = await res.json();
                 if (result.status === 'success') {
-                    this.modalMonths = result.data.months || [0,0,0,0,0,0,0,0,0,0,0,0];
+                    this.modalPositions = (result.data.positions || []).map(p => ({
+                        position_name: p.position_name,
+                        months: [
+                            parseInt(p.m1)||0, parseInt(p.m2)||0, parseInt(p.m3)||0, parseInt(p.m4)||0,
+                            parseInt(p.m5)||0, parseInt(p.m6)||0, parseInt(p.m7)||0, parseInt(p.m8)||0,
+                            parseInt(p.m9)||0, parseInt(p.m10)||0, parseInt(p.m11)||0, parseInt(p.m12)||0
+                        ]
+                    }));
                     this.modalNote = result.data.note || '';
                 }
             } catch (err) {
@@ -157,36 +164,31 @@ function mppEntry() {
         },
 
         // -------------------------------------------------------
-        // Sub-Tab 1: Modal - Auto-Fill Ke Kolom Sebelah Kanan
+        // Sub-Tab 1: Modal - Auto-Fill ke Kanan (same row)
         // -------------------------------------------------------
-        autoFillRight(colIndex, value) {
-            let numericVal = parseInt(value) || 0;
-            this.modalMonths[colIndex] = numericVal;
-            for (let i = colIndex + 1; i < 12; i++) {
-                this.modalMonths[i] = numericVal;
+        fillRight(posIdx, colIdx, value) {
+            const numVal = parseInt(value) || 0;
+            for (let i = colIdx; i < 12; i++) {
+                this.modalPositions[posIdx].months[i] = numVal;
             }
         },
 
         // -------------------------------------------------------
-        // Sub-Tab 1: Modal - Hitung Total Row
-        // -------------------------------------------------------
-        getModalTotal() {
-            return this.modalMonths.reduce((acc, curr) => acc + (parseInt(curr) || 0), 0);
-        },
-
-        // -------------------------------------------------------
-        // Sub-Tab 1: Modal - Simpan Data Breakdown
+        // Sub-Tab 1: Modal - Simpan Data Breakdown (multi-posisi)
         // -------------------------------------------------------
         async saveMppBreakdown() {
             this.saving = true;
             try {
+                const rows = this.modalPositions.map(p => ({
+                    staff_name: p.position_name,
+                    months: p.months
+                }));
                 const payload = {
                     id_dept: this.selectedCostCenter,
                     tipe_id: this.modalTipeId,
-                    months: this.modalMonths,
+                    rows: rows,
                     note: this.modalNote
                 };
-                payload[this.csrfName] = this.csrfHash;
 
                 const res = await fetch(`<?= base_url('mpp/saveMppBreakdown') ?>`, {
                     method: 'POST',
@@ -219,8 +221,8 @@ function mppEntry() {
         // Sub-Tab 1: Helper - Get CC Display Name
         // -------------------------------------------------------
         getCostCenterName() {
-            const found = this.costCenterList.find(c => String(c.id_dept) === String(this.selectedCostCenter));
-            return found ? `[${found.dept_code}] ${found.dept_desc}` : '';
+            const found = this.costCenterList.find(c => String(c.cost_center) === String(this.selectedCostCenter));
+            return found ? `[${found.cost_center_sap}] ${found.cost_desc}` : '';
         },
 
         // -------------------------------------------------------

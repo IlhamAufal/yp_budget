@@ -14,7 +14,7 @@
 
 <div class="mb-6 bg-white dark:bg-boxdark p-4 rounded-xl shadow-xs border border-gray-100 dark:border-gray-800">
     <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Cost Center</label>
-    <select x-model="selectedCostCenter" class="w-full max-w-lg rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none">
+    <select x-model="selectedCostCenter" @change="loadEntryData()" class="w-full max-w-lg rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none">
         <template x-for="cc in costCenters" :key="cc.id">
             <option :value="cc.id" x-text="cc.name"></option>
         </template>
@@ -52,22 +52,34 @@
                             </button>
                         </td>
                         <td class="p-3 font-medium text-gray-800 dark:text-gray-200" x-text="`${cat.code} - ${cat.name}`"></td>
-                        <td class="p-3 text-right">0</td>
-                        <td class="p-3 text-right">0</td>
-                        <td class="p-3 text-right">0</td>
-                        <td class="p-3 text-right">0</td>
-                        <td class="p-3 text-right">0</td>
-                        <td class="p-3 text-right">0</td>
-                        <td class="p-3 text-right">0</td>
-                        <td class="p-3 text-right">0</td>
-                        <td class="p-3 text-right">0</td>
-                        <td class="p-3 text-right">0</td>
-                        <td class="p-3 text-right">0</td>
-                        <td class="p-3 text-right">0</td>
-                        <td class="p-3 text-right font-bold">0</td>
+                        <td class="p-3 text-right" x-text="fmtNumber(catVal(cat, 'jan'))"></td>
+                        <td class="p-3 text-right" x-text="fmtNumber(catVal(cat, 'feb'))"></td>
+                        <td class="p-3 text-right" x-text="fmtNumber(catVal(cat, 'mar'))"></td>
+                        <td class="p-3 text-right" x-text="fmtNumber(catVal(cat, 'apr'))"></td>
+                        <td class="p-3 text-right" x-text="fmtNumber(catVal(cat, 'may'))"></td>
+                        <td class="p-3 text-right" x-text="fmtNumber(catVal(cat, 'jun'))"></td>
+                        <td class="p-3 text-right" x-text="fmtNumber(catVal(cat, 'jul'))"></td>
+                        <td class="p-3 text-right" x-text="fmtNumber(catVal(cat, 'aug'))"></td>
+                        <td class="p-3 text-right" x-text="fmtNumber(catVal(cat, 'sep'))"></td>
+                        <td class="p-3 text-right" x-text="fmtNumber(catVal(cat, 'oct'))"></td>
+                        <td class="p-3 text-right" x-text="fmtNumber(catVal(cat, 'nov'))"></td>
+                        <td class="p-3 text-right" x-text="fmtNumber(catVal(cat, 'dec'))"></td>
+                        <td class="p-3 text-right font-bold text-brand-600 dark:text-brand-400" x-text="fmtNumber(catTotal(cat))"></td>
                     </tr>
                 </template>
+                <tr x-show="categories.length === 0">
+                    <td colspan="15" class="p-6 text-center text-gray-500 dark:text-gray-400">Belum ada kategori aset.</td>
+                </tr>
             </tbody>
+            <tfoot class="bg-gray-50 dark:bg-gray-900/80 font-bold text-black dark:text-white">
+                <tr>
+                    <td colspan="2" class="p-3 uppercase text-xs border-t border-r border-gray-200 dark:border-gray-800">Total</td>
+                    <template x-for="m in monthKeys" :key="'ft_' + m">
+                        <td class="p-3 text-right border-t border-r border-gray-200 dark:border-gray-800" x-text="fmtNumber(categories.reduce((s, c) => s + catVal(c, m), 0))"></td>
+                    </template>
+                    <td class="p-3 text-right border-t border-gray-200 dark:border-gray-800 text-brand-600 dark:text-brand-400" x-text="fmtNumber(categories.reduce((s, c) => s + catTotal(c), 0))"></td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>

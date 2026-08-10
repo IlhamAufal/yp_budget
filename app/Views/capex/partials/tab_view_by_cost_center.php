@@ -2,8 +2,8 @@
     <div class="w-full max-w-lg">
         <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Cost Center</label>
         <select x-model="viewCostCenter" class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none">
-            <template x-for="cc in costCenters" :key="cc.id">
-                <option :value="cc.id" x-text="cc.name"></option>
+            <template x-for="(cc, idx) in costCenters" :key="cc.id">
+                <option :value="cc.id" x-text="`${idx + 1}. ${cc.name}`"></option>
             </template>
         </select>
     </div>

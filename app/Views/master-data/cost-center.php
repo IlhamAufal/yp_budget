@@ -247,7 +247,7 @@
           />
         </div>
 
-        <div>
+        <!-- <div>
           <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
             Departemen Terkait <span class="text-rose-500">*</span>
           </label>
@@ -263,7 +263,7 @@
               </option>
             <?php endforeach; ?>
           </select>
-        </div>
+        </div> -->
 
         <div>
           <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">

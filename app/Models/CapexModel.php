@@ -134,11 +134,15 @@ class CapexModel extends Model
                  ->delete();
 
         // 2. Clean Orphan Details/Totals/Depreciations
-        $validIdsSubquery =$this->db->table('yp_plan__trans_capex_entry_header')->select('id');
-        
-        $this->db->table('yp_plan__trans_capex_entry_detail')->whereNotIn('id_header',$validIdsSubquery)->delete();
-        $this->db->table('yp_plan__trans_capex_entry_depreciation')->whereNotIn('id_header',$validIdsSubquery)->delete();
-        $this->db->table('yp_plan__trans_capex_entry_total')->whereNotIn('id_header',$validIdsSubquery)->delete();
+        $this->db->query("DELETE d FROM yp_plan__trans_capex_entry_detail d
+                          LEFT JOIN yp_plan__trans_capex_entry_header h ON h.id = d.id_header
+                          WHERE h.id IS NULL");
+        $this->db->query("DELETE dep FROM yp_plan__trans_capex_entry_depreciation dep
+                          LEFT JOIN yp_plan__trans_capex_entry_header h ON h.id = dep.id_header
+                          WHERE h.id IS NULL");
+        $this->db->query("DELETE t FROM yp_plan__trans_capex_entry_total t
+                          LEFT JOIN yp_plan__trans_capex_entry_header h ON h.id = t.id_header
+                          WHERE h.id IS NULL");
 
         // 3. Batch Insert Items & Details
         $lastInsertedHeaderId = null;
@@ -367,6 +371,174 @@ class CapexModel extends Model
                 ->join('gw_plan__master_coa c', 'c.main_account = a.main_account', 'left')
                 ->orderBy('a.main_account', 'ASC')
                 ->get()->getResultArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Kategori aset CAPEX (master depresiasi + nama friendly dari master_coa).
+     * Dipakai untuk baris tabel tab_entry_capex & title modal form.
+     */
+    public function getCapexCategories(): array
+    {
+        $sql = "SELECT a.main_account,
+                       COALESCE(NULLIF(REPLACE(MIN(c.cost_center_desc), 'Depreciation - ', ''), ''),
+                                CONCAT('Asset ', a.main_account)) AS category_name
+                FROM yp_plan__master_amount_depreciation a
+                LEFT JOIN gw_plan__master_coa c
+                       ON c.main_account = a.main_account AND c.status = 'A'
+                GROUP BY a.main_account
+                ORDER BY a.main_account ASC";
+        try {
+            return $this->db->query($sql)->getResultArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Simpan form CAPEX (modal) — header + detail + depresiasi + total per baris.
+     * Data lama untuk (tahun, main_account, dept) dihapus lalu di-insert ulang
+     * agar re-save kategori yang sama tidak menumpuk.
+     */
+    public function saveCapexFormData(array $rows, string $mainAccount, string $dept, string $year, $user): bool
+    {
+        $this->db->transStart();
+
+        // Useful life (tahun) dari master depresiasi untuk kalkulasi depresiasi
+        $master = $this->db->table('yp_plan__master_amount_depreciation')
+            ->where('main_account', $mainAccount)->get()->getRowArray();
+        $lifeYears = $master ? (int) $master['amount'] : 0;
+
+        // id_coa = id_cost_center dari master_coa tipe CAPEX
+        $coa = $this->db->table('gw_plan__master_coa')
+            ->where('main_account', $mainAccount)
+            ->where('type', 'CAPEX')
+            ->where('status', 'A')
+            ->get()->getRowArray();
+        $idCoa = $coa ? (int) $coa['id_cost_center'] : 0;
+
+        // 1. Hapus entry lama untuk kombinasi ini
+        $this->db->table('yp_plan__trans_capex_entry_header')
+            ->where(['year_code' => $year, 'main_account' => $mainAccount, 'dept_id' => $dept])
+            ->delete();
+
+        // Bersihkan orphan detail/depresiasi/total (header sudah tidak ada)
+        $this->db->query("DELETE d FROM yp_plan__trans_capex_entry_detail d
+                          LEFT JOIN yp_plan__trans_capex_entry_header h ON h.id = d.id_header
+                          WHERE h.id IS NULL");
+        $this->db->query("DELETE dep FROM yp_plan__trans_capex_entry_depreciation dep
+                          LEFT JOIN yp_plan__trans_capex_entry_header h ON h.id = dep.id_header
+                          WHERE h.id IS NULL");
+        $this->db->query("DELETE t FROM yp_plan__trans_capex_entry_total t
+                          LEFT JOIN yp_plan__trans_capex_entry_header h ON h.id = t.id_header
+                          WHERE h.id IS NULL");
+
+        $monthNames = [1 => 'jan', 2 => 'feb', 3 => 'mar', 4 => 'apr', 5 => 'may', 6 => 'jun',
+                       7 => 'jul', 8 => 'aug', 9 => 'sep', 10 => 'oct', 11 => 'nov', 12 => 'dec'];
+        $any = false;
+
+        foreach ($rows as $r) {
+            $desc = trim((string) ($r['description'] ?? ''));
+            if ($desc === '') continue;
+
+            $headerData = [
+                'main_account' => (int) $mainAccount,
+                'id_coa'       => $idCoa,
+                'dept_id'      => (int) $dept,
+                'newlines'     => (($r['newLines'] ?? 'Tidak') === 'Ya') ? 1 : 0,
+                'item_desc'    => $desc,
+                'cost_center'  => (int) ($r['costCenter'] ?? 0),
+                'unit'         => (int) ($r['qty'] ?? 0),
+                'unit_price'   => (float) ($r['unitPrice'] ?? 0),
+                'remarks'      => (string) ($r['remarks'] ?? ''),
+                'year_code'    => (int) $year,
+            ];
+            $this->db->table('yp_plan__trans_capex_entry_header')->insert($headerData);
+            $headerId = $this->db->insertID();
+
+            // Nilai per bulan (acquisition period)
+            $vals = [];
+            $total = 0.0;
+            foreach ($monthNames as $m) {
+                $v = (float) ($r[$m] ?? 0);
+                $vals[] = $v;
+                $total += $v;
+            }
+
+            // 2. Detail (acquisition per bulan)
+            $this->db->query(
+                "INSERT INTO yp_plan__trans_capex_entry_detail
+                 (id_header, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`, `11`, `12`, total)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                array_merge([$headerId], $vals, [round($total, 4)])
+            );
+
+            // 3. Depresiasi straight-line: aset bulan k didepresiasi mulai bulan k
+            $depVals = [];
+            $depTotal = 0.0;
+            if ($lifeYears > 0) {
+                for ($m = 1; $m <= 12; $m++) {
+                    $dep = 0.0;
+                    for ($k = 1; $k <= $m; $k++) {
+                        if (($vals[$k - 1] ?? 0) > 0) {
+                            $dep += $vals[$k - 1] / ($lifeYears * 12);
+                        }
+                    }
+                    $depVals[] = round($dep, 4);
+                    $depTotal += $dep;
+                }
+            } else {
+                $depVals = array_fill(0, 12, 0.0);
+            }
+            $this->db->query(
+                "INSERT INTO yp_plan__trans_capex_entry_depreciation
+                 (id_header, id_coa, main_account, dept_id, year_code, master_amount,
+                  `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`, `11`, `12`, total)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                array_merge([$headerId, $idCoa, (int) $mainAccount, (int) $dept, (int) $year, $lifeYears],
+                    $depVals, [round($depTotal, 4)])
+            );
+
+            // 4. Total (mirror detail acquisition)
+            $this->db->query(
+                "INSERT INTO yp_plan__trans_capex_entry_total
+                 (id_header, id_coa, main_account, dept_id, year_code,
+                  `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`, `11`, `12`, total)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                array_merge([$headerId, $idCoa, (int) $mainAccount, (int) $dept, (int) $year],
+                    $vals, [round($total, 4)])
+            );
+
+            $any = true;
+        }
+
+        $this->db->transComplete();
+        return $any && $this->db->transStatus();
+    }
+
+    /**
+     * Total per kategori aset (main_account) untuk tab_entry_capex,
+     * difilter cost center (dept_id) + tahun.
+     */
+    public function getEntryDataByCategory(string $year, string $dept): array
+    {
+        $sql = "SELECT h.main_account AS category_code,
+                       IFNULL(SUM(d.`1`),0) AS jan, IFNULL(SUM(d.`2`),0) AS feb,
+                       IFNULL(SUM(d.`3`),0) AS mar, IFNULL(SUM(d.`4`),0) AS apr,
+                       IFNULL(SUM(d.`5`),0) AS may, IFNULL(SUM(d.`6`),0) AS jun,
+                       IFNULL(SUM(d.`7`),0) AS jul, IFNULL(SUM(d.`8`),0) AS aug,
+                       IFNULL(SUM(d.`9`),0) AS sep, IFNULL(SUM(d.`10`),0) AS oct,
+                       IFNULL(SUM(d.`11`),0) AS nov, IFNULL(SUM(d.`12`),0) AS `dec`,
+                       IFNULL(SUM(d.total),0) AS total
+                FROM yp_plan__trans_capex_entry_header h
+                LEFT JOIN yp_plan__trans_capex_entry_detail d ON d.id_header = h.id
+                WHERE h.year_code = ? AND h.dept_id = ?
+                GROUP BY h.main_account
+                ORDER BY h.main_account ASC";
+        try {
+            return $this->db->query($sql, [$year, $dept])->getResultArray();
         } catch (\Throwable $e) {
             return [];
         }
