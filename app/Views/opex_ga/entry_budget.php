@@ -71,6 +71,9 @@ function opexGaEntryApp() {
         selectedEntryCc: '',
         selectedViewCc: '',
 
+        actualMonths: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG'],
+        actualMonthKeys: ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug'],
+
         entryAccounts: [],
         viewAccounts: [],
 
@@ -92,12 +95,15 @@ function opexGaEntryApp() {
                 .then(r => r.json())
                 .then(res => {
                     if (res.status === 'success') {
+                        this.currentPage = 1;
                         this.entryAccounts = (res.headers || []).map((h, i) => ({
                             idx: i + 1,
-                            main_account: h.acct_code,
+                            main_account: h.main_account,
+                            acct_code: h.acct_code,
                             description: h.coa_desc,
-                            total_budget: this.fmtShort(h.total_budget),
-                            total_raw: parseFloat(h.total_budget) || 0
+                            jan: h.jan, feb: h.feb, mar: h.mar, apr: h.apr,
+                            may: h.may, jun: h.jun, jul: h.jul, aug: h.aug,
+                            total: parseFloat(h.total_actual) || 0
                         }));
                     }
                 });
@@ -126,7 +132,7 @@ function opexGaEntryApp() {
         },
 
         goToDetail(account) {
-            const headerEncoded = encodeURIComponent(account.description);
+            const headerEncoded = encodeURIComponent(account.main_account);
             window.location.href = `<?= base_url('opex-ga/entry-budget-detail') ?>?header=${headerEncoded}&dept=${this.selectedEntryCc}&idx=${account.idx}`;
         },
 
@@ -138,6 +144,49 @@ function opexGaEntryApp() {
             const num = parseFloat(val) || 0;
             if (num === 0) return '0';
             return num.toLocaleString('id-ID');
+        },
+
+        fmtActual(val) {
+            return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(val) || 0);
+        },
+
+        columnTotal(key) {
+            return this.entryAccounts.reduce((sum, r) => sum + (parseFloat(r[key]) || 0), 0);
+        },
+
+        grandTotal() {
+            return this.entryAccounts.reduce((sum, r) => sum + (parseFloat(r.total) || 0), 0);
+        },
+
+        // Pagination
+        currentPage: 1,
+        perPage: 10,
+        get totalRows() { return this.entryAccounts.length; },
+        get totalPages() { return Math.ceil(this.totalRows / this.perPage) || 1; },
+        get paginatedEntries() {
+            const start = (this.currentPage - 1) * this.perPage;
+            return this.entryAccounts.slice(start, start + this.perPage);
+        },
+        goPage(page) {
+            if (page < 1 || page > this.totalPages) return;
+            this.currentPage = page;
+        },
+        pageNumbers() {
+            const pages = [];
+            const total = this.totalPages;
+            const current = this.currentPage;
+            if (total <= 7) {
+                for (let i = 1; i <= total; i++) pages.push(i);
+            } else {
+                pages.push(1);
+                if (current > 3) pages.push('...');
+                const start = Math.max(2, current - 1);
+                const end = Math.min(total - 1, current + 1);
+                for (let i = start; i <= end; i++) pages.push(i);
+                if (current < total - 2) pages.push('...');
+                pages.push(total);
+            }
+            return pages;
         }
     }
 }

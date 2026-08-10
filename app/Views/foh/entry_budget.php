@@ -135,14 +135,6 @@
                 </div>
               </div>
             </div>
-            <button
-              type="button"
-              @click="loadHeaderData()"
-              :disabled="!selectedDept"
-              class="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-colors"
-              :class="selectedDept ? 'bg-gray-900 dark:bg-brand-500 text-white hover:bg-black dark:hover:bg-brand-600' : 'bg-gray-200 text-gray-400 cursor-not-allowed'">
-              <i class="fa-solid fa-rotate text-xs"></i> Muat Data
-            </button>
           </div>
         </div>
 

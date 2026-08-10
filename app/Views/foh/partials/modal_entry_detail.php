@@ -2,7 +2,7 @@
   <div @click.outside="isModalOpen = false" class="w-full max-w-5xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800 space-y-4">
     
     <div class="flex items-center justify-between border-b pb-3 dark:border-gray-700">
-      <h3 class="text-base font-bold text-brand-600 dark:text-brand-400" x-text="`Detail Entry Budget: ${activeRow ? activeRow.account_name : ''}`"></h3>
+      <h3 class="text-base font-bold text-brand-500 dark:text-brand-400" x-text="`Detail Entry Budget: ${activeRow ? activeRow.account_name : ''}`"></h3>
       <button @click="isModalOpen = false" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
     </div>
 
@@ -49,7 +49,7 @@
       </button>
       <div class="flex gap-2">
         <button @click="isModalOpen = false" class="rounded-lg border border-gray-300 px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">Batal</button>
-        <button @click="saveDetailItems()" class="rounded-lg bg-brand-00 px-4 py-2 text-xs font-medium text-white shadow transition-colors">💾 Simpan Detail</button>
+        <button @click="saveDetailItems()" class="rounded-lg bg-brand-500 hover:bg-brand-600 px-4 py-2 text-xs font-medium text-white shadow transition-colors">💾 Simpan Detail</button>
       </div>
     </div>
 

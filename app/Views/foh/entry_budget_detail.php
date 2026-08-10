@@ -76,7 +76,7 @@
           <template x-for="(row, idx) in matrixRows" :key="idx">
             <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
               <td class="py-3 px-4 text-center border-r">
-                <button @click="openModalDetail(row, idx)" title="Edit Detail Item" class="inline-flex items-center justify-center rounded-lg bg-blue-600 p-1.5 text-white shadow hover:bg-blue-700 active:scale-[0.98] transition-all">
+                <button @click="openModalDetail(row, idx)" title="Edit Detail Item" class="inline-flex items-center justify-center rounded-lg bg-brand-500 hover:bg-brand-600 p-1.5 text-white shadow active:scale-[0.98] transition-all">
                   <i class="fa-solid fa-pen-to-square text-[11px]"></i>
                 </button>
               </td>
@@ -101,7 +101,7 @@
     <div @click.outside="isModalOpen = false" x-transition class="w-full max-w-5xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800 space-y-4">
 
       <div class="flex items-center justify-between border-b pb-3 dark:border-gray-700">
-        <h3 class="text-base font-bold text-brand-600 dark:text-brand-400">
+        <h3 class="text-base font-bold text-brand-500 dark:text-brand-400">
           <i class="fa-solid fa-pen-to-square mr-1"></i>
           Detail Entry Budget: <span x-text="activeRow ? activeRow.coa_name : ''"></span>
         </h3>
@@ -157,7 +157,7 @@
         </button>
         <div class="flex gap-2">
           <button @click="isModalOpen = false" class="rounded-lg border border-gray-300 px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Batal</button>
-          <button @click="saveDetailItems()" class="rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700 shadow transition-colors">
+          <button @click="saveDetailItems()" class="rounded-lg bg-brand-500 hover:bg-brand-600 px-4 py-2 text-xs font-semibold text-white shadow transition-colors">
             <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Detail
           </button>
         </div>

@@ -180,12 +180,19 @@ class OpexGaController extends BaseController
             return $this->response->setStatusCode(405)->setJSON(['status' => 'error', 'message' => 'Invalid method']);
         }
 
+        $year        = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
         $userId      = (int) (session()->get('user_id') ?? 0);
         $entryDataId = (int) $this->request->getPost('entry_data_id');
         $itemsRaw    = $this->request->getPost('items');
-        $items       = is_string($itemsRaw) ? (array) json_decode($itemsRaw, true) : (array) $itemsRaw;
+        $items       = is_string($itemsRaw) ? (array) json_decode($itemsRaw, true) : (array) ($itemsRaw ?? []);
 
-        $result = $this->opexModel->saveDetailItemsBatch($entryDataId, $items, $userId);
+        // id_coa/dept sebagai hint bila parent entry budget belum ada
+        // (model akan auto-create sebelum menyimpan detail).
+        $result = $this->opexModel->saveDetailItemsBatch($entryDataId, $items, $userId, [
+            'id_coa'    => (int) $this->request->getPost('id_coa'),
+            'id_dept'   => (int) $this->request->getPost('dept'),
+            'year_code' => (int) $year,
+        ]);
 
         if ($result['success']) {
             AuditLog::saved('opex-ga/saveDetailItems', "Detail breakdown OPEX GA entry_data_id={$entryDataId} disimpan ({$result['count']} item)");

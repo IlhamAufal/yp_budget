@@ -19,7 +19,7 @@
             </div>
 
             <div>
-                <button @click="addRow()" class="p-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition inline-flex items-center gap-1 text-xs font-semibold">
+                <button @click="addRow()" class="p-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg transition inline-flex items-center gap-1 text-xs font-semibold shadow-xs">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Tambah Item
                 </button>
@@ -98,7 +98,7 @@
         </div>
 
         <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex justify-end gap-2">
-            <button @click="saveFormCapex()" class="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg text-xs transition">
+            <button @click="saveFormCapex()" class="px-5 py-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-lg text-xs shadow-xs transition">
                 💾 Save
             </button>
         </div>

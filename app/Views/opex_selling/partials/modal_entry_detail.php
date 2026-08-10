@@ -95,7 +95,7 @@
                 <button 
                     type="button" 
                     @click="saveItemModal()" 
-                    class="rounded bg-brand-600 px-6 py-2 text-xs font-semibold text-white shadow hover:bg-brand-700 transition-colors"
+                    class="rounded bg-brand-500 hover:bg-brand-600 px-6 py-2 text-xs font-semibold text-white shadow transition-colors"
                 >
                     <i class="fas fa-save mr-1"></i> Simpan Item
                 </button>

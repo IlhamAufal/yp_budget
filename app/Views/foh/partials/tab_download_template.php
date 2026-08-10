@@ -14,9 +14,9 @@
     <button
       @click="downloadTemplate()"
       :disabled="!selectedTemplateCC"
-      :class="selectedTemplateCC ? 'bg-brand-600 hover:bg-brand-700 text-white shadow-xs' : 'bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-600'"
+      :class="selectedTemplateCC ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs' : 'bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-600'"
       class="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all">
-      <i class="fa-solid fa-cloud-arrow-down text-xs"></i>
+      <i class="fa-solid fa-file-excel text-xs"></i>
       Download Template Excel
     </button>
   </div>

@@ -7,7 +7,8 @@
             </template>
         </select>
     </div>
-    <button class="inline-flex items-center gap-2 rounded-lg bg-gray-100 border border-gray-300 dark:border-gray-700 dark:bg-gray-800 px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-200 transition">
+    <button @click="exportExcel('View by Cost Center')" class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-xs font-semibold transition shadow-xs">
+        <i class="fa-solid fa-file-excel"></i>
         Export to Excel
     </button>
 </div>

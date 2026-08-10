@@ -24,19 +24,12 @@
       </div>
     </div>
 
-    <div class="sm:self-end flex gap-2">
-      <button
-        @click="loadViewData()"
-        :disabled="!viewDept"
-        class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors"
-        :class="viewDept ? 'bg-gray-900 dark:bg-brand-500 text-white hover:bg-black dark:hover:bg-brand-600' : 'bg-gray-200 text-gray-400 cursor-not-allowed'">
-        <i class="fa-solid fa-rotate text-xs"></i> Muat
-      </button>
+    <div class="sm:self-end">
       <button
         @click="exportData()"
         :disabled="!viewDept"
         class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors"
-        :class="viewDept ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-gray-200 text-gray-400 cursor-not-allowed'">
+        :class="viewDept ? 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs' : 'bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-600'">
         <i class="fa-solid fa-file-excel text-xs"></i> Export Excel
       </button>
     </div>

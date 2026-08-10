@@ -2,14 +2,14 @@
   <div class="flex flex-wrap items-center gap-4">
     <button
       @click="openUploadModal('AXAPTA')"
-      class="inline-flex items-center gap-2.5 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-xs hover:bg-blue-700 active:scale-[0.98] transition-all">
+      class="inline-flex items-center gap-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-xs active:scale-[0.98] transition-all">
       <i class="fa-solid fa-cloud-arrow-up"></i>
       Upload Data (Dari AXAPTA)
     </button>
 
     <button
       @click="openUploadModal('TEMPLATE')"
-      class="inline-flex items-center gap-2.5 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-xs hover:bg-indigo-700 active:scale-[0.98] transition-all">
+      class="inline-flex items-center gap-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-5 py-3 text-sm font-semibold text-white shadow-xs active:scale-[0.98] transition-all">
       <i class="fa-solid fa-file-excel"></i>
       Upload Data (Dari Template Sistem Budget)
     </button>
@@ -42,7 +42,7 @@
 
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" @click="isUploadModalOpen = false" class="rounded-lg px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Batal</button>
-          <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700 shadow transition-colors">
+          <button type="submit" class="rounded-lg bg-brand-500 hover:bg-brand-600 px-4 py-2 text-xs font-semibold text-white shadow transition-colors">
             <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Upload Data
           </button>
         </div>

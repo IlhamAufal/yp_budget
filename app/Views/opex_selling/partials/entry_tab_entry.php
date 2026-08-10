@@ -1,10 +1,13 @@
 <div x-data="{
     searchCostCenter: '',
     dropdownOpen: false,
-    costCenters: <?= json_encode(array_map(fn($cc) => [
-        'id'   => $cc['cost_center'],
-        'name' => ($cc['cc_code'] ?? $cc['cost_center']) . ' - ' . $cc['cost_desc'],
-    ], $costCenters)) ?>,
+    costCenters: <?= htmlspecialchars(json_encode(array_map(function($cc) {
+        $cc = (array) $cc;
+        return [
+            'id'   => $cc['cost_center'] ?? '',
+            'name' => trim(($cc['cc_code'] ?? $cc['cost_center'] ?? '') . ' - ' . ($cc['cost_desc'] ?? '-')),
+        ];
+    }, $costCenters ?? [])), ENT_QUOTES, 'UTF-8') ?>,
     selectedCostCenter: '',
     
     entries: [],

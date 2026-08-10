@@ -28,12 +28,6 @@
           </div>
         </div>
       </div>
-      <button
-        type="button"
-        @click="fetchActualData()"
-        class="inline-flex items-center gap-2 rounded-xl bg-gray-900 dark:bg-brand-500 px-5 py-3 text-sm font-semibold text-white hover:bg-black dark:hover:bg-brand-600 transition-colors">
-        <i class="fa-solid fa-rotate text-xs"></i> Muat Data
-      </button>
     </div>
   </div>
 
