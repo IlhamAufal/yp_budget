@@ -78,8 +78,8 @@ class OpexSellingController extends BaseController
      * ------------------------------------------------------------------ */
 
     /**
-     * AJAX: header accounts OPEX Selling beserta total budget.
-     * Mengembalikan data dari DB, atau mock data fallback jika kosong.
+     * AJAX: header accounts OPEX Selling (Master COA tipe SELLING) beserta
+     * actual per bulan (Jan-Agustus). Sumber: master COA + trans_budget_actual.
      */
     public function getHeaderAccounts(): ResponseInterface
     {
@@ -90,41 +90,9 @@ class OpexSellingController extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Cost Center wajib dipilih.']);
         }
 
-        $headers = $this->opexModel->getHeaderAccounts($year, $dept);
-
-        // Mock data fallback jika DB kosong
-        if (empty($headers)) {
-            $headers = [
-                [
-                    'id'         => 1,
-                    'id_coa'     => '5111000',
-                    'acct_code'  => '5111000',
-                    'coa_desc'   => 'Salaries & Wages',
-                    'id_dept'    => $dept,
-                    'total_budget' => 1440.00,
-                ],
-                [
-                    'id'         => 2,
-                    'id_coa'     => '5112000',
-                    'acct_code'  => '5112000',
-                    'coa_desc'   => 'Overtime & Allowance',
-                    'id_dept'    => $dept,
-                    'total_budget' => 720.00,
-                ],
-                [
-                    'id'         => 3,
-                    'id_coa'     => '5121000',
-                    'acct_code'  => '5121000',
-                    'coa_desc'   => 'Office Supplies',
-                    'id_dept'    => $dept,
-                    'total_budget' => 360.00,
-                ],
-            ];
-        }
-
         return $this->response->setJSON([
             'status'  => 'success',
-            'headers' => $headers,
+            'headers' => $this->opexModel->getHeaderAccounts($year, $dept),
         ]);
     }
 
@@ -147,7 +115,10 @@ class OpexSellingController extends BaseController
     }
 
     /**
-     * AJAX: data view dengan parent-child hierarchy untuk expandable row.
+     * AJAX: data view dengan kategori grouping + actual vs budget per COA.
+     *
+     * Output: { status, groups: [{ header_name, items: [per-COA data] }], cc }
+     * Digunakan oleh tab View Data di entry_tab_view.php.
      */
     public function getViewData(): ResponseInterface
     {
@@ -158,56 +129,22 @@ class OpexSellingController extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => 'Cost Center wajib dipilih.']);
         }
 
-        $headers = $this->opexModel->getHeaderAccounts($year, $dept);
-        $viewData = [];
-
-        foreach ($headers as $h) {
-            $children = $this->opexModel->getDetailItems((int) ($h['id'] ?? 0));
-            $viewData[] = [
-                'id'          => $h['id'] ?? 0,
-                'account'     => $h['acct_code'] ?? $h['id_coa'],
-                'description' => $h['coa_desc'] ?? '',
-                'total'       => (float) ($h['total_budget'] ?? 0),
-                'children'    => array_map(function ($c) {
-                    return [
-                        'desc'  => $c['nama_barang'] ?? '',
-                        'jan'   => (float) ($c['jan'] ?? $c['1'] ?? 0),
-                        'feb'   => (float) ($c['feb'] ?? $c['2'] ?? 0),
-                        'mar'   => (float) ($c['mar'] ?? $c['3'] ?? 0),
-                        'apr'   => (float) ($c['apr'] ?? $c['4'] ?? 0),
-                        'may'   => (float) ($c['may'] ?? $c['5'] ?? 0),
-                        'jun'   => (float) ($c['jun'] ?? $c['6'] ?? 0),
-                        'jul'   => (float) ($c['jul'] ?? $c['7'] ?? 0),
-                        'aug'   => (float) ($c['aug'] ?? $c['8'] ?? 0),
-                        'sep'   => (float) ($c['sep'] ?? $c['9'] ?? 0),
-                        'oct'   => (float) ($c['oct'] ?? $c['10'] ?? 0),
-                        'nov'   => (float) ($c['nov'] ?? $c['11'] ?? 0),
-                        'dec'   => (float) ($c['dec'] ?? $c['12'] ?? 0),
-                        'total' => (float) ($c['total'] ?? 0),
-                    ];
-                }, $children),
-            ];
-        }
-
-        // Mock data fallback jika DB kosong
-        if (empty($viewData)) {
-            $viewData = [
-                [
-                    'id'          => 1,
-                    'account'     => '5111000',
-                    'description' => 'Salaries & Wages',
-                    'total'       => 1440.00,
-                    'children'    => [
-                        ['desc' => 'Basic Salary Staff', 'jan' => 50, 'feb' => 50, 'mar' => 50, 'apr' => 50, 'may' => 50, 'jun' => 50, 'jul' => 50, 'aug' => 50, 'sep' => 50, 'oct' => 50, 'nov' => 50, 'dec' => 50, 'total' => 600],
-                        ['desc' => 'Allowance Staff', 'jan' => 70, 'feb' => 70, 'mar' => 70, 'apr' => 70, 'may' => 70, 'jun' => 70, 'jul' => 70, 'aug' => 70, 'sep' => 70, 'oct' => 70, 'nov' => 70, 'dec' => 70, 'total' => 840],
-                    ],
-                ],
-            ];
+        // Cari informasi cost center untuk label header
+        $cc = null;
+        foreach ($this->opexModel->getCostCenters() as $c) {
+            if ((string) ($c['cost_center'] ?? '') === (string) $dept) {
+                $cc = [
+                    'cc_code'   => $c['cc_code'] ?? $c['cost_center'],
+                    'cost_desc' => $c['cost_desc'] ?? '',
+                ];
+                break;
+            }
         }
 
         return $this->response->setJSON([
-            'status'   => 'success',
-            'viewData' => $viewData,
+            'status' => 'success',
+            'groups' => $this->opexModel->getViewDataGrouped($year, $dept),
+            'cc'     => $cc,
         ]);
     }
 
@@ -380,12 +317,19 @@ class OpexSellingController extends BaseController
             return $this->response->setStatusCode(405)->setJSON(['status' => 'error', 'message' => 'Invalid method']);
         }
 
+        $year        = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
         $userId      = (int) (session()->get('user_id') ?? 0);
         $entryDataId = (int) $this->request->getPost('entry_data_id');
         $itemsRaw    = $this->request->getPost('items');
-        $items       = is_string($itemsRaw) ? (array) json_decode($itemsRaw, true) : (array) $itemsRaw;
+        $items       = is_string($itemsRaw) ? (array) json_decode($itemsRaw, true) : (array) ($itemsRaw ?? []);
 
-        $result = $this->opexModel->saveDetailItemsBatch($entryDataId, $items, $userId);
+        // id_coa/dept sebagai hint bila parent entry budget belum ada
+        // (model akan auto-create sebelum menyimpan detail).
+        $result = $this->opexModel->saveDetailItemsBatch($entryDataId, $items, $userId, [
+            'id_coa'    => (int) $this->request->getPost('id_coa'),
+            'id_dept'   => (int) $this->request->getPost('dept'),
+            'year_code' => (int) $year,
+        ]);
 
         if ($result['success']) {
             AuditLog::saved('opex-selling/saveDetailItems', "Detail breakdown OPEX Selling entry_data_id={$entryDataId} disimpan ({$result['count']} item)");

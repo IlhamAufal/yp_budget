@@ -1,4 +1,4 @@
-<?= $this->extend('layout/main') ?>
+<?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
 <div x-data="capexEntryApp()" class="mx-auto max-w-7xl p-4 md:p-6 2xl:p-10">
