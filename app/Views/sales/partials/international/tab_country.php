@@ -14,11 +14,11 @@
             </button>
         </div>
         <button type="button" @click="exportCountryExcel()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5">
-            <i class="fa-solid fa-file-excel"></i> Export Country Excel
+            <i class="fa-solid fa-file-excel"></i> Export International Country Excel
         </button>
     </div>
     <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-xs border border-gray-200/80 dark:border-gray-800 p-6">
-        <h3 class="text-xs font-bold uppercase tracking-wider mb-4"><i class="fa-solid fa-flag text-indigo-500 mr-1"></i> Detail Export per Negara</h3>
+        <h3 class="text-xs font-bold uppercase tracking-wider mb-4"><i class="fa-solid fa-flag text-indigo-500 mr-1"></i> Detail International per Negara</h3>
         <div class="overflow-x-auto">
             <table class="w-full text-xs border-collapse">
                 <thead class="bg-gray-100 dark:bg-gray-800 font-bold border-b border-gray-300 dark:border-gray-700">

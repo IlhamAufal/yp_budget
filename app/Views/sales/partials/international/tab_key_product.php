@@ -1,9 +1,9 @@
 <div class="space-y-6">
     <div class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
         <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
-            <i class="fa-solid fa-award text-amber-500"></i> Report Key Product ($) Export
+            <i class="fa-solid fa-award text-amber-500"></i> Report Key Product ($) International
         </h3>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-6">Rekapitulasi performa per Kategori Key Product Export dalam USD ($).</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-6">Rekapitulasi performa per Kategori Key Product International dalam USD ($).</p>
         <div class="overflow-x-auto scrollbar-thin">
             <table class="w-full text-left text-xs border-collapse">
                 <thead class="bg-gray-100 dark:bg-gray-800 font-bold border-b border-gray-300 dark:border-gray-700">

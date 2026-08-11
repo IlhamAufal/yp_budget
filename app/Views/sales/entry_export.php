@@ -34,13 +34,13 @@
                 </span>
                 <div>
                     <h1 class="text-xl md:text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
-                        2.2 Sales International (Export) Entry
+                        2.2 Sales International Entry
                         <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800">
                             USD ($) · FY <?= esc($workingYear) ?>
                         </span>
                     </h1>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        Pengelolaan target dan laporan Sales International / Export per Negara (Valas USD $).
+                        Pengelolaan target dan laporan Sales International per Negara (Valas USD $).
                     </p>
                 </div>
             </div>
@@ -52,7 +52,7 @@
     <!-- 2. SUB-TABS NAVIGATION BAR (6 SUB-TABS) -->
     <!-- ============================================================ -->
     <div class="bg-gray-100/80 dark:bg-gray-800/60 p-1.5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs">
-        <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="Export Sub Tabs">
+        <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="International Sub Tabs">
             <button type="button" @click="subTab = 'budget'" 
                     :class="subTab === 'budget' ? 'bg-white dark:bg-gray-900 text-primary dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
                     class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2">
@@ -101,12 +101,12 @@
     <!-- ============================================================ -->
     <!-- SUB-TAB CONTENT (partials) -->
     <!-- ============================================================ -->
-    <div x-show="subTab === 'budget'" x-cloak><?= $this->include('sales/partials/export/tab_budget') ?></div>
-    <div x-show="subTab === 'key_product'" x-cloak><?= $this->include('sales/partials/export/tab_key_product') ?></div>
-    <div x-show="subTab === 'country'" x-cloak><?= $this->include('sales/partials/export/tab_country') ?></div>
-    <div x-show="subTab === 'regional'" x-cloak><?= $this->include('sales/partials/export/tab_regional') ?></div>
-    <div x-show="subTab === 'download'" x-cloak><?= $this->include('sales/partials/export/tab_download') ?></div>
-    <div x-show="subTab === 'upload'" x-cloak><?= $this->include('sales/partials/export/tab_upload') ?></div>
+    <div x-show="subTab === 'budget'" x-cloak><?= $this->include('sales/partials/international/tab_budget') ?></div>
+    <div x-show="subTab === 'key_product'" x-cloak><?= $this->include('sales/partials/international/tab_key_product') ?></div>
+    <div x-show="subTab === 'country'" x-cloak><?= $this->include('sales/partials/international/tab_country') ?></div>
+    <div x-show="subTab === 'regional'" x-cloak><?= $this->include('sales/partials/international/tab_regional') ?></div>
+    <div x-show="subTab === 'download'" x-cloak><?= $this->include('sales/partials/international/tab_download') ?></div>
+    <div x-show="subTab === 'upload'" x-cloak><?= $this->include('sales/partials/international/tab_upload') ?></div>
 
 </div>
 
@@ -575,7 +575,7 @@ function exportSalesEntry(initialProducts = [], initialCountries = [], initialRe
 
         downloadExportTemplate(type = 'VOL') {
             if (window.ypToast) {
-                window.ypToast.info('Mengunduh template export ' + type + '...');
+                window.ypToast.info('Mengunduh template international ' + type + '...');
             }
             window.open(`<?= base_url('sales/export_template_export') ?>/EXPORTV2?type=${type}`, '_blank');
         },
@@ -608,7 +608,7 @@ function exportSalesEntry(initialProducts = [], initialCountries = [], initialRe
         },
 
         /**
-         * Simpan seluruh data budget export ke backend (batch upsert).
+         * Simpan seluruh data budget international ke backend (batch upsert).
          */
         saveChanges() {
             if (this.items.length === 0) {
@@ -621,7 +621,7 @@ function exportSalesEntry(initialProducts = [], initialCountries = [], initialRe
                 monthly: item.monthly
             }));
 
-            if (window.ypToast) window.ypToast.info('Menyimpan data budget export...');
+            if (window.ypToast) window.ypToast.info('Menyimpan data budget international...');
 
             fetch('<?= base_url('sales/saveExportEntry') ?>', {
                 method: 'POST',
@@ -659,7 +659,7 @@ function exportSalesEntry(initialProducts = [], initialCountries = [], initialRe
             const formData = new FormData();
             formData.append('excel_file', file);
 
-            if (window.ypToast) window.ypToast.info('Mengupload file Sales Export...');
+            if (window.ypToast) window.ypToast.info('Mengupload file Sales International...');
 
             fetch('<?= base_url('sales/uploadExport') ?>', {
                 method: 'POST',
@@ -686,8 +686,8 @@ function exportSalesEntry(initialProducts = [], initialCountries = [], initialRe
         },
 
         processSummarySKU() {
-            if (confirm('Yakin ingin memproses summary SKU Sales International Export? Data summary akan di-reagregasi.')) {
-                if (window.ypToast) window.ypToast.info('Memproses Summary SKU Export...');
+            if (confirm('Yakin ingin memproses summary SKU Sales International? Data summary akan di-reagregasi.')) {
+                if (window.ypToast) window.ypToast.info('Memproses Summary SKU International...');
 
                 fetch('<?= base_url('sales/proses_summary_export') ?>', {
                     method: 'POST',
@@ -701,10 +701,10 @@ function exportSalesEntry(initialProducts = [], initialCountries = [], initialRe
                 .then(r => r.json())
                 .then(res => {
                     if (res.success) {
-                        if (window.ypToast) window.ypToast.success(res.message || 'Proses summary SKU Export selesai');
+                        if (window.ypToast) window.ypToast.success(res.message || 'Proses summary SKU International selesai');
                         location.reload();
                     } else {
-                        if (window.ypToast) window.ypToast.error(res.message || 'Gagal memproses summary SKU Export');
+                        if (window.ypToast) window.ypToast.error(res.message || 'Gagal memproses summary SKU International');
                     }
                 })
                 .catch(err => {

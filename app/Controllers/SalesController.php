@@ -76,7 +76,7 @@ class SalesController extends BaseController
         $workingYear = $this->getWorkingYear();
 
         return view('sales/entry_export', [
-            'title'                => '2.2 Sales International (Export)',
+            'title'                => '2.2 Sales International',
             'workingYear'          => $workingYear,
             'salesData'            => $this->getAssumptionData($workingYear, 'International'),
             'exportProducts'       => $this->getProductSummary($workingYear, 'yp_plan__trans_sales_export'),
@@ -1109,7 +1109,7 @@ class SalesController extends BaseController
 
             return $this->response->setJSON([
                 'status'  => 'success',
-                'message' => 'Data Sales Export berhasil disimpan (' . count($items) . ' SKU).',
+                'message' => 'Data Sales International berhasil disimpan (' . count($items) . ' SKU).',
             ]);
         } catch (\Throwable $e) {
             $this->db->transRollback();
@@ -1319,7 +1319,7 @@ class SalesController extends BaseController
 
             return $this->response->setJSON([
                 'status'  => 'success',
-                'message' => "Upload Sales " . ucfirst($type) . " berhasil ({$saved} baris).",
+                'message' => "Upload Sales " . ($type === 'export' ? 'International' : ucfirst($type)) . " berhasil ({$saved} baris).",
                 'count'   => $saved,
             ]);
         } catch (\Throwable $e) {
@@ -1370,7 +1370,7 @@ class SalesController extends BaseController
 
             return $this->response->setJSON([
                 'success' => true,
-                'message' => "Summary SKU Export tahun {$year} berhasil diproses.",
+                'message' => "Summary SKU International tahun {$year} berhasil diproses.",
             ]);
         } catch (\Throwable $e) {
             $this->db->transRollback();
@@ -1460,7 +1460,7 @@ class SalesController extends BaseController
             $data[] = $row;
         }
 
-        return ExcelExporter::export($headers, $data, "Sales_Export_Country_{$year}", 'Country');
+        return ExcelExporter::export($headers, $data, "Sales_International_Country_{$year}", 'Country');
     }
 
     /**
@@ -1493,8 +1493,8 @@ class SalesController extends BaseController
         return ExcelExporter::export(
             $headers,
             $data,
-            "Template_Sales_Export_{$type}_{$year}",
-            'Export Template'
+            "Template_Sales_International_{$type}_{$year}",
+            'International Template'
         );
     }
 }

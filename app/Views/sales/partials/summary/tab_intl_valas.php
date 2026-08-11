@@ -1,6 +1,6 @@
 <div x-data="intlValasSalesTab()" x-init="initData()" class="space-y-6">
 
-    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <!-- <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div class="flex flex-wrap items-center gap-3">
             <div class="w-full sm:w-36">
                 <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Mata Uang (Valas)</label>
@@ -49,7 +49,7 @@
                 <span x-text="saving ? 'Menyimpan...' : 'Simpan Data Valas'"></span>
             </button>
         </div>
-    </div>
+    </div> -->
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">

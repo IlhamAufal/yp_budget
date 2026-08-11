@@ -16,7 +16,7 @@
                 </div>
             </div>
 
-            <button @click="manualBookModalOpen = true"
+            <button type="button" @click="window.openManualBook && window.openManualBook()"
                 class="inline-flex shrink-0 items-center gap-1.5 rounded bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-red-700 transition">
                 <i class="fas fa-book"></i> Manual Book
             </button>

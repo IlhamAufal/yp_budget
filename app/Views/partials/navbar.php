@@ -714,6 +714,21 @@
                 Change Password
               </button>
             </li>
+            <li>
+              <?php $changePasswordManualPath = 'assets/docs/manual_book/MANUAL BOOK - BUDGET SYSTEM - GANTI PASSWORD.pdf'; ?>
+              <?php if (is_file(FCPATH . $changePasswordManualPath)): ?>
+                <a href="<?= base_url($changePasswordManualPath) ?>" target="_blank" download
+                  class="group text-theme-sm flex w-full items-center gap-3 rounded-lg px-3 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
+                  <i class="fa-solid fa-book-open w-6 text-center text-gray-500 group-hover:text-gray-700 dark:text-gray-400"></i>
+                  Manual Book Ganti Password
+                </a>
+              <?php else: ?>
+                <span class="group text-theme-sm flex w-full items-center gap-3 rounded-lg px-3 py-2 font-medium text-gray-400 dark:text-gray-600">
+                  <i class="fa-solid fa-file-circle-xmark w-6 text-center"></i>
+                  Manual Book Belum Tersedia
+                </span>
+              <?php endif; ?>
+            </li>
           </ul>
           <a
             href="<?= base_url('logout') ?>"

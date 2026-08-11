@@ -41,7 +41,11 @@
     </div>
 
     <?= $this->include('capex/partials/modal_form_capex') ?>
-    <?= $this->include('capex/partials/modal_manual_book') ?>
+    <?= $this->include('partials/manual_book_modal', [
+        'mbTitle' => 'Manual Book - Input CAPEX',
+        'mbPdfUrl' => base_url('assets/docs/manual_book/MANUAL BOOK - BUDGET SYSTEM - INPUT CAPEX.pdf'),
+        'mbPdfExists' => is_file(FCPATH . 'assets/docs/manual_book/MANUAL BOOK - BUDGET SYSTEM - INPUT CAPEX.pdf'),
+    ]) ?>
 </div>
 
 <script>

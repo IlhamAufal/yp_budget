@@ -55,7 +55,11 @@
         </div>
     </div>
 
-    <?= $this->include('opex_ga/partials/modal_manual_book') ?>
+    <?= $this->include('partials/manual_book_modal', [
+        'mbTitle' => 'Manual Book - Input OPEX GA',
+        'mbPdfUrl' => base_url('assets/docs/manual_book/MANUAL BOOK - BUDGET SYSTEM - INPUT OPEX GA.pdf'),
+        'mbPdfExists' => is_file(FCPATH . 'assets/docs/manual_book/MANUAL BOOK - BUDGET SYSTEM - INPUT OPEX GA.pdf'),
+    ]) ?>
 
 </div>
 

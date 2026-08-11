@@ -15,8 +15,8 @@
  *        <?= $this->section('modals') ?>
  *          <?= $this->include('partials/manual_book_modal', [
  *              'mbTitle'     => 'Manual Book - Input OPEX GA',
- *              'mbPdfUrl'    => base_url('assets/docs/manual_book_opex_ga.pdf'),
- *              'mbPdfExists' => is_file(FCPATH . 'assets/docs/manual_book_opex_ga.pdf'),
+ *              'mbPdfUrl'    => base_url('assets/docs/manual_book/MANUAL BOOK - BUDGET SYSTEM - INPUT OPEX GA.pdf'),
+ *              'mbPdfExists' => is_file(FCPATH . 'assets/docs/manual_book/MANUAL BOOK - BUDGET SYSTEM - INPUT OPEX GA.pdf'),
  *          ]) ?>
  *        <?= $this->endSection() ?>
  *   2. Trigger dari tombol mana pun di halaman:
@@ -120,7 +120,7 @@ $mbPdfExists = $mbPdfExists ?? false;
                 <h3 class="text-base font-bold text-gray-900 dark:text-white mb-1">Dokumen Manual Book Belum Tersedia</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                   File PDF belum diupload. Silakan letakkan file PDF pada folder
-                  <code class="px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-xs font-mono">public/assets/docs/</code>
+                  <code class="px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-xs font-mono">public/assets/docs/manual_book/</code>
                   lalu muat ulang halaman ini.
                 </p>
               </div>

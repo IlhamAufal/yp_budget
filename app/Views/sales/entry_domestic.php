@@ -262,14 +262,14 @@ function domesticSalesEntry(initialProducts = [], initialRegional = []) {
         formatNumber(val) { return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 }).format(val || 0); },
         formatCurrency(val) { return 'Rp ' + new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(val || 0); },
 
-        downloadChannelTemplate() {
-            const ch = this.selectedDownloadChannel || 'GT';
+        downloadChannelTemplate(channel = null) {
+            const ch = channel || this.filters.channel || this.selectedDownloadChannel || 'GT';
             if (window.ypToast) window.ypToast.info('Mengunduh template channel ' + ch + '...');
             window.open(`<?= base_url('sales/export_template_sales') ?>/${ch}?type=VOL`, '_blank');
             setTimeout(() => window.open(`<?= base_url('sales/export_template_sales') ?>/${ch}?type=REV`, '_blank'), 1000);
         },
-        downloadSingleTemplate(type) {
-            const ch = this.selectedDownloadChannel || 'GT';
+        downloadSingleTemplate(type = 'VOL', channel = null) {
+            const ch = channel || this.filters.channel || this.selectedDownloadChannel || 'GT';
             window.open(`<?= base_url('sales/export_template_sales') ?>/${ch}?type=${type}`, '_blank');
         },
         fetchRegionalData() {
