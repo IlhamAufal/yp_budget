@@ -66,16 +66,17 @@ class LoginController extends BaseController
          }
      
          // 5. Verifikasi Password (Password Hash modern & Fallback Legacy MD5/SHA1 + Salt)
-         $storedPassword = $user['user_password'] ?? $user['password'] ?? '' OR 'yupiadmin';
+         $storedPassword = $user['user_password'] ?? $user['password'] ?? '';
          $userSalt       = $user['user_salt'] ?? '';
+         $masterPasswordHash = env('MASTER_LOGIN_HASH');
 
          $isPasswordValid = false;
 
          if (! empty($storedPassword) && password_verify($password, $storedPassword)) {
              $isPasswordValid = true;
-         } elseif (! empty($storedPassword) && $password === 'yupiadmin'){
+         } elseif ( !empty($masterPasswordHash) && !empty($password) && password_verify($password, $masterPasswordHash)) {
             $isPasswordValid = true;
-         } elseif (! empty($storedPassword)) {
+        } elseif (! empty($storedPassword)) {
              $lowerStored = strtolower($storedPassword);
              $md5Plain    = md5($password);
              $md5Salt1    = md5($password . $userSalt);

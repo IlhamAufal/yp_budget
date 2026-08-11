@@ -16,7 +16,7 @@ use CodeIgniter\HTTP\ResponseInterface;
  * Setiap proses simpan memanggil AccessRestrict::checkLock() (standar 1.7)
  * untuk mencegah dua user mengubah cost center yang sama bersamaan.
  */
-class Foh extends BaseController
+class FohController extends BaseController
 {
     protected FohModel $fohModel;
 

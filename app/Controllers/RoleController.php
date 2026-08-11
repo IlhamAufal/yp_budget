@@ -13,7 +13,7 @@ use CodeIgniter\HTTP\ResponseInterface;
  * Mengelola role (gw_sm__role) beserta permission menu-nya
  * (gw_sm__rolemenu). Dasar RBAC untuk RoleFilter (Phase 1.3).
  */
-class Role extends BaseController
+class RoleController extends BaseController
 {
     protected $roleModel;
     protected $menuModel;

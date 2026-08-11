@@ -12,7 +12,7 @@ use CodeIgniter\HTTP\ResponseInterface;
  * Mengelola master menu (gw_sm__menu) yang nantinya dirender dinamis
  * oleh MenuBuilder (Phase 1.2).
  */
-class Menu extends BaseController
+class MenuController extends BaseController
 {
     protected $menuModel;
 

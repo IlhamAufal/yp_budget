@@ -110,9 +110,6 @@
 
 </div>
 
-
-</div>
-
 <!-- ============================================================ -->
 <!-- 3. ALPINE.JS CONTROLLER SCRIPT -->
 <!-- ============================================================ -->
@@ -131,6 +128,17 @@ function exportSalesEntry(initialProducts = [], initialCountries = [], initialRe
 
         items: [],
         filteredItems: [],
+        domesticMetricCols: (() => {
+            const columns = [];
+            for (let m = 1; m <= 12; m++) columns.push({ m, k: 'qty' }, { m, k: 'rev' }, { m, k: 'asp' });
+            return columns;
+        })(),
+        domesticBudgetItems: [],
+        domesticBudgetRows: [],
+        domesticBudgetGroups: [],
+        domesticBudgetGrandTotal: { monthly: {}, total_qty: 0, total_rev: 0, total_asp: 0 },
+        domesticBudgetFilters: { channel: 'ALL', search: '' },
+        domesticBudgetLoading: false,
         keyProductsSummary: [],
         countryDetails: [],
         regionalSummaries: [],
@@ -171,6 +179,121 @@ function exportSalesEntry(initialProducts = [], initialCountries = [], initialRe
             }
 
             this.applyFilters();
+            this.loadDomesticBudget();
+        },
+
+        loadDomesticBudget() {
+            this.domesticBudgetLoading = true;
+            const channel = this.domesticBudgetFilters.channel === 'ALL' ? '' : this.domesticBudgetFilters.channel;
+
+            fetch(`<?= base_url('sales/cari_domestic_sales') ?>`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                },
+                body: JSON.stringify({
+                    year: <?= json_encode($workingYear) ?>,
+                    dept: channel
+                })
+            })
+                .then(response => response.json().then(data => ({ ok: response.ok, data })))
+                .then(({ ok, data }) => {
+                    if (!ok || data.status !== 'success') {
+                        throw new Error(data.message || 'Data Sales Domestic gagal dimuat.');
+                    }
+                    this.domesticBudgetItems = (data.data || []).map((row, index) => this.transformDomesticBudgetRow(row, index + 1));
+                    this.applyDomesticBudgetFilters();
+                })
+                .catch(error => {
+                    console.error(error);
+                    this.domesticBudgetItems = [];
+                    this.applyDomesticBudgetFilters();
+                    if (window.ypToast) window.ypToast.error(error.message || 'Data Sales Domestic gagal dimuat.');
+                })
+                .finally(() => { this.domesticBudgetLoading = false; });
+        },
+
+        transformDomesticBudgetRow(row, rowNo) {
+            const monthly = {};
+            const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+            for (let m = 1; m <= 12; m++) {
+                const key = months[m - 1];
+                const qty = Number(row[`${key}_qty`] || 0);
+                const revenue = Number(row[`${key}_rev`] || 0);
+                monthly[m] = {
+                    qty,
+                    revenue,
+                    asp: Number(row[`${key}_asp`] || (qty > 0 ? (revenue / qty) * 1000 : 0))
+                };
+            }
+            const totalQty = Number(row.total_qty || 0);
+            const totalRev = Number(row.total_rev || 0);
+            return {
+                row_no: rowNo,
+                id_channel: row.id_channel || '',
+                key_product: row.key_product || '',
+                mid_product: row.mid_product || '',
+                product_name: row.product_name || '',
+                monthly,
+                total_qty: totalQty,
+                total_rev: totalRev,
+                total_asp: Number(row.total_asp || (totalQty > 0 ? (totalRev / totalQty) * 1000 : 0))
+            };
+        },
+
+        applyDomesticBudgetFilters() {
+            const query = (this.domesticBudgetFilters.search || '').trim().toLowerCase();
+            const filtered = this.domesticBudgetItems.filter(item => {
+                if (!query) return true;
+                return [item.id_channel, item.key_product, item.mid_product, item.product_name]
+                    .join(' ').toLowerCase().includes(query);
+            });
+
+            const groups = {};
+            const grandMonthly = {};
+            for (let m = 1; m <= 12; m++) grandMonthly[m] = { qty: 0, revenue: 0 };
+
+            filtered.forEach((item, index) => {
+                item.row_no = index + 1;
+                const channel = item.id_channel || 'OTHER';
+                if (!groups[channel]) {
+                    const monthly = {};
+                    for (let m = 1; m <= 12; m++) monthly[m] = { qty: 0, revenue: 0 };
+                    groups[channel] = { channel, items: [], monthly, total_qty: 0, total_rev: 0 };
+                }
+                const group = groups[channel];
+                group.items.push(item);
+                group.total_qty += item.total_qty;
+                group.total_rev += item.total_rev;
+                for (let m = 1; m <= 12; m++) {
+                    group.monthly[m].qty += item.monthly[m].qty;
+                    group.monthly[m].revenue += item.monthly[m].revenue;
+                    grandMonthly[m].qty += item.monthly[m].qty;
+                    grandMonthly[m].revenue += item.monthly[m].revenue;
+                }
+            });
+
+            const groupList = Object.values(groups);
+            const grandTotal = { monthly: grandMonthly, total_qty: 0, total_rev: 0, total_asp: 0 };
+            groupList.forEach(group => {
+                grandTotal.total_qty += group.total_qty;
+                grandTotal.total_rev += group.total_rev;
+            });
+            grandTotal.total_asp = grandTotal.total_qty > 0 ? (grandTotal.total_rev / grandTotal.total_qty) * 1000 : 0;
+
+            this.domesticBudgetGroups = groupList;
+            this.domesticBudgetRows = [];
+            groupList.forEach(group => {
+                this.domesticBudgetRows.push({ kind: 'subtotal', group });
+                group.items.forEach(item => this.domesticBudgetRows.push({ kind: 'item', group, item }));
+            });
+            this.domesticBudgetGrandTotal = grandTotal;
+        },
+
+        formatDomesticASP(revenue, qty) {
+            return this.formatNumber(qty > 0 ? (revenue / qty) * 1000 : 0);
         },
 
         transformDbCountry(c, id) {

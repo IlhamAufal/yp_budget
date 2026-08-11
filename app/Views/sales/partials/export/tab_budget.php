@@ -1,75 +1,33 @@
 <div class="space-y-6">
-    <!-- Toolbar & Filter Area -->
     <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
         <div class="flex flex-wrap items-center gap-3 flex-1">
-            <div class="flex items-center gap-2 min-w-[220px]">
-                <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1.5 shrink-0">
-                    <i class="fa-solid fa-filter text-primary"></i> Channel:
-                </label>
-                <select x-model="filters.channel" @change="applyFilters()" class="w-full text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white py-2 px-3">
-                    <option value="">EXPORT (Sales International)</option>
-                </select>
-            </div>
-            <div class="relative flex-1 min-w-[240px]">
-                <input type="text" x-model="filters.search" @input.debounce.300ms="applyFilters()" placeholder="Cari SKU / Nama Produk..." class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white">
-                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-gray-400"></i>
-            </div>
+            <div class="flex items-center gap-2 min-w-[220px]"><label class="text-xs font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1.5 shrink-0"><i class="fa-solid fa-filter text-primary"></i> Channel:</label><select x-model="domesticBudgetFilters.channel" @change="loadDomesticBudget()" class="w-full text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white py-2 px-3"><option value="ALL">ALL DOMESTIC CHANNEL</option><option value="GT">GT - General Trade</option><option value="MT">MT - Modern Trade</option><option value="OEM">OEM</option><option value="YTI">YTI - Yupi Trading International</option></select></div>
+            <div class="relative flex-1 min-w-[240px]"><input type="text" x-model="domesticBudgetFilters.search" @input.debounce.300ms="applyDomesticBudgetFilters()" placeholder="Cari channel / code inv / key product / nama produk..." class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"><i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-gray-400"></i></div>
         </div>
-        <div class="flex items-center gap-2 shrink-0">
-            <button type="button" @click="downloadExportTemplate()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-1.5">
-                <i class="fa-solid fa-file-excel"></i> Template Data Export
-            </button>
-            <button type="button" @click="saveChanges()" class="px-3.5 py-2 bg-primary hover:bg-primary/90 text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-1.5">
-                <i class="fa-solid fa-floppy-disk"></i> Save Changes
-            </button>
-        </div>
+        <button type="button" @click="loadDomesticBudget()" class="px-3.5 py-2 bg-primary hover:bg-primary/90 text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-1.5" :disabled="domesticBudgetLoading"><i class="fa-solid fa-rotate" :class="domesticBudgetLoading ? 'animate-spin' : ''"></i><span x-text="domesticBudgetLoading ? 'Memuat...' : 'Muat Data'"></span></button>
     </div>
 
-    <!-- Data Table -->
     <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-xs border border-gray-200/80 dark:border-gray-800 overflow-hidden">
-        <div class="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/40">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-table text-primary"></i>
-                <h3 class="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">Target Sales International 12 Bulan (Valas USD $)</h3>
-            </div>
-            <span class="text-[11px] text-amber-600 dark:text-amber-400 font-medium italic">ASP: Revenue / Qty ($/Kg)</span>
-        </div>
+        <div class="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/40"><div class="flex items-center gap-2"><i class="fa-solid fa-table text-primary"></i><h3 class="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">Sales Domestic - Budget (12 Bulan)</h3></div><span class="text-[11px] text-primary dark:text-primary-300 font-medium italic">ASP: Revenue / Qty × 1000 (Rp/kg)</span></div>
         <div class="overflow-x-auto scrollbar-thin max-h-[600px]">
-            <table class="w-full text-left text-[11px] border-collapse min-w-[1400px]">
+            <table class="w-full text-left text-[11px] border-collapse min-w-[2800px]">
                 <thead class="bg-gray-100/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-300 font-bold uppercase border-b border-gray-300 dark:border-gray-700 sticky top-0 z-20">
-                    <tr>
-                        <th class="p-2.5 border-r border-gray-300 dark:border-gray-700 w-10 text-center">No.</th>
-                        <th class="p-2.5 border-r border-gray-300 dark:border-gray-700 w-20 text-center">CHANNEL</th>
-                        <th class="p-2.5 border-r border-gray-300 dark:border-gray-700 min-w-[100px]">KEY PRODUCT</th>
-                        <th class="p-2.5 border-r border-gray-300 dark:border-gray-700 min-w-[80px]">CODE INV</th>
-                        <th class="p-2.5 border-r border-gray-300 dark:border-gray-700 min-w-[200px]">PRODUCT NAME</th>
-                        <th class="p-2.5 border-r border-gray-300 dark:border-gray-700 w-24 text-right">TOT QTY</th>
-                        <th class="p-2.5 border-r border-gray-300 dark:border-gray-700 w-28 text-right text-amber-700">TOT REV ($)</th>
-                        <th class="p-2.5 w-20 text-right text-emerald-700">AVG ASP ($)</th>
-                    </tr>
+                    <tr><th class="p-2.5 border-r border-gray-300 dark:border-gray-700 w-10 text-center" rowspan="2">No.</th><th class="p-2.5 border-r border-gray-300 dark:border-gray-700 min-w-[90px] text-center" rowspan="2">CHANNEL</th><th class="p-2.5 border-r border-gray-300 dark:border-gray-700 min-w-[130px]" rowspan="2">KEY PRODUCT</th><th class="p-2.5 border-r border-gray-300 dark:border-gray-700 min-w-[110px]" rowspan="2">CODE INV</th><th class="p-2.5 border-r border-gray-300 dark:border-gray-700 min-w-[220px]" rowspan="2">NAME PRODUCT</th><template x-for="(month, idx) in monthNames" :key="'dom-budget-head-'+month"><th class="p-2 border-r border-gray-300 dark:border-gray-700 text-center" :class="idx % 2 === 0 ? 'bg-sky-50/70 dark:bg-gray-800/80' : 'bg-gray-100/70 dark:bg-gray-800/40'" colspan="3" x-text="month"></th></template><th class="p-2 border-l-2 border-primary/40 bg-primary/10 dark:bg-primary/20 text-center font-extrabold text-primary dark:text-white" colspan="3">TOTAL</th></tr>
+                    <tr class="bg-gray-50 dark:bg-gray-800 text-[10px]"><template x-for="col in domesticMetricCols" :key="'dom-budget-subhead-'+col.m+'-'+col.k"><th class="p-1 border-r border-gray-200 dark:border-gray-700 text-center" :class="col.k === 'asp' ? 'bg-gray-100/50 dark:bg-gray-800/60' : ''" x-text="col.k === 'qty' ? 'QTY' : col.k === 'rev' ? 'REVENUE (Rp)' : 'ASP/kg'"></th></template><th class="p-1 border-r border-gray-300 dark:border-gray-700 text-center bg-primary/10 text-primary font-bold">TOT QTY</th><th class="p-1 border-r border-gray-300 dark:border-gray-700 text-center bg-primary/10 text-primary font-bold">TOT REV</th><th class="p-1 border-r border-gray-300 dark:border-gray-700 text-center bg-primary/10 text-primary font-bold">AVG ASP</th></tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-xs">
-                    <?php if (empty($exportProducts)): ?>
-                    <tr><td colspan="8" class="p-8 text-center text-gray-400">Tidak ada data produk export.</td></tr>
-                    <?php else: ?>
-                    <?php foreach ($exportProducts as $idx => $p):
-                        $totQty = 0; $totRev = 0;
-                        $months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
-                        foreach ($months as $mk) { $totQty += (float)($p[$mk.'_qty'] ?? 0); $totRev += (float)($p[$mk.'_rev'] ?? 0); }
-                        $avgAsp = $totQty > 0 ? ($totRev / $totQty) : 0;
-                    ?>
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                        <td class="p-2 text-center border-r border-gray-200 dark:border-gray-800 text-gray-500"><?= $idx + 1 ?></td>
-                        <td class="p-2 text-center border-r border-gray-200 dark:border-gray-800 font-bold text-amber-700">EXPORT</td>
-                        <td class="p-2 border-r border-gray-200 dark:border-gray-800"><?= esc($p['key_product'] ?? '-') ?></td>
-                        <td class="p-2 border-r border-gray-200 dark:border-gray-800 font-semibold"><?= esc($p['mid_product'] ?? '-') ?></td>
-                        <td class="p-2 border-r border-gray-200 dark:border-gray-800 font-medium text-gray-900 dark:text-white"><?= esc($p['product_name'] ?? '-') ?></td>
-                        <td class="p-2 border-r border-gray-200 dark:border-gray-800 text-right font-mono font-bold"><?= number_format($totQty, 2) ?></td>
-                        <td class="p-2 border-r border-gray-200 dark:border-gray-800 text-right font-mono font-bold text-amber-600">$ <?= number_format($totRev, 2) ?></td>
-                        <td class="p-2 text-right font-mono font-bold text-emerald-600">$ <?= number_format($avgAsp, 2) ?></td>
-                    </tr>
-                    <?php endforeach; ?>
-                    <?php endif; ?>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-800 font-mono">
+                    <template x-if="domesticBudgetLoading"><tr><td colspan="44" class="p-12 text-center text-gray-400"><i class="fa-solid fa-spinner animate-spin text-2xl mb-3"></i><p>Memuat data Sales Domestic...</p></td></tr></template>
+                    <template x-if="!domesticBudgetLoading && domesticBudgetRows.length === 0"><tr><td colspan="44" class="p-12 text-center text-gray-400"><i class="fa-solid fa-inbox text-2xl mb-3"></i><p class="font-semibold text-gray-600 dark:text-gray-300">Belum ada data Sales Domestic</p><p class="text-xs mt-1">Tidak ada data yang sesuai dengan filter.</p></td></tr></template>
+                    <template x-for="(row, rowIndex) in domesticBudgetRows" :key="'dom-budget-row-'+row.kind+'-'+rowIndex">
+                        <tr :class="row.kind === 'subtotal' ? 'bg-amber-50/80 dark:bg-amber-950/30 border-y border-amber-200 dark:border-amber-900/50 font-bold text-amber-900 dark:text-amber-200' : 'hover:bg-sky-50/50 dark:hover:bg-gray-800/60 transition-colors'">
+                            <template x-if="row.kind === 'subtotal'"><td colspan="5" class="p-2 text-center" x-text="'SUBTOTAL CHANNEL ' + row.group.channel + ' (' + row.group.items.length + ' items)'"></td></template>
+                            <template x-if="row.kind === 'item'"><td class="p-2 text-center border-r border-gray-200 dark:border-gray-800 text-gray-500" x-text="row.item.row_no"></td></template><template x-if="row.kind === 'item'"><td class="p-2 text-center border-r border-gray-200 dark:border-gray-800 font-sans font-bold text-gray-700 dark:text-gray-300" x-text="row.item.id_channel"></td></template><template x-if="row.kind === 'item'"><td class="p-2 border-r border-gray-200 dark:border-gray-800 font-sans text-gray-600 dark:text-gray-400" x-text="row.item.key_product || '-' "></td></template><template x-if="row.kind === 'item'"><td class="p-2 border-r border-gray-200 dark:border-gray-800 font-semibold text-gray-800 dark:text-gray-200" x-text="row.item.mid_product || '-' "></td></template><template x-if="row.kind === 'item'"><td class="p-2 border-r border-gray-200 dark:border-gray-800 font-sans font-medium text-gray-900 dark:text-white" x-text="row.item.product_name || '-' "></td></template>
+                            <template x-for="col in domesticMetricCols" :key="'dom-budget-metric-'+row.kind+'-'+rowIndex+'-'+col.m+'-'+col.k"><td class="p-1 text-right border-r border-gray-200 dark:border-gray-800" :class="row.kind === 'subtotal' ? 'border-amber-200/60 ' + (col.k === 'asp' ? 'bg-amber-100/40' : '') : (col.k === 'rev' ? 'text-emerald-600 dark:text-emerald-400' : (col.k === 'asp' ? 'bg-gray-50/50 dark:bg-gray-800/40' : ''))" x-text="row.kind === 'subtotal' ? (col.k === 'qty' ? formatNumber(row.group.monthly[col.m].qty) : col.k === 'rev' ? formatNumber(row.group.monthly[col.m].revenue) : formatDomesticASP(row.group.monthly[col.m].revenue, row.group.monthly[col.m].qty)) : (col.k === 'qty' ? formatNumber(row.item.monthly[col.m].qty) : col.k === 'rev' ? formatNumber(row.item.monthly[col.m].revenue) : formatDomesticASP(row.item.monthly[col.m].revenue, row.item.monthly[col.m].qty))"></td></template>
+                            <template x-if="row.kind === 'subtotal'"><td class="p-2 text-right border-r border-amber-300 bg-amber-100 dark:bg-amber-900/50" x-text="formatNumber(row.group.total_qty)"></td></template><template x-if="row.kind === 'subtotal'"><td class="p-2 text-right border-r border-amber-300 bg-amber-100 dark:bg-amber-900/50" x-text="formatNumber(row.group.total_rev)"></td></template><template x-if="row.kind === 'subtotal'"><td class="p-2 text-right bg-amber-100 dark:bg-amber-900/50" x-text="formatDomesticASP(row.group.total_rev, row.group.total_qty)"></td></template>
+                            <template x-if="row.kind === 'item'"><td class="p-2 text-right border-l-2 border-primary/30 border-r border-gray-200 dark:border-gray-800 bg-primary/5 font-bold" x-text="formatNumber(row.item.total_qty)"></td></template><template x-if="row.kind === 'item'"><td class="p-2 text-right border-r border-gray-200 dark:border-gray-800 bg-primary/5 font-bold text-emerald-600 dark:text-emerald-400" x-text="formatNumber(row.item.total_rev)"></td></template><template x-if="row.kind === 'item'"><td class="p-2 text-right bg-primary/5 font-bold text-amber-600 dark:text-amber-400" x-text="formatDomesticASP(row.item.total_rev, row.item.total_qty)"></td></template>
+                        </tr>
+                    </template>
+                    <tr x-show="!domesticBudgetLoading && domesticBudgetRows.length > 0" class="bg-primary/10 dark:bg-primary/20 font-extrabold text-gray-900 dark:text-white border-t-2 border-primary/30"><td class="p-3 text-center" colspan="5">GRAND TOTAL ALL DOMESTIC CHANNELS</td><template x-for="col in domesticMetricCols" :key="'dom-budget-grand-'+col.m+'-'+col.k"><td class="p-2 text-right border-r border-primary/20" :class="col.k === 'asp' ? 'bg-primary/15' : ''" x-text="col.k === 'qty' ? formatNumber(domesticBudgetGrandTotal.monthly[col.m]?.qty || 0) : col.k === 'rev' ? formatNumber(domesticBudgetGrandTotal.monthly[col.m]?.revenue || 0) : formatDomesticASP(domesticBudgetGrandTotal.monthly[col.m]?.revenue || 0, domesticBudgetGrandTotal.monthly[col.m]?.qty || 0)"></td></template><td class="p-3 text-right border-r border-primary/30" x-text="formatNumber(domesticBudgetGrandTotal.total_qty)"></td><td class="p-3 text-right border-r border-primary/30 text-emerald-600 dark:text-emerald-400" x-text="formatNumber(domesticBudgetGrandTotal.total_rev)"></td><td class="p-3 text-right text-amber-600 dark:text-amber-400" x-text="formatDomesticASP(domesticBudgetGrandTotal.total_rev, domesticBudgetGrandTotal.total_qty)"></td></tr>
                 </tbody>
             </table>
         </div>

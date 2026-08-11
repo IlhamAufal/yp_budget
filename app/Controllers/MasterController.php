@@ -20,7 +20,7 @@ use CodeIgniter\HTTP\ResponseInterface;
  * Halaman di-render server-side dengan filter via GET.
  * Mutasi (save / toggle / copy / lock) via POST AJAX → JSON.
  */
-class Master extends BaseController
+class MasterController extends BaseController
 {
     protected $coa;
     protected $costCenter;

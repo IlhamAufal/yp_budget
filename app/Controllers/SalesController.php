@@ -771,6 +771,109 @@ class SalesController extends BaseController
     // ===================================================================
 
     /**
+     * AJAX POST: Search Sales Domestic Budget.
+     *
+     * Data source is the domestic transaction table joined to both product
+     * master tables. The response contains monthly QTY, Revenue, ASP, and
+     * calculated annual totals for the budget table.
+     */
+    public function cariDomesticSales(): ResponseInterface
+    {
+        $payload = $this->request->getJSON(true);
+        if (! is_array($payload)) {
+            $payload = $this->request->getPost();
+        }
+
+        $year = (string) ($payload['year'] ?? $payload['year_code'] ?? $this->getWorkingYear());
+        $channel = strtoupper(trim((string) ($payload['dept'] ?? $payload['channel'] ?? '')));
+        $search = strtolower(trim((string) ($payload['search'] ?? '')));
+
+        if ($channel === 'ALL') {
+            $channel = '';
+        }
+
+        $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+        $selects = [
+            'b.mid_product',
+            'a.id_channel',
+            'b.key_product',
+            'b.product_name',
+        ];
+
+        foreach ($months as $month) {
+            $selects[] = "IFNULL(a.{$month}_qty, 0) AS {$month}_qty";
+            $selects[] = "IFNULL(a.{$month}_rev, 0) AS {$month}_rev";
+            $selects[] = "CASE WHEN IFNULL(a.{$month}_qty, 0) = 0 THEN 0 ELSE (IFNULL(a.{$month}_rev, 0) / a.{$month}_qty) * 1000 END AS {$month}_asp";
+        }
+
+        $selectSql = implode(', ', $selects);
+        $where = "a.year_code = ? AND a.id_channel <> 'ECOM'";
+        $branchParams = [$year];
+        if ($channel !== '') {
+            $where .= ' AND a.id_channel = ?';
+            $branchParams[] = $channel;
+        }
+
+        $sql = "SELECT {$selectSql}
+                FROM yp_plan__trans_sales_domestic a
+                INNER JOIN gw_plan__master_product b ON a.id_inv = b.mid_product
+                WHERE {$where}
+                UNION ALL
+                SELECT {$selectSql}
+                FROM yp_plan__trans_sales_domestic a
+                INNER JOIN gw_plan__master_product_new b ON a.id_inv = b.mid_product
+                WHERE {$where}
+                ORDER BY id_channel ASC, mid_product ASC";
+
+        try {
+            $rows = $this->db->query($sql, array_merge($branchParams, $branchParams))->getResultArray();
+            $data = [];
+
+            foreach ($rows as $row) {
+                if ($search !== '') {
+                    $haystack = strtolower(implode(' ', [
+                        (string) ($row['id_channel'] ?? ''),
+                        (string) ($row['mid_product'] ?? ''),
+                        (string) ($row['key_product'] ?? ''),
+                        (string) ($row['product_name'] ?? ''),
+                    ]));
+                    if (! str_contains($haystack, $search)) {
+                        continue;
+                    }
+                }
+
+                $totalQty = 0.0;
+                $totalRev = 0.0;
+                foreach ($months as $month) {
+                    $row["{$month}_qty"] = (float) ($row["{$month}_qty"] ?? 0);
+                    $row["{$month}_rev"] = (float) ($row["{$month}_rev"] ?? 0);
+                    $row["{$month}_asp"] = (float) ($row["{$month}_asp"] ?? 0);
+                    $totalQty += $row["{$month}_qty"];
+                    $totalRev += $row["{$month}_rev"];
+                }
+
+                $row['total_qty'] = $totalQty;
+                $row['total_rev'] = $totalRev;
+                $row['total_asp'] = $totalQty > 0 ? ($totalRev / $totalQty) * 1000 : 0.0;
+                $data[] = $row;
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'year'   => $year,
+                'data'   => $data,
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'SalesController::cariDomesticSales: ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => 'Data Sales Domestic gagal dimuat.',
+                'data'    => [],
+            ]);
+        }
+    }
+
+    /**
      * AJAX: Get domestic entry data (filtered by channel/search).
      */
     public function getDomesticEntryData(): ResponseInterface

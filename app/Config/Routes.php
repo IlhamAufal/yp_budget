@@ -301,6 +301,7 @@ $routes->group('sales', ['filter' => 'auth'], function ($routes) {
 
     // --- FE-BE Sync: AJAX Data Fetch ---
     $routes->get('getDomesticEntryData', 'SalesController::getDomesticEntryData');
+    $routes->post('cari_domestic_sales', 'SalesController::cariDomesticSales');
     $routes->get('getExportEntryData', 'SalesController::getExportEntryData');
     $routes->get('getRegionalData', 'SalesController::getRegionalData');
 

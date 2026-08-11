@@ -15,7 +15,7 @@ use CodeIgniter\HTTP\ResponseInterface;
  * dan reset password. Role yang dipilih disimpan ke tabel relasi
  * yang akan dibaca RoleFilter (Phase 1.3).
  */
-class User extends BaseController
+class UserController extends BaseController
 {
     protected $userModel;
     protected $roleModel;
