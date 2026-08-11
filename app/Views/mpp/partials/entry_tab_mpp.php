@@ -17,9 +17,9 @@
             </label>
             <div class="flex-1 flex gap-2">
                 <select x-model="selectedCostCenter" class="w-full rounded border border-stroke bg-gray-5 py-2.5 px-4 text-sm text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary">
-                    <template x-for="(item, idx) in costCenterList" :key="item.cost_center">
-                        <option :value="String(item.cost_center)" x-text="`${idx + 1}. [${item.cost_center_sap}]${item.cost_desc}`"></option>
-                    </template>
+                    <?php foreach (($costCenterList ?? []) as $idx => $cc): ?>
+                        <option value="<?= esc($cc['cost_center']) ?>"><?= ($idx + 1) . '. [' . esc($cc['cost_center_sap'] ?? $cc['cost_center']) . ']' . esc($cc['cost_desc'] ?? '') ?></option>
+                    <?php endforeach; ?>
                 </select>
                 <button type="button" @click="loadMatrixData()" class="inline-flex items-center justify-center rounded bg-primary px-4 py-2.5 text-white hover:bg-opacity-90 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>

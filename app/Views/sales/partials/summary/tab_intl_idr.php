@@ -1,33 +1,28 @@
 <div x-data="intlIdrSalesTab()" x-init="initData()" class="space-y-6">
 
-    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex flex-wrap items-center gap-3">
-            <div class="w-full sm:w-48">
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Wilayah Ekspor</label>
-                <select x-model="filters.region" @change="fetchData()" class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary">
-                    <option value="ALL">All Regions</option>
-                    <option value="ASIA">Asia Pacific</option>
-                    <option value="AMER">Americas</option>
-                    <option value="EUROPE">Europe & MEA</option>
-                </select>
+    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1">
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Rate US$ (IDR)</label>
+                    <input type="number" step="1" x-model.number="rateUsd" class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary font-mono font-semibold" placeholder="16200">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Rate Baht Thailand (IDR)</label>
+                    <input type="number" step="1" x-model.number="rateBaht" class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary font-mono font-semibold" placeholder="450">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Rate Ringgit Malaysia (IDR)</label>
+                    <input type="number" step="1" x-model.number="rateRinggit" class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary font-mono font-semibold" placeholder="3600">
+                </div>
             </div>
-
-            <div class="w-full sm:w-52">
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Cari Produk IDR</label>
-                <input type="text" x-model="filters.search" placeholder="Nama / Kode SKU..." class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary">
+            <div class="flex items-center gap-2">
+                <button type="button" @click="processRates()" :disabled="processing" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors disabled:opacity-50 shadow-sm">
+                    <i x-show="!processing" class="fa-solid fa-gear"></i>
+                    <i x-show="processing" class="fa-solid fa-spinner fa-spin"></i>
+                    <span x-text="processing ? 'Processing...' : 'Process'"></span>
+                </button>
             </div>
-        </div>
-
-        <div class="flex items-center gap-2 self-end md:self-auto">
-            <button type="button" @click="exportExcel()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                <span>Export IDR Excel</span>
-            </button>
-            
-            <button type="button" @click="saveData()" :disabled="saving" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50">
-                <svg x-show="!saving" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                <span x-text="saving ? 'Menyimpan...' : 'Simpan Data IDR'"></span>
-            </button>
         </div>
     </div>
 
@@ -112,7 +107,11 @@
 function intlIdrSalesTab() {
     return {
         saving: false,
+        processing: false,
         monthNames: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        rateUsd: 16200,
+        rateBaht: 450,
+        rateRinggit: 3600,
         filters: { region: 'ALL', search: '' },
         items: [],
 
@@ -169,6 +168,19 @@ function intlIdrSalesTab() {
 
         formatNumber(val) {
             return new Intl.NumberFormat('id-ID').format(Math.round(val || 0));
+        },
+
+        processRates() {
+            this.processing = true;
+            this.recalculateAll();
+            setTimeout(() => {
+                this.processing = false;
+                if (window.showToast) {
+                    window.showToast('success', 'Rate berhasil diproses. Data IDR diperbarui.');
+                } else {
+                    alert('Rate berhasil diproses. Data IDR diperbarui.');
+                }
+            }, 400);
         },
 
         saveData() {

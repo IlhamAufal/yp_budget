@@ -101,16 +101,17 @@ class UserModel extends Model
      */
     public function getAllUsers(array $filters = []): array
     {
-        $builder = $this->db->table('gw_sm__user u')
-            ->select("u.*,
-                GROUP_CONCAT(DISTINCT r.role_name_idn ORDER BY r.role_id SEPARATOR ', ') AS role_names,
-                GROUP_CONCAT(DISTINCT r.role_id ORDER BY r.role_id SEPARATOR ',') AS role_ids,
-                GROUP_CONCAT(DISTINCT CASE WHEN r.role_type = 'menu' THEN r.role_id END ORDER BY r.role_id SEPARATOR ',') AS menu_role_ids,
-                GROUP_CONCAT(DISTINCT CASE WHEN r.role_type = 'object' THEN r.role_id END ORDER BY r.role_id SEPARATOR ',') AS obj_role_ids,
-                GROUP_CONCAT(DISTINCT CASE WHEN r.role_type = 'object' THEN r.role_name_idn END ORDER BY r.role_id SEPARATOR ',') AS obj_role_names")
-            ->join('gw_sm__profile p', 'p.profile_user_id = u.user_id', 'left')
-            ->join('gw_sm__role r', 'r.role_id = p.profile_role_id AND r.role_active = \'Y\'', 'left')
-            ->groupBy('u.user_id');
+        try {
+            $builder = $this->db->table('gw_sm__user u')
+                ->select("u.*,
+                    GROUP_CONCAT(DISTINCT r.role_name_idn ORDER BY r.role_id SEPARATOR ', ') AS role_names,
+                    GROUP_CONCAT(DISTINCT r.role_id ORDER BY r.role_id SEPARATOR ',') AS role_ids,
+                    GROUP_CONCAT(DISTINCT CASE WHEN r.role_type = 'menu' THEN r.role_id END ORDER BY r.role_id SEPARATOR ',') AS menu_role_ids,
+                    GROUP_CONCAT(DISTINCT CASE WHEN r.role_type = 'object' THEN r.role_id END ORDER BY r.role_id SEPARATOR ',') AS obj_role_ids,
+                    GROUP_CONCAT(DISTINCT CASE WHEN r.role_type = 'object' THEN r.role_name_idn END ORDER BY r.role_id SEPARATOR ',') AS obj_role_names")
+                ->join('gw_sm__profile p', 'p.profile_user_id = u.user_id', 'left')
+                ->join('gw_sm__role r', 'r.role_id = p.profile_role_id AND r.role_active = \'Y\'', 'left')
+                ->groupBy('u.user_id');
 
         $search = trim($filters['search'] ?? '');
         if ($search !== '') {
@@ -137,6 +138,21 @@ class UserModel extends Model
             ->orderBy('u.user_id', 'ASC')
             ->get()
             ->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'UserModel::getAllUsers: ' . $e->getMessage());
+            // Fallback: query tanpa join profile/role
+            try {
+                $fb = $this->db->table('gw_sm__user u')->select('u.*, NULL AS role_names, NULL AS role_ids, NULL AS menu_role_ids, NULL AS obj_role_ids, NULL AS obj_role_names');
+                if (!empty($filters['search'])) {
+                    $fb->groupStart()->like('u.user_username', $filters['search'])->orLike('u.user_name', $filters['search'])->groupEnd();
+                }
+                if (!empty($filters['status'])) $fb->where('u.user_active', $filters['status']);
+                if (!empty($filters['limit'])) $fb->limit((int)$filters['limit'], (int)($filters['offset'] ?? 0));
+                return $fb->orderBy('u.user_id', 'ASC')->get()->getResultArray();
+            } catch (\Throwable $e2) {
+                return [];
+            }
+        }
     }
 
     /**
@@ -144,10 +160,11 @@ class UserModel extends Model
      */
     public function countUsers(array $filters = []): int
     {
-        $builder = $this->db->table('gw_sm__user u')
-            ->selectCount('DISTINCT u.user_id', 'c')
-            ->join('gw_sm__profile p', 'p.profile_user_id = u.user_id', 'left')
-            ->join('gw_sm__role r', 'r.role_id = p.profile_role_id AND r.role_active = \'Y\'', 'left');
+        try {
+            $builder = $this->db->table('gw_sm__user u')
+                ->selectCount('DISTINCT u.user_id', 'c')
+                ->join('gw_sm__profile p', 'p.profile_user_id = u.user_id', 'left')
+                ->join('gw_sm__role r', 'r.role_id = p.profile_role_id AND r.role_active = \'Y\'', 'left');
 
         $search = trim($filters['search'] ?? '');
         if ($search !== '') {
@@ -168,6 +185,14 @@ class UserModel extends Model
 
         $row = $builder->get()->getRowArray();
         return (int) ($row['c'] ?? 0);
+        } catch (\Throwable $e) {
+            log_message('error', 'UserModel::countUsers: ' . $e->getMessage());
+            try {
+                return (int) $this->db->table('gw_sm__user')->countAllResults();
+            } catch (\Throwable $e2) {
+                return 0;
+            }
+        }
     }
 
     /**

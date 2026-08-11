@@ -37,69 +37,72 @@ $routes->get('api/active-years', 'PeriodController::getActiveYears');
 $routes->get('login', 'LoginController::index');
 $routes->post('login/process', 'LoginController::process');
 $routes->get('logout', 'LoginController::logout');
+$routes->post('auth/changePassword', 'LoginController::changePassword');
+$routes->get('auth/change-password-form', 'LoginController::changePasswordForm');
 
 // Protected routes (require auth)
-$routes->get('/', 'Dashboard::index', ['filter' => 'auth']);
-$routes->get('dashboard', 'Dashboard::index', ['filter' => 'auth']);
+$routes->get('/', 'DashboardController::index', ['filter' => 'auth']);
+$routes->get('dashboard', 'DashboardController::index', ['filter' => 'auth']);
 
 // Master Data (COA, Cost Center, Departemen, Periode)
 $routes->group('master', ['filter' => 'auth'], function ($routes) {
-    $routes->get('/', 'Master::index');
-    $routes->get('coa', 'Master::coa');
-    $routes->get('coa/export', 'Master::coaExport');
-    $routes->get('cost-center', 'Master::costCenter');
-    $routes->get('cost-center/export', 'Master::costCenterExport');
-    $routes->get('department', 'Master::department');
-    $routes->get('department/export', 'Master::departmentExport');
-    $routes->get('product', 'Master::product');
-    $routes->get('product/export', 'Master::productExport');
-    $routes->get('salary-mpp', 'Master::salaryMpp');
-    $routes->get('salary-mpp/export', 'Master::salaryMppExport');
-    $routes->get('configure-period', 'Master::configurePeriod');
-    $routes->get('period', 'Master::period');
+    $routes->get('/', 'MasterController::index');
+    $routes->get('coa', 'MasterController::coa');
+    $routes->get('coa/export', 'MasterController::coaExport');
+    $routes->get('cost-center', 'MasterController::costCenter');
+    $routes->get('cost-center/export', 'MasterController::costCenterExport');
+    $routes->get('department', 'MasterController::department');
+    $routes->get('department/export', 'MasterController::departmentExport');
+    $routes->get('product', 'MasterController::product');
+    $routes->get('product/export', 'MasterController::productExport');
+    $routes->get('salary-mpp', 'MasterController::salaryMpp');
+    $routes->get('salary-mpp/export', 'MasterController::salaryMppExport');
+    $routes->get('configure-period', 'MasterController::configurePeriod');
+    $routes->get('period', 'MasterController::period');
 
-    $routes->post('api/coa/save', 'Master::coaSave');
-    $routes->post('api/coa/toggle', 'Master::coaToggle');
-    $routes->post('api/coa/copy-year', 'Master::coaCopyYear');
+    $routes->post('api/coa/save', 'MasterController::coaSave');
+    $routes->post('api/coa/toggle', 'MasterController::coaToggle');
+    $routes->post('api/coa/copy-year', 'MasterController::coaCopyYear');
 
-    $routes->post('api/cost-center/save', 'Master::costCenterSave');
-    $routes->post('api/cost-center/toggle', 'Master::costCenterToggle');
+    $routes->post('api/cost-center/save', 'MasterController::costCenterSave');
+    $routes->post('api/cost-center/toggle', 'MasterController::costCenterToggle');
 
-    $routes->post('api/department/save', 'Master::departmentSave');
-    $routes->post('api/department/toggle', 'Master::departmentToggle');
+    $routes->post('api/department/save', 'MasterController::departmentSave');
+    $routes->post('api/department/toggle', 'MasterController::departmentToggle');
 
-    $routes->post('api/product/save', 'Master::productSave');
-    $routes->post('api/product/toggle', 'Master::productToggle');
+    $routes->post('api/product/save', 'MasterController::productSave');
+    $routes->post('api/product/toggle', 'MasterController::productToggle');
 
-    $routes->post('api/salary-mpp/save', 'Master::salaryMppSave');
-    $routes->post('api/salary-mpp/toggle', 'Master::salaryMppToggle');
+    $routes->post('api/salary-mpp/save', 'MasterController::salaryMppSave');
+    $routes->post('api/salary-mpp/toggle', 'MasterController::salaryMppToggle');
+    $routes->get('api/salary-mpp/data', 'MasterController::salaryMppData');
 
-    $routes->post('api/period/save', 'Master::periodSave');
-    $routes->post('api/period/set-active', 'Master::periodSetActive');
-    $routes->post('api/period/set-locked', 'Master::periodSetLocked');
-    $routes->post('api/period/delete', 'Master::periodDelete');
+    $routes->post('api/period/save', 'MasterController::periodSave');
+    $routes->post('api/period/set-active', 'MasterController::periodSetActive');
+    $routes->post('api/period/set-locked', 'MasterController::periodSetLocked');
+    $routes->post('api/period/delete', 'MasterController::periodDelete');
 });
 
 // System Administration — Phase 1.1 RBAC (Menu, Role, User Management)
 $routes->group('sys-admin', ['filter' => 'auth'], function ($routes) {
-    $routes->get('menu', 'Menu::index');
-    $routes->post('api/menu/save', 'Menu::save');
-    $routes->post('api/menu/toggle', 'Menu::toggle');
-    $routes->post('api/menu/delete', 'Menu::delete');
+    $routes->get('menu', 'MenuController::index');
+    $routes->post('api/menu/save', 'MenuController::save');
+    $routes->post('api/menu/toggle', 'MenuController::toggle');
+    $routes->post('api/menu/delete', 'MenuController::delete');
 
-    $routes->get('role', 'Role::index');
-    $routes->post('api/role/save', 'Role::save');
-    $routes->post('api/role/toggle', 'Role::toggle');
-    $routes->post('api/role/delete', 'Role::delete');
-    $routes->post('api/role/menus', 'Role::menus');
-    $routes->post('api/role/menus/save', 'Role::saveMenus');
+    $routes->get('role', 'RoleController::index');
+    $routes->post('api/role/save', 'RoleController::save');
+    $routes->post('api/role/toggle', 'RoleController::toggle');
+    $routes->post('api/role/delete', 'RoleController::delete');
+    $routes->post('api/role/menus', 'RoleController::menus');
+    $routes->post('api/role/menus/save', 'RoleController::saveMenus');
 
-    $routes->get('user', 'User::index');
-    $routes->get('user/form', 'User::formModal');
-    $routes->post('api/user/save', 'User::save');
-    $routes->post('api/user/toggle', 'User::toggle');
-    $routes->post('api/user/delete', 'User::delete');
-    $routes->post('api/user/reset-password', 'User::resetPassword');
+    $routes->get('user', 'UserController::index');
+    $routes->get('user/form', 'UserController::formModal');
+    $routes->post('api/user/save', 'UserController::save');
+    $routes->post('api/user/toggle', 'UserController::toggle');
+    $routes->post('api/user/delete', 'UserController::delete');
+    $routes->post('api/user/reset-password', 'UserController::resetPassword');
 });
 
 // -------------------------------------------------------------------
@@ -190,38 +193,38 @@ $routes->group('opex-ga', ['filter' => 'auth'], function ($routes) {
 // FOH — Factory Overhead (Phase 2.1)
 $routes->group('foh', ['filter' => 'auth'], function ($routes) {
     // Entry Budget
-    $routes->get('/', 'Foh::entry');
-    $routes->get('entry', 'Foh::entry');
-    $routes->get('entry-budget', 'Foh::entry');
-    $routes->get('entry-budget-detail', 'Foh::entryBudgetDetail');
-    $routes->get('getEntryData', 'Foh::getEntryData');
-    $routes->get('getConfigPeriod', 'Foh::getConfigPeriod');
-    $routes->get('getHeaderAccounts', 'Foh::getHeaderAccounts');
-    $routes->get('getDetailMatrix', 'Foh::getDetailMatrix');
-    $routes->post('saveBudget', 'Foh::saveBudget');
-    $routes->post('saveDetailItems', 'Foh::saveDetailItems');
-    $routes->post('submit', 'Foh::submit');
-    $routes->post('approve', 'Foh::approve');
-    $routes->post('reject', 'Foh::reject');
-    $routes->get('getStatus', 'Foh::getStatus');
+    $routes->get('/', 'FohController::entry');
+    $routes->get('entry', 'FohController::entry');
+    $routes->get('entry-budget', 'FohController::entry');
+    $routes->get('entry-budget-detail', 'FohController::entryBudgetDetail');
+    $routes->get('getEntryData', 'FohController::getEntryData');
+    $routes->get('getConfigPeriod', 'FohController::getConfigPeriod');
+    $routes->get('getHeaderAccounts', 'FohController::getHeaderAccounts');
+    $routes->get('getDetailMatrix', 'FohController::getDetailMatrix');
+    $routes->post('saveBudget', 'FohController::saveBudget');
+    $routes->post('saveDetailItems', 'FohController::saveDetailItems');
+    $routes->post('submit', 'FohController::submit');
+    $routes->post('approve', 'FohController::approve');
+    $routes->post('reject', 'FohController::reject');
+    $routes->get('getStatus', 'FohController::getStatus');
 
     // Actual
-    $routes->get('actual', 'Foh::actual');
-    $routes->post('cariActualTable', 'Foh::cariActualTable');
-    $routes->post('uploadActual', 'Foh::uploadActual');
+    $routes->get('actual', 'FohController::actual');
+    $routes->post('cariActualTable', 'FohController::cariActualTable');
+    $routes->post('uploadActual', 'FohController::uploadActual');
 
     // Download / Export
-    $routes->get('download-template', 'Foh::downloadTemplate');
-    $routes->get('exportExcel', 'Foh::exportExcel');
+    $routes->get('download-template', 'FohController::downloadTemplate');
+    $routes->get('exportExcel', 'FohController::exportExcel');
 
     // Summary
-    $routes->get('summary', 'Foh::summary');
-    $routes->get('summary/export', 'Foh::summaryExport');
+    $routes->get('summary', 'FohController::summary');
+    $routes->get('summary/export', 'FohController::summaryExport');
 
     // Breakdown (standar 1.5)
-    $routes->get('getDetailItems', 'Foh::getDetailItems');
-    $routes->post('saveDetail', 'Foh::saveDetail');
-    $routes->post('deleteDetail', 'Foh::deleteDetail');
+    $routes->get('getDetailItems', 'FohController::getDetailItems');
+    $routes->post('saveDetail', 'FohController::saveDetail');
+    $routes->post('deleteDetail', 'FohController::deleteDetail');
 });
 // Alias tanpa dash (beberapa view memakai base_url('opexga/...'))
 $routes->group('opexga', ['filter' => 'auth'], function ($routes) {

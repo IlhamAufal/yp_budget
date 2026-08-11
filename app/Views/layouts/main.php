@@ -136,13 +136,10 @@
   >
 
   <!-- ============================================================ -->
-  <!-- GENERAL COMPONENTS — harus selalu di luar wrapper layout     -->
-  <!-- agar fixed positioning & z-index tidak terpengaruh overflow  -->
+  <!-- GENERAL COMPONENTS (pre-layout)                              -->
   <!-- ============================================================ -->
   <?= $this->include('partials/preloader') ?>
   <?= $this->include('partials/toast') ?>
-  <?= $this->include('partials/modal_select_year') ?>
-  <?= $this->include('partials/global_modal') ?>
   <?= $this->renderSection('modals') ?>
   <!-- ============================================================ -->
 
@@ -158,6 +155,12 @@
       </main>
     </div>
   </div>
+
+  <!-- ============================================================ -->
+  <!-- MODALS — rendered AFTER layout so they sit on top of all     -->
+  <!-- ============================================================ -->
+  <?= $this->include('partials/modal_select_year') ?>
+  <?= $this->include('partials/global_modal') ?>
 
   <?= $this->include('partials/master_scripts') ?>
   <?= $this->include('partials/footer_scripts') ?>

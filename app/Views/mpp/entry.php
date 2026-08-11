@@ -63,8 +63,8 @@ function mppEntry() {
         saving: false,
 
         // Cost Center
-        selectedCostCenter: '',
-        costCenterList: <?= json_encode($costCenterList) ?>,
+        selectedCostCenter: '<?= esc(($costCenterList[0]['cost_center'] ?? ''), 'js') ?>',
+        costCenterList: <?= json_encode($costCenterList, JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP) ?>,
 
         // Period Info
         periodInfo: <?= json_encode($periodInfo) ?>,

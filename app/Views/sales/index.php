@@ -31,160 +31,20 @@
         </div>
     </div>
 
-    <div x-show="activeTab === 'domestic' || activeTab === 'summary'" class="bg-sky-50/70 dark:bg-gray-800 p-5 rounded-xl border border-sky-100 dark:border-gray-700 shadow-sm space-y-4">
-        
-        <div class="flex flex-col lg:flex-row lg:items-center gap-4">
-            <div class="w-32 flex-shrink-0">
-                <span class="text-xs font-bold text-gray-800 dark:text-gray-200">Key Product</span>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 flex-1">
-                <div class="space-y-1.5">
-                    <div class="flex items-center justify-between gap-1">
-                        <label class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">Global - Volume</label>
-                        <div class="flex items-center gap-1">
-                            <input type="number" step="0.1" x-model.number="adjustment.global_vol" class="w-16 text-right text-xs p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary">
-                            <span class="text-xs text-gray-500">%</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between gap-1">
-                        <label class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">Global - ASP</label>
-                        <div class="flex items-center gap-1">
-                            <input type="number" step="0.1" x-model.number="adjustment.global_asp" class="w-16 text-right text-xs p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary">
-                            <span class="text-xs text-gray-500">%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="space-y-1.5">
-                    <div class="flex items-center justify-between gap-1">
-                        <label class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">GUMMY - Volume</label>
-                        <div class="flex items-center gap-1">
-                            <input type="number" step="0.1" x-model.number="adjustment.gummy_vol" class="w-16 text-right text-xs p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary">
-                            <span class="text-xs text-gray-500">%</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between gap-1">
-                        <label class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">GUMMY - ASP</label>
-                        <div class="flex items-center gap-1">
-                            <input type="number" step="0.1" x-model.number="adjustment.gummy_asp" class="w-16 text-right text-xs p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary">
-                            <span class="text-xs text-gray-500">%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="space-y-1.5">
-                    <div class="flex items-center justify-between gap-1">
-                        <label class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">BOLI - Volume</label>
-                        <div class="flex items-center gap-1">
-                            <input type="number" step="0.1" x-model.number="adjustment.boli_vol" class="w-16 text-right text-xs p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary">
-                            <span class="text-xs text-gray-500">%</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between gap-1">
-                        <label class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">BOLI - ASP</label>
-                        <div class="flex items-center gap-1">
-                            <input type="number" step="0.1" x-model.number="adjustment.boli_asp" class="w-16 text-right text-xs p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary">
-                            <span class="text-xs text-gray-500">%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="space-y-1.5">
-                    <div class="flex items-center justify-between gap-1">
-                        <label class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">EXTRUDER - Volume</label>
-                        <div class="flex items-center gap-1">
-                            <input type="number" step="0.1" x-model.number="adjustment.extruder_vol" class="w-16 text-right text-xs p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary">
-                            <span class="text-xs text-gray-500">%</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between gap-1">
-                        <label class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">EXTRUDER - ASP</label>
-                        <div class="flex items-center gap-1">
-                            <input type="number" step="0.1" x-model.number="adjustment.extruder_asp" class="w-16 text-right text-xs p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary">
-                            <span class="text-xs text-gray-500">%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <hr class="border-sky-200 dark:border-gray-700 my-2">
-
-        <div class="flex flex-col lg:flex-row lg:items-center gap-4">
-            <div class="w-32 flex-shrink-0">
-                <span class="text-xs font-bold text-gray-800 dark:text-gray-200">Channel</span>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 flex-1">
-                <div class="space-y-1.5">
-                    <div class="flex items-center justify-between gap-1">
-                        <label class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">GT - Volume</label>
-                        <div class="flex items-center gap-1">
-                            <input type="number" step="0.1" x-model.number="adjustment.gt_vol" class="w-16 text-right text-xs p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary">
-                            <span class="text-xs text-gray-500">%</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between gap-1">
-                        <label class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">GT - ASP</label>
-                        <div class="flex items-center gap-1">
-                            <input type="number" step="0.1" x-model.number="adjustment.gt_asp" class="w-16 text-right text-xs p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary">
-                            <span class="text-xs text-gray-500">%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="space-y-1.5">
-                    <div class="flex items-center justify-between gap-1">
-                        <label class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">MT - Volume</label>
-                        <div class="flex items-center gap-1">
-                            <input type="number" step="0.1" x-model.number="adjustment.mt_vol" class="w-16 text-right text-xs p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary">
-                            <span class="text-xs text-gray-500">%</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between gap-1">
-                        <label class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">MT - ASP</label>
-                        <div class="flex items-center gap-1">
-                            <input type="number" step="0.1" x-model.number="adjustment.mt_asp" class="w-16 text-right text-xs p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary">
-                            <span class="text-xs text-gray-500">%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="space-y-1.5">
-                    <div class="flex items-center justify-between gap-1">
-                        <label class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">OEM - Volume</label>
-                        <div class="flex items-center gap-1">
-                            <input type="number" step="0.1" x-model.number="adjustment.oem_vol" class="w-16 text-right text-xs p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary">
-                            <span class="text-xs text-gray-500">%</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between gap-1">
-                        <label class="text-[11px] font-semibold text-gray-700 dark:text-gray-300">OEM - ASP</label>
-                        <div class="flex items-center gap-1">
-                            <input type="number" step="0.1" x-model.number="adjustment.oem_asp" class="w-16 text-right text-xs p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary">
-                            <span class="text-xs text-gray-500">%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex items-end justify-end">
-                    <button type="button" @click="processAdjustment()" :disabled="processing" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded shadow transition-colors flex items-center gap-1.5 disabled:opacity-50">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
-                        <span x-text="processing ? 'Processing...' : 'Process'"></span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
+    <?php /* COMMENTED OUT: Key Product & Channel form — currently GET only
+    <div x-show="activeTab === 'domestic' || activeTab === 'intl_valas'" class="bg-sky-50/70 dark:bg-gray-800 p-5 rounded-xl border border-sky-100 dark:border-gray-700 shadow-sm space-y-4">
+        ... Key Product grid 4x2 + Channel grid 3x2 + Process button ...
     </div>
+    */ ?>
 
     <div>
-        <div x-show="activeTab === 'domestic'"><?= $this->include('sales/partials/tab_domestic') ?></div>
-        <div x-show="activeTab === 'intl_valas'"><?= $this->include('sales/partials/tab_intl_valas') ?></div>
-        <div x-show="activeTab === 'intl_idr'"><?= $this->include('sales/partials/tab_intl_idr') ?></div>
-        <div x-show="activeTab === 'delivery_claim'"><?= $this->include('sales/partials/tab_delivery_claim') ?></div>
-        <div x-show="activeTab === 'key_product'"><?= $this->include('sales/partials/tab_key_product') ?></div>
-        <div x-show="activeTab === 'summary'"><?= $this->include('sales/partials/tab_summary') ?></div>
-        <div x-show="activeTab === 'reclass'"><?= $this->include('sales/partials/tab_reclass') ?></div>
+        <div x-show="activeTab === 'domestic'"><?= $this->include('sales/partials/summary/tab_domestic') ?></div>
+        <div x-show="activeTab === 'intl_valas'"><?= $this->include('sales/partials/summary/tab_intl_valas') ?></div>
+        <div x-show="activeTab === 'intl_idr'"><?= $this->include('sales/partials/summary/tab_intl_idr') ?></div>
+        <div x-show="activeTab === 'delivery_claim'"><?= $this->include('sales/partials/summary/tab_delivery_claim') ?></div>
+        <div x-show="activeTab === 'key_product'"><?= $this->include('sales/partials/summary/tab_key_product') ?></div>
+        <div x-show="activeTab === 'summary'"><?= $this->include('sales/partials/summary/tab_summary') ?></div>
+        <div x-show="activeTab === 'reclass'"><?= $this->include('sales/partials/summary/tab_reclass') ?></div>
     </div>
 
 </div>

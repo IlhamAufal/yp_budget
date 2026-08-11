@@ -187,8 +187,10 @@ class Master extends BaseController
             'title'       => 'Master Data - Salary & MPP',
             'rows'        => $this->salaryMpp->getAll($filters),
             'departments' => $this->department->getAll(['status' => 'A']),
+            'costCenters' => $this->getCostCenterSapListMaster(),
             'mppTypes'    => $this->salaryMpp->getMppTypes(),
             'years'       => $this->salaryMpp->getYears(),
+            'staffNames'  => $this->salaryMpp->getStaffNames(),
             'filters'     => $filters,
             'page'        => $page,
             'perPage'     => $perPage,
@@ -494,6 +496,27 @@ class Master extends BaseController
     public function salaryMppSave(): ResponseInterface
     {
         $data = $this->request->getPost();
+
+        // Handle multi-name insert from top form
+        if (!empty($data['names']) && is_array($data['names'])) {
+            $saved = 0;
+            foreach ($data['names'] as $name) {
+                $row = [
+                    'desc'      => trim($name),
+                    'type'      => $data['type'] ?? 1,
+                    'dept_id'   => $data['dept_id'] ?? '',
+                    'salary'    => $data['salary'] ?? 0,
+                    'year_code' => $data['year_code'] ?? session()->get('year_code') ?? date('Y'),
+                    'status'    => 'A',
+                ];
+                $result = $this->salaryMpp->saveSalaryMpp($row, null);
+                if ($result['success'] ?? false) $saved++;
+            }
+            $msg = $saved > 0 ? "Berhasil menyimpan {$saved} data salary MPP." : 'Gagal menyimpan data.';
+            return $this->response->setJSON(['success' => $saved > 0, 'message' => $msg]);
+        }
+
+        // Single row save (modal edit)
         $id   = ! empty($data['id']) ? (int) $data['id'] : null;
         $result = $this->salaryMpp->saveSalaryMpp($data, $id);
 
@@ -506,6 +529,25 @@ class Master extends BaseController
         $result = $this->salaryMpp->toggleStatus($id);
 
         return $this->jsonResult($result, 'master/salary-mpp/toggle');
+    }
+
+    public function salaryMppData(): ResponseInterface
+    {
+        $filters = [
+            'search'  => $this->request->getGet('search') ?? '',
+            'dept_id' => $this->request->getGet('dept_id') ?? '',
+            'type'    => $this->request->getGet('type') ?? '',
+            'year'    => $this->request->getGet('year') ?: session()->get('year_code'),
+            'status'  => $this->request->getGet('status') ?? '',
+        ];
+
+        $rows = $this->salaryMpp->getAll($filters);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'data'    => $rows,
+            'total'   => count($rows),
+        ]);
     }
 
     /* ------------------------------------------------------------------
@@ -587,5 +629,16 @@ class Master extends BaseController
             'success' => session()->getFlashdata('master_msg'),
             'error'   => session()->getFlashdata('master_err'),
         ];
+    }
+
+    private function getCostCenterSapListMaster(): array
+    {
+        $db = \Config\Database::connect();
+        return $db->table('gw_plan__master_cost_center')
+            ->select("cost_center, COALESCE(NULLIF(cost_center_sap,''), CAST(cost_center AS CHAR)) AS cost_center_sap, cost_desc")
+            ->where('status', 'A')
+            ->orderBy('cost_center', 'ASC')
+            ->get()
+            ->getResultArray();
     }
 }

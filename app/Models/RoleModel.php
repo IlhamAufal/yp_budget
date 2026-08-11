@@ -39,31 +39,43 @@ class RoleModel extends Model
      */
     public function getAll(array $filters = []): array
     {
-        $builder = $this->db->table('gw_sm__role r')
-            ->select("r.*,
-                (SELECT COUNT(*) FROM gw_sm__rolemenu rm WHERE rm.rolemenu_role_id = r.role_id AND rm.rolemenu_active = 'Y') AS menu_count,
-                (SELECT COUNT(*) FROM gw_sm__profile p WHERE p.profile_role_id = r.role_id) AS user_count");
+        try {
+            $builder = $this->db->table('gw_sm__role r')
+                ->select("r.*,
+                    (SELECT COUNT(*) FROM gw_sm__rolemenu rm WHERE rm.rolemenu_role_id = r.role_id AND rm.rolemenu_active = 'Y') AS menu_count,
+                    (SELECT COUNT(*) FROM gw_sm__profile p WHERE p.profile_role_id = r.role_id) AS user_count");
 
-        $search = trim($filters['search'] ?? '');
-        if ($search !== '') {
-            $builder->groupStart()
-                ->like('r.role_name_idn', $search)
-                ->orLike('r.role_name_eng', $search)
-            ->groupEnd();
+            $search = trim($filters['search'] ?? '');
+            if ($search !== '') {
+                $builder->groupStart()
+                    ->like('r.role_name_idn', $search)
+                    ->orLike('r.role_name_eng', $search)
+                ->groupEnd();
+            }
+
+            if (($filters['status'] ?? '') !== '') {
+                $builder->where('r.role_active', $filters['status']);
+            }
+
+            if (! empty($filters['limit'])) {
+                $builder->limit((int) $filters['limit'], (int) ($filters['offset'] ?? 0));
+            }
+
+            return $builder
+                ->orderBy('r.role_id', 'ASC')
+                ->get()
+                ->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'RoleModel::getAll: ' . $e->getMessage());
+            try {
+                $fb = $this->db->table('gw_sm__role r')->select('r.*, 0 AS menu_count, 0 AS user_count');
+                if (!empty($filters['status'])) $fb->where('r.role_active', $filters['status']);
+                if (!empty($filters['limit'])) $fb->limit((int)$filters['limit'], (int)($filters['offset'] ?? 0));
+                return $fb->orderBy('r.role_id', 'ASC')->get()->getResultArray();
+            } catch (\Throwable $e2) {
+                return [];
+            }
         }
-
-        if (($filters['status'] ?? '') !== '') {
-            $builder->where('r.role_active', $filters['status']);
-        }
-
-        if (! empty($filters['limit'])) {
-            $builder->limit((int) $filters['limit'], (int) ($filters['offset'] ?? 0));
-        }
-
-        return $builder
-            ->orderBy('r.role_id', 'ASC')
-            ->get()
-            ->getResultArray();
     }
 
     public function countAll(array $filters = []): int

@@ -44,10 +44,11 @@ class MenuModel extends Model
      */
     public function getAll(array $filters = []): array
     {
-        $builder = $this->db->table('gw_sm__menu m')
-            ->select('m.*, p.menu_name_idn AS parent_name, p.menu_id AS parent_id')
-            ->join('gw_sm__menu_structure s', 's.structure_child_menu_id = m.menu_id', 'left')
-            ->join('gw_sm__menu p', 'p.menu_id = s.structure_menu_id', 'left');
+        try {
+            $builder = $this->db->table('gw_sm__menu m')
+                ->select('m.*, p.menu_name_idn AS parent_name, p.menu_id AS parent_id')
+                ->join('gw_sm__menu_structure s', 's.structure_child_menu_id = m.menu_id', 'left')
+                ->join('gw_sm__menu p', 'p.menu_id = s.structure_menu_id', 'left');
 
         $search = trim($filters['search'] ?? '');
         if ($search !== '') {
@@ -73,13 +74,29 @@ class MenuModel extends Model
             ->orderBy('m.menu_id', 'ASC')
             ->get()
             ->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'MenuModel::getAll: ' . $e->getMessage());
+            // Fallback: query tanpa join structure
+            try {
+                $fb = $this->db->table('gw_sm__menu m')->select('m.*, NULL AS parent_name, NULL AS parent_id');
+                if (!empty($filters['search'])) {
+                    $fb->groupStart()->like('m.menu_name_idn', $filters['search'])->orLike('m.menu_link', $filters['search'])->groupEnd();
+                }
+                if (!empty($filters['status'])) $fb->where('m.menu_active', $filters['status']);
+                if (!empty($filters['limit'])) $fb->limit((int)$filters['limit'], (int)($filters['offset'] ?? 0));
+                return $fb->orderBy('m.menu_level', 'ASC')->orderBy('m.menu_order', 'ASC')->get()->getResultArray();
+            } catch (\Throwable $e2) {
+                return [];
+            }
+        }
     }
 
     public function countAll(array $filters = []): int
     {
-        $builder = $this->db->table('gw_sm__menu m')
-            ->selectCount('DISTINCT m.menu_id', 'c')
-            ->join('gw_sm__menu_structure s', 's.structure_child_menu_id = m.menu_id', 'left');
+        try {
+            $builder = $this->db->table('gw_sm__menu m')
+                ->selectCount('DISTINCT m.menu_id', 'c')
+                ->join('gw_sm__menu_structure s', 's.structure_child_menu_id = m.menu_id', 'left');
 
         $search = trim($filters['search'] ?? '');
         if ($search !== '') {
@@ -96,6 +113,14 @@ class MenuModel extends Model
 
         $row = $builder->get()->getRowArray();
         return (int) ($row['c'] ?? 0);
+        } catch (\Throwable $e) {
+            log_message('error', 'MenuModel::countAll: ' . $e->getMessage());
+            try {
+                return (int) $this->db->table('gw_sm__menu')->countAllResults();
+            } catch (\Throwable $e2) {
+                return 0;
+            }
+        }
     }
 
     /**

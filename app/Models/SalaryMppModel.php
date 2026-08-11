@@ -32,21 +32,21 @@ class SalaryMppModel extends Model
     {
         $db = \Config\Database::connect();
         $builder = $db->table($this->table . ' s')
-            ->select('s.*, d.dept_code, d.dept_desc, t.desc_mpp as type_name')
-            ->join('gw_plan__master_department d', 'd.id_dept = s.dept_id', 'left')
+            ->select("s.*, COALESCE(NULLIF(cc.cost_center_sap,''), CAST(cc.cost_center AS CHAR)) AS cost_center_sap, cc.cost_desc, t.desc_mpp as type_name")
+            ->join('gw_plan__master_cost_center cc', 'cc.cost_center = s.dept_id', 'left')
             ->join('yp_plan__master_tipe_mpp t', 't.id_mpp = s.type', 'left');
 
         if (! empty($filters['search'])) {
             $like = trim($filters['search']);
             $builder->groupStart()
                 ->like('s.desc', $like)
-                ->orLike('d.dept_desc', $like)
-                ->orLike('d.dept_code', $like)
+                ->orLike('cc.cost_desc', $like)
+                ->orLike('cc.cost_center_sap', $like)
                 ->groupEnd();
         }
 
         if (! empty($filters['dept_id'])) {
-            $builder->where('s.dept_id', (int) $filters['dept_id']);
+            $builder->where('s.dept_id', $filters['dept_id']);
         }
 
         if (! empty($filters['type'])) {
@@ -68,7 +68,7 @@ class SalaryMppModel extends Model
         }
 
         return $builder->orderBy('s.year_code', 'DESC')
-            ->orderBy('d.dept_code', 'ASC')
+            ->orderBy('cc.cost_center', 'ASC')
             ->orderBy('s.desc', 'ASC')
             ->get()
             ->getResultArray();
@@ -143,6 +143,21 @@ class SalaryMppModel extends Model
         }
 
         return $years;
+    }
+
+    /**
+     * Daftar nama staff/posisi unik yang sudah pernah diinput.
+     */
+    public function getStaffNames(): array
+    {
+        $res = $this->builder()
+            ->select('DISTINCT(`desc`) as name', false)
+            ->where('`desc` IS NOT NULL AND `desc` != ""', null, false)
+            ->orderBy('`desc`', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        return array_values(array_filter(array_column($res, 'name')));
     }
 
     /**

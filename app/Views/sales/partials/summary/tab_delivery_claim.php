@@ -1,9 +1,18 @@
 <div x-data="deliveryClaimTab()" x-init="initData()" class="space-y-6">
 
     <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div>
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Pengaturan Rate Delivery & Claim (%)</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Persentase pengurang revenue dan beban alokasi pengiriman bulanan.</p>
+        <div class="flex items-center gap-4">
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Pengaturan Rate Delivery & Claim (%)</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Persentase pengurang revenue dan beban alokasi pengiriman bulanan.</p>
+            </div>
+            <div class="w-48">
+                <label class="block text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">Channel</label>
+                <select x-model="selectedChannel" @change="filterByChannel()" class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary font-semibold">
+                    <option value="domestic">Domestic (YTI)</option>
+                    <option value="international">International</option>
+                </select>
+            </div>
         </div>
 
         <button type="button" @click="saveData()" :disabled="saving" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50">
@@ -26,7 +35,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                    <template x-for="item in segments" :key="item.id">
+                    <template x-for="item in filteredSegments" :key="item.id">
                         <template x-for="rateType in ['delivery', 'claim']">
                             <tr :class="rateType === 'claim' ? 'bg-gray-50/50 dark:bg-gray-800/50' : ''">
                                 <template x-if="rateType === 'delivery'">
@@ -60,15 +69,24 @@
 function deliveryClaimTab() {
     return {
         saving: false,
+        selectedChannel: 'domestic',
         monthNames: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         segments: [],
 
         initData() {
             this.segments = [
-                { id: 1, segment_name: 'Domestic General Trade (GT)', avg_delivery: 2.50, avg_claim: 0.50, monthly: { delivery: {1:2.5,2:2.5,3:2.5,4:2.5,5:2.5,6:2.5,7:2.5,8:2.5,9:2.5,10:2.5,11:2.5,12:2.5}, claim: {1:0.5,2:0.5,3:0.5,4:0.5,5:0.5,6:0.5,7:0.5,8:0.5,9:0.5,10:0.5,11:0.5,12:0.5} } },
-                { id: 2, segment_name: 'Domestic Modern Trade (MT)', avg_delivery: 3.20, avg_claim: 1.00, monthly: { delivery: {1:3.2,2:3.2,3:3.2,4:3.2,5:3.2,6:3.2,7:3.2,8:3.2,9:3.2,10:3.2,11:3.2,12:3.2}, claim: {1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1,11:1,12:1} } },
-                { id: 3, segment_name: 'Export Sales All Regions', avg_delivery: 5.00, avg_claim: 0.20, monthly: { delivery: {1:5,2:5,3:5,4:5,5:5,6:5,7:5,8:5,9:5,10:5,11:5,12:5}, claim: {1:0.2,2:0.2,3:0.2,4:0.2,5:0.2,6:0.2,7:0.2,8:0.2,9:0.2,10:0.2,11:0.2,12:0.2} } }
+                { id: 1, segment_name: 'Domestic General Trade (GT)', channel: 'domestic', avg_delivery: 2.50, avg_claim: 0.50, monthly: { delivery: {1:2.5,2:2.5,3:2.5,4:2.5,5:2.5,6:2.5,7:2.5,8:2.5,9:2.5,10:2.5,11:2.5,12:2.5}, claim: {1:0.5,2:0.5,3:0.5,4:0.5,5:0.5,6:0.5,7:0.5,8:0.5,9:0.5,10:0.5,11:0.5,12:0.5} } },
+                { id: 2, segment_name: 'Domestic Modern Trade (MT)', channel: 'domestic', avg_delivery: 3.20, avg_claim: 1.00, monthly: { delivery: {1:3.2,2:3.2,3:3.2,4:3.2,5:3.2,6:3.2,7:3.2,8:3.2,9:3.2,10:3.2,11:3.2,12:3.2}, claim: {1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1,11:1,12:1} } },
+                { id: 3, segment_name: 'Export Sales All Regions', channel: 'international', avg_delivery: 5.00, avg_claim: 0.20, monthly: { delivery: {1:5,2:5,3:5,4:5,5:5,6:5,7:5,8:5,9:5,10:5,11:5,12:5}, claim: {1:0.2,2:0.2,3:0.2,4:0.2,5:0.2,6:0.2,7:0.2,8:0.2,9:0.2,10:0.2,11:0.2,12:0.2} } }
             ];
+        },
+
+        filterByChannel() {
+            // Data already filtered via getter
+        },
+
+        get filteredSegments() {
+            return this.segments.filter(s => s.channel === this.selectedChannel);
         },
 
         calculateAvg(item, rateType) {
