@@ -96,11 +96,17 @@ class ProductModel extends Model
     }
 
     /**
-     * Ambil daftar channel unik yang tersedia.
+     * Ambil daftar channel unik yang tersedia dari database.
      */
     public function getChannels(): array
     {
-        return ['OEM', 'GT', 'MT', 'ECOM', 'YTI', 'EXPORT'];
+        $rows = db_connect()->table('gw_plan__master_channel')
+            ->select('channel_code')
+            ->orderBy('id_channel', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        return array_column($rows, 'channel_code');
     }
 
     /**

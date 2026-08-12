@@ -24,7 +24,7 @@
         <div class="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-1 dark:bg-boxdark dark:text-gray-200">
             <i class="fas fa-calendar-alt text-primary"></i>
             <span>Budget Plan Year :</span>
-            <span class="text-red-500 font-bold"><?= esc($workingYear) ?></span>
+            <span class="text-red-500 font-bold"><?= esc($workingYear ?? '') ?></span>
         </div>
     </div>
 
@@ -73,9 +73,9 @@ function opexGaActualApp() {
     return {
         activeTab: 'actual',
         costCenters: <?= json_encode(array_map(fn($cc) => [
-            'id'   => $cc['cost_center'],
+            'id'   => $cc['cost_center_sap'] ?? $cc['cost_center'],
             'text' => ($cc['cc_code'] ?? $cc['cost_center']) . ' - ' . $cc['cost_desc'],
-        ], $costCenters)) ?>,
+        ], $costCenters ?? [])) ?>,
         selectedActualCc: '',
         selectedDownloadCc: '',
         
@@ -89,6 +89,13 @@ function opexGaActualApp() {
         totalData: 0,
         currentPage: 1,
         perPage: 25,
+        search: '',
+        searchTimer: null,
+        loading: false,
+
+        get totalPages() { return Math.ceil(this.totalData / this.perPage) || 1; },
+        get pageFrom() { return this.totalData === 0 ? 0 : ((this.currentPage - 1) * this.perPage) + 1; },
+        get pageTo() { return Math.min(this.currentPage * this.perPage, this.totalData); },
 
         init() {
             if (this.costCenters.length > 0) {
@@ -104,26 +111,35 @@ function opexGaActualApp() {
                 this.totalData = 0;
                 return;
             }
+            this.loading = true;
             fetch(`<?= base_url('opex-ga/getActualData') ?>`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `dept=${this.selectedActualCc}&page=${this.currentPage}`
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: `dept=${encodeURIComponent(this.selectedActualCc)}&page=${this.currentPage}&perPage=${this.perPage}&search=${encodeURIComponent(this.search)}`
             })
             .then(r => r.json())
             .then(res => {
+                this.loading = false;
                 if (res.status === 'success') {
                     this.tableData = (res.rows || []).map(r => ({
                         main_account: r.id_coa,
                         description: r.coa_desc,
-                        jan: this.fmtShort(r.jan), feb: this.fmtShort(r.feb), mar: this.fmtShort(r.mar),
-                        apr: this.fmtShort(r.apr), may: this.fmtShort(r.may), jun: this.fmtShort(r.jun),
-                        jul: this.fmtShort(r.jul), aug: this.fmtShort(r.aug), sep: this.fmtShort(r.sep),
-                        oct: this.fmtShort(r.oct), nov: this.fmtShort(r.nov), dec: this.fmtShort(r.dec),
-                        avg: this.fmtShort((parseFloat(r.total) || 0) / 12),
-                        total: this.fmtShort(r.total)
+                        jan: parseFloat(r.jan) || 0, feb: parseFloat(r.feb) || 0, mar: parseFloat(r.mar) || 0,
+                        apr: parseFloat(r.apr) || 0, may: parseFloat(r.may) || 0, jun: parseFloat(r.jun) || 0,
+                        jul: parseFloat(r.jul) || 0, aug: parseFloat(r.aug) || 0, sep: parseFloat(r.sep) || 0,
+                        oct: parseFloat(r.oct) || 0, nov: parseFloat(r.nov) || 0, dec: parseFloat(r.dec) || 0,
+                        total: parseFloat(r.total) || 0
                     }));
                     this.totalData = res.total || 0;
                 }
+            })
+            .catch(() => {
+                this.loading = false;
+                this.tableData = [];
+                this.totalData = 0;
             });
         },
 
@@ -186,10 +202,50 @@ function opexGaActualApp() {
             this.uploadModalOpen = false;
         },
 
-        fmtShort(val) {
-            const num = parseFloat(val) || 0;
-            if (num === 0) return '0';
-            return num.toLocaleString('id-ID');
+        goPage(page) {
+            if (page < 1 || page > this.totalPages || page === this.currentPage) return;
+            this.currentPage = page;
+            this.fetchActualData();
+        },
+        pageNumbers() {
+            const pages = [];
+            const total = this.totalPages;
+            const current = this.currentPage;
+            if (total <= 7) {
+                for (let i = 1; i <= total; i++) pages.push(i);
+            } else {
+                pages.push(1);
+                if (current > 3) pages.push('...');
+                const start = Math.max(2, current - 1);
+                const end = Math.min(total - 1, current + 1);
+                for (let i = start; i <= end; i++) pages.push(i);
+                if (current < total - 2) pages.push('...');
+                pages.push(total);
+            }
+            return pages;
+        },
+
+        onSearch() {
+            clearTimeout(this.searchTimer);
+            this.searchTimer = setTimeout(() => {
+                this.currentPage = 1;
+                this.fetchActualData();
+            }, 400);
+        },
+        onChangePerPage() {
+            this.perPage = parseInt(this.perPage, 10) || 25;
+            this.currentPage = 1;
+            this.fetchActualData();
+        },
+
+        pageTotal(monthKey) {
+            return this.tableData.reduce((sum, r) => sum + (parseFloat(r[monthKey]) || 0), 0);
+        },
+        pageTotalTotal() {
+            return this.tableData.reduce((sum, r) => sum + (parseFloat(r.total) || 0), 0);
+        },
+        formatNumber(val) {
+            return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 }).format(parseFloat(val) || 0);
         }
     }
 }

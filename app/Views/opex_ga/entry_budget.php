@@ -24,7 +24,7 @@
         <div class="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-1 dark:bg-boxdark dark:text-gray-200">
             <i class="fas fa-calendar-alt text-primary"></i>
             <span>Budget Plan Year :</span>
-            <span class="text-red-500 font-bold"><?= esc($workingYear) ?></span>
+            <span class="text-red-500 font-bold"><?= esc($workingYear ?? '') ?></span>
         </div>
     </div>
 
@@ -69,9 +69,9 @@ function opexGaEntryApp() {
         activeTab: 'entry',
         manualBookModalOpen: false,
         costCenters: <?= json_encode(array_map(fn($cc) => [
-            'id'   => $cc['cost_center'],
+            'id'   => $cc['cost_center_sap'] ?? $cc['cost_center'],
             'text' => ($cc['cc_code'] ?? $cc['cost_center']) . ' - ' . $cc['cost_desc'],
-        ], $costCenters)) ?>,
+        ], $costCenters ?? [])) ?>,
         selectedEntryCc: '',
         selectedViewCc: '',
 
@@ -80,6 +80,13 @@ function opexGaEntryApp() {
 
         entryAccounts: [],
         viewAccounts: [],
+        viewSubtotals: [],
+        viewGrandTotal: { actual: { months: {}, avg: 0, total: 0 }, budget: { months: {}, total: 0 } },
+        isLoadingView: false,
+        actualViewMonths: ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','AVG','TOTAL'],
+        actualViewKeys: ['jan','feb','mar','apr','may','jun','jul','aug'],
+        budgetViewMonths: ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC','TOTAL'],
+        budgetViewKeys: ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'],
 
         init() {
             if (this.costCenters.length > 0) {
@@ -95,49 +102,50 @@ function opexGaEntryApp() {
                 this.entryAccounts = [];
                 return;
             }
-            fetch(`<?= base_url('opex-ga/getHeaderAccounts') ?>?dept=${this.selectedEntryCc}`)
+            fetch(`<?= base_url('opex-ga/getHeaderAccounts') ?>?dept=${encodeURIComponent(this.selectedEntryCc)}`)
                 .then(r => r.json())
                 .then(res => {
-                    if (res.status === 'success') {
-                        this.currentPage = 1;
-                        this.entryAccounts = (res.headers || []).map((h, i) => ({
-                            idx: i + 1,
-                            main_account: h.main_account,
-                            acct_code: h.acct_code,
-                            description: h.coa_desc,
-                            jan: h.jan, feb: h.feb, mar: h.mar, apr: h.apr,
-                            may: h.may, jun: h.jun, jul: h.jul, aug: h.aug,
-                            total: parseFloat(h.total_actual) || 0
-                        }));
-                    }
-                });
+                    this.currentPage = 1;
+                    this.entryAccounts = res.status === 'success' ? (res.headers || []).map(h => ({
+                        cost_center_header: h.cost_center_header,
+                        id_cost_header: h.id_cost_header,
+                        actual: h.actual || {},
+                        total_actual: parseFloat(h.total_actual) || 0,
+                        status_entry: h.status_entry || 'belum'
+                    })) : [];
+                })
+                .catch(() => { this.entryAccounts = []; });
         },
 
         fetchViewData() {
             if (!this.selectedViewCc) {
                 this.viewAccounts = [];
+                this.viewSubtotals = [];
                 return;
             }
-            fetch(`<?= base_url('opex-ga/getEntryData') ?>?dept=${this.selectedViewCc}`)
+            this.isLoadingView = true;
+            fetch(`<?= base_url('opex-ga/getEntryData') ?>?dept=${encodeURIComponent(this.selectedViewCc)}`)
                 .then(r => r.json())
                 .then(res => {
                     if (res.status === 'success') {
-                        this.viewAccounts = (res.rows || []).map(r => ({
-                            main_account: r.acct_code,
-                            description: r.coa_desc,
-                            jan: this.fmtShort(r.jan), feb: this.fmtShort(r.feb), mar: this.fmtShort(r.mar),
-                            apr: this.fmtShort(r.apr), may: this.fmtShort(r.may), jun: this.fmtShort(r.jun),
-                            jul: this.fmtShort(r.jul), aug: this.fmtShort(r.aug), sep: this.fmtShort(r.sep),
-                            oct: this.fmtShort(r.oct), nov: this.fmtShort(r.nov), dec: this.fmtShort(r.dec),
-                            total: this.fmtShort(r.total)
-                        }));
+                        this.viewAccounts = res.rows || [];
+                        this.viewSubtotals = res.subtotals || [];
+                        this.viewGrandTotal = res.grand_total || this.viewGrandTotal;
+                    } else {
+                        this.viewAccounts = [];
+                        this.viewSubtotals = [];
                     }
-                });
+                })
+                .catch(() => { this.viewAccounts = []; this.viewSubtotals = []; })
+                .finally(() => { this.isLoadingView = false; });
+        },
+
+        detailUrl(row) {
+            return `<?= base_url('opex-ga/entry-budget-detail') ?>?header=${encodeURIComponent(row.cost_center_header)}&dept=${encodeURIComponent(this.selectedEntryCc)}&idx=${encodeURIComponent(row.id_cost_header)}`;
         },
 
         goToDetail(account) {
-            const headerEncoded = encodeURIComponent(account.main_account);
-            window.location.href = `<?= base_url('opex-ga/entry-budget-detail') ?>?header=${headerEncoded}&dept=${this.selectedEntryCc}&idx=${account.idx}`;
+            window.location.href = this.detailUrl(account);
         },
 
         exportExcel() {
@@ -154,12 +162,16 @@ function opexGaEntryApp() {
             return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(val) || 0);
         },
 
+        formatNumber(val) {
+            return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(val) || 0);
+        },
+
         columnTotal(key) {
-            return this.entryAccounts.reduce((sum, r) => sum + (parseFloat(r[key]) || 0), 0);
+            return this.entryAccounts.reduce((sum, r) => sum + (parseFloat(r.actual?.[key]) || 0), 0);
         },
 
         grandTotal() {
-            return this.entryAccounts.reduce((sum, r) => sum + (parseFloat(r.total) || 0), 0);
+            return this.entryAccounts.reduce((sum, r) => sum + (parseFloat(r.total_actual) || 0), 0);
         },
 
         // Pagination

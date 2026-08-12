@@ -88,6 +88,8 @@ project_progress.md
 app/Database/Seeds/QaUserSeeder.php
 PRD_SALES_DATA_SUMMARY.md
 /.agents/
+/tests
+/writable
 
 test_*.php
 tmp_*.php

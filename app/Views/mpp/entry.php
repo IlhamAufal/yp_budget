@@ -82,6 +82,7 @@ function mppEntry() {
         modalPositions: [],
         modalNote: '',
         modalLoading: false,
+        deletingPositionId: null,
 
         // View Data (Sub-Tab 2)
         viewData: [],
@@ -147,7 +148,9 @@ function mppEntry() {
                 const result = await res.json();
                 if (result.status === 'success') {
                     this.modalPositions = (result.data.positions || []).map(p => ({
+                        id_mppx: Number(p.id_mppx),
                         position_name: p.position_name,
+                        has_entry: Number(p.has_entry) === 1,
                         months: [
                             parseInt(p.m1)||0, parseInt(p.m2)||0, parseInt(p.m3)||0, parseInt(p.m4)||0,
                             parseInt(p.m5)||0, parseInt(p.m6)||0, parseInt(p.m7)||0, parseInt(p.m8)||0,
@@ -214,6 +217,47 @@ function mppEntry() {
                 alert('Terjadi kesalahan saat menyimpan data.');
             } finally {
                 this.saving = false;
+            }
+        },
+
+        async deleteMppPosition(pos) {
+            if (!pos || !pos.has_entry || !pos.id_mppx || this.deletingPositionId !== null) return;
+            if (! window.confirm(`Hapus entry posisi ${pos.position_name}?`)) return;
+
+            this.deletingPositionId = pos.id_mppx;
+            try {
+                const res = await fetch(`<?= base_url('mpp/deleteMppPosition') ?>`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        id_dept: this.selectedCostCenter,
+                        tipe_id: this.modalTipeId,
+                        position_id: pos.id_mppx
+                    })
+                });
+                const result = await res.json();
+                if (!res.ok || result.status !== 'success') {
+                    throw new Error(result.message || 'Gagal menghapus entry posisi.');
+                }
+
+                if (window.showToast) {
+                    window.showToast('success', result.message || 'Entry posisi berhasil dihapus.');
+                }
+
+                await this.openFormModal(this.modalCategory, this.modalTipeId);
+                await Promise.all([this.loadMatrixData(), this.loadViewData()]);
+            } catch (err) {
+                console.error('Error deleting MPP position:', err);
+                if (window.showToast) {
+                    window.showToast('error', err.message || 'Terjadi kesalahan saat menghapus entry posisi.');
+                } else {
+                    alert(err.message || 'Terjadi kesalahan saat menghapus entry posisi.');
+                }
+            } finally {
+                this.deletingPositionId = null;
             }
         },
 

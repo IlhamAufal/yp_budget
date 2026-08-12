@@ -6,6 +6,7 @@ use App\Libraries\ExcelExporter;
 use App\Libraries\ExcelImporter;
 use App\Libraries\AuditLog;
 use App\Models\AssumptionModel;
+use App\Models\ChannelModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
 /**
@@ -17,10 +18,12 @@ use CodeIgniter\HTTP\ResponseInterface;
 class SalesController extends BaseController
 {
     protected $db;
+    protected $channelModel;
 
     public function __construct()
     {
         $this->db = \Config\Database::connect();
+        $this->channelModel = new ChannelModel();
     }
 
     /**
@@ -49,6 +52,7 @@ class SalesController extends BaseController
             'domesticProducts'  => $this->getProductSummary($workingYear, 'yp_plan__trans_sales_domestic'),
             'exportProducts'    => $this->getProductSummary($workingYear, 'yp_plan__trans_sales_export'),
             'kurs'              => $this->getKurs($workingYear),
+            'channels'          => $this->channelModel->getDomesticChannels(),
         ]);
     }
 
@@ -65,6 +69,7 @@ class SalesController extends BaseController
             'salesData'        => $this->getAssumptionData($workingYear, 'Domestic'),
             'domesticProducts' => $this->getProductSummary($workingYear, 'yp_plan__trans_sales_domestic'),
             'regionalSummary'  => $this->getRegionSummary($workingYear),
+            'channels'         => $this->channelModel->getDomesticChannels(),
         ]);
     }
 
@@ -83,6 +88,7 @@ class SalesController extends BaseController
             'countrySummary'       => $this->getCountrySummary($workingYear),
             'exportCountryDetail'  => $this->getExportCountryDetail($workingYear),
             'exportRegionSummary'  => $this->getExportRegionSummary($workingYear),
+            'channels'             => $this->channelModel->getDomesticChannels(),
         ]);
     }
 

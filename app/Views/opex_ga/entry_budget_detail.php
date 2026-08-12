@@ -225,7 +225,7 @@ function opexGaDetailApp() {
             if (!this.headerAccount || !this.costCenterCode) return;
             this.loading = true;
             try {
-                const res = await fetch(`<?= base_url('opex-ga/getDetailMatrix') ?>?dept=${encodeURIComponent(this.costCenterCode)}&header=${encodeURIComponent(this.headerAccount)}`, {
+                const res = await fetch(`<?= base_url('opex-ga/getDetailMatrix') ?>?dept=${encodeURIComponent(this.costCenterCode)}&header=${encodeURIComponent(this.headerAccount)}&idx=${encodeURIComponent(this.idx)}`, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
                 const data = await res.json();
@@ -245,14 +245,7 @@ function opexGaDetailApp() {
         },
 
         getActualValue(row, m) {
-            // Actual dari yp_plan__trans_budget_actual; bila kosong, tampilkan
-            // simulated dari breakdown entry detail (perilaku sama dengan FOH).
-            let hasActual = false;
-            for (let i = 1; i <= 12; i++) {
-                if (parseFloat(row.actual ? row.actual['a' + i] : 0) !== 0) { hasActual = true; break; }
-            }
-            if (hasActual) return row.actual['a' + m] || 0;
-            return row.simulated ? (row.simulated['a' + m] || 0) : 0;
+            return row.actual ? (row.actual['a' + m] || 0) : 0;
         },
 
         getActualTotal(row) {
@@ -435,6 +428,8 @@ function opexGaDetailApp() {
                     entry_data_id: entryDataId,
                     id_coa: idCoa,
                     dept: this.costCenterCode,
+                    header: this.headerAccount,
+                    idx: this.idx,
                     items: JSON.stringify(validItems)
                 });
 

@@ -1,7 +1,7 @@
 <div class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
         <div><h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2"><i class="fa-solid fa-award text-amber-500"></i>Report Key Product (Domestic Hero SKUs)</h3><p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Rekapitulasi performa per Kategori Key Product (GUMMY, BOLI, MARSHMALLOW, EXTR, dll).</p></div>
-        <div class="flex items-center gap-2"><select x-model="filters.channelKey" @change="calculateKeyProducts()" class="text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white py-2 px-3"><option value="">- All Channel -</option><option value="GT">General Trade</option><option value="MT">Modern Trade</option><option value="OEM">OEM</option><option value="ECOM">E-Commerce</option><option value="YTI">YTI</option></select></div>
+        <div class="flex items-center gap-2"><select x-model="filters.channelKey" @change="calculateKeyProducts()" class="text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white py-2 px-3"><option value="">- All Channel -</option><?php foreach ($channels ?? [] as $ch): ?><option value="<?= esc($ch['channel_code']) ?>"><?= esc($ch['channel_code']) ?> - <?= esc($ch['channel_name']) ?></option><?php endforeach; ?></select></div>
     </div>
     <div class="overflow-x-auto scrollbar-thin">
         <table class="w-full text-left text-xs border-collapse min-w-[2400px]">

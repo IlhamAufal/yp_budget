@@ -9,6 +9,7 @@ use CodeIgniter\Filters\Honeypot;
 use CodeIgniter\Filters\InvalidChars;
 use CodeIgniter\Filters\SecureHeaders;
 use App\Filters\AuthFilter;
+use App\Filters\AuthorizationContextFilter;
 use App\Filters\EnsureContextFilter;
 use App\Filters\RoleFilter;
 use App\Filters\PeriodLockFilter;
@@ -28,6 +29,7 @@ class Filters extends BaseConfig
         'invalidchars'  => InvalidChars::class,
         'secureheaders' => SecureHeaders::class,
         'auth'          => AuthFilter::class,
+        'authorizationContext' => AuthorizationContextFilter::class,
         'ensureContext' => EnsureContextFilter::class,
         'role'          => RoleFilter::class,
         'periodLock'    => PeriodLockFilter::class,
@@ -42,6 +44,7 @@ class Filters extends BaseConfig
     public $globals = [
         'before' => [
             'ensureContext',
+            'authorizationContext',
             'role',
             'periodLock',
         ],

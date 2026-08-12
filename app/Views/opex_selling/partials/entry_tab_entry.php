@@ -61,7 +61,7 @@
             <thead>
                 <tr class="bg-gray-2 text-black dark:bg-meta-4 dark:text-white font-bold border-b border-stroke dark:border-strokedark uppercase">
                     <th rowspan="2" class="py-3 px-2 text-center border-r border-stroke dark:border-strokedark min-w-[60px]">ENTRY</th>
-                    <th rowspan="2" class="py-3 px-3 border-r border-stroke dark:border-strokedark min-w-[240px]">DESCRIPTION</th>
+                    <th rowspan="2" class="py-3 px-3 border-r border-stroke dark:border-strokedark min-w-[240px]">SELLING EXPENSE</th>
                     <th colspan="8" class="py-2 px-3 text-center border-r border-stroke dark:border-strokedark">ACTUAL</th>
                     <th rowspan="2" class="py-3 px-3 text-right min-w-[110px]">TOTAL</th>
                 </tr>
@@ -79,18 +79,19 @@
                         </td>
                     </tr>
                 </template>
-                <template x-for="(row, idx) in paginatedEntries" :key="idx">
+                <template x-for="row in paginatedEntries" :key="row.id_cost_header + '_' + row.cost_center_header">
                     <tr class="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4">
                         <td class="py-2.5 px-2 text-center border-r border-stroke dark:border-strokedark">
                             <a
-                                :href="'<?= base_url('opex-selling/entry-budget-detail') ?>?header=' + encodeURIComponent(row.main_account) + '&dept=' + encodeURIComponent(selectedCostCenter) + '&idx=' + (idx + 1)"
+                                :href="'<?= base_url('opex-selling/entry-budget-detail') ?>?header=' + encodeURIComponent(row.cost_center_header) + '&dept=' + encodeURIComponent(selectedCostCenter) + '&idx=' + encodeURIComponent(row.id_cost_header)"
                                 title="Entry"
-                                class="inline-flex items-center justify-center rounded bg-blue-600 p-1.5 text-white shadow hover:bg-blue-700 active:scale-[0.98] transition-all"
+                                :class="row.indicator === 'sudah' ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'"
+                                class="inline-flex items-center justify-center rounded p-1.5 text-white shadow active:scale-[0.98] transition-all"
                             >
                                 <i class="fas fa-edit text-[11px]"></i>
                             </a>
                         </td>
-                        <td class="py-2.5 px-3 border-r border-stroke dark:border-strokedark font-medium text-black dark:text-white" x-text="row.description"></td>
+                        <td class="py-2.5 px-3 border-r border-stroke dark:border-strokedark font-medium text-black dark:text-white" x-text="row.cost_center_header"></td>
                         <template x-for="m in actualMonthKeys" :key="m">
                             <td class="py-2.5 px-1 text-right border-r border-stroke dark:border-strokedark font-mono" x-text="fmtBudget(row[m])"></td>
                         </template>
@@ -145,8 +146,8 @@ function opexSellingEntryTab() {
         searchCostCenter: '',
         dropdownOpen: false,
         costCenters: <?= json_encode(array_map(fn($cc) => [
-            'id'   => $cc['cost_center'],
-            'name' => ($cc['cc_code'] ?? $cc['cost_center']) . ' - ' . $cc['cost_desc'],
+            'id'   => $cc['cost_center_sap'],
+            'name' => ($cc['cost_center_sap'] ?? $cc['cost_center']) . ' - ' . $cc['cost_desc'],
         ], $costCenters)) ?>,
         selectedCostCenter: '',
 
@@ -197,17 +198,24 @@ function opexSellingEntryTab() {
                 this.entries = [];
                 return;
             }
-            fetch(`<?= base_url('opex-selling/getHeaderAccounts') ?>?dept=${this.selectedCostCenter}`)
+            fetch(`<?= base_url('opex-selling/getEntryDataGrouped') ?>?dept=${encodeURIComponent(this.selectedCostCenter)}`)
                 .then(r => r.json())
                 .then(res => {
                     if (res.status === 'success') {
                         this.currentPage = 1;
-                        this.entries = (res.headers || []).map(r => ({
-                            main_account: r.main_account,
-                            description: r.coa_name,
-                            jan: r.jan, feb: r.feb, mar: r.mar, apr: r.apr,
-                            may: r.may, jun: r.jun, jul: r.jul, aug: r.aug,
-                            total: parseFloat(r.total_actual) || 0
+                        this.entries = (res.rows || []).map(r => ({
+                            cost_center_header: r.cost_center_header,
+                            id_cost_header: r.id_cost_header,
+                            jan: parseFloat(r.jan) || 0,
+                            feb: parseFloat(r.feb) || 0,
+                            mar: parseFloat(r.mar) || 0,
+                            apr: parseFloat(r.apr) || 0,
+                            may: parseFloat(r.may) || 0,
+                            jun: parseFloat(r.jun) || 0,
+                            jul: parseFloat(r.jul) || 0,
+                            aug: parseFloat(r.aug) || 0,
+                            total: parseFloat(r.total) || 0,
+                            indicator: r.indicator || 'belum'
                         }));
                     }
                 });

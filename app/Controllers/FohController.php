@@ -316,32 +316,17 @@ class FohController extends BaseController
     }
 
     /**
-     * AJAX: data actual FOH per cost center.
+     * AJAX: Tab View Data — replika Foh::cari_actual_table() (sistem lama).
+     * Response berupa array langsung (bukan dibungkus), karena front-end iterasi response.
      */
     public function cariActualTable(): ResponseInterface
     {
         $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
         $dept = $this->request->getPost('dept') ?? '';
-        $page = max(1, (int) ($this->request->getPost('page') ?? 1));
 
-        $perPage = 10;
-        $all     = $this->fohModel->getActualData($year, $dept);
+        $rows = $this->fohModel->getViewData((string) $year, (string) $dept);
 
-        // View tab_actual_data mengharapkan key main_account/description/grand_total
-        // (SAP display), sementara model mengembalikan id_coa/coa_desc/total.
-        $mapped = array_map(static function (array $r): array {
-            return array_merge($r, [
-                'main_account' => $r['id_coa'] ?? '',
-                'description'  => $r['coa_desc'] ?? '',
-                'grand_total'  => $r['total'] ?? 0,
-            ]);
-        }, $all);
-
-        return $this->response->setJSON([
-            'status' => 'success',
-            'rows'   => array_slice($mapped, ($page - 1) * $perPage, $perPage),
-            'total'  => count($all),
-        ]);
+        return $this->response->setJSON($rows);
     }
 
     /**
@@ -469,19 +454,32 @@ class FohController extends BaseController
     {
         $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
 
-        $all     = $this->fohModel->getSummary($year);
-        $page    = max(1, (int) ($this->request->getGet('page') ?? 1));
-        $perPage = 10;
-        $total   = count($all);
-
         return view('foh/summary', [
             'title'       => 'FOH - Summary',
             'workingYear' => $year,
-            'summary'     => array_slice($all, ($page - 1) * $perPage, $perPage),
-            'page'        => $page,
-            'perPage'     => $perPage,
-            'total'       => $total,
+            'deptx'       => $this->fohModel->getCostCentersWithData(),
+            'deptx2'      => $this->fohModel->getCostCentersNewlines((string) $year),
         ]);
+    }
+
+    /**
+     * AJAX: Tab Summary by Cost Center — replika Foh::summary_costcenter().
+     */
+    public function summaryCostCenter(): ResponseInterface
+    {
+        $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+
+        return $this->response->setJSON($this->fohModel->getSummaryCostCenter((string) $year));
+    }
+
+    /**
+     * AJAX: Tab Summary by Account — replika Foh::summary_account().
+     */
+    public function summaryAccount(): ResponseInterface
+    {
+        $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+
+        return $this->response->setJSON($this->fohModel->getSummaryAccount((string) $year));
     }
 
     /**

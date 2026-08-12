@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\OpexGaModel;
+use App\Services\OpexReportService;
 use App\Libraries\AccessRestrict;
 use App\Libraries\AuditLog;
 use App\Libraries\ExcelExporter;
@@ -18,12 +19,27 @@ use CodeIgniter\HTTP\ResponseInterface;
 class OpexGaController extends BaseController
 {
     protected OpexGaModel $opexModel;
+    protected OpexReportService $reportService;
     protected $db;
 
     public function __construct()
     {
         $this->opexModel = new OpexGaModel();
+        $this->reportService = new OpexReportService();
         $this->db = \Config\Database::connect();
+    }
+
+    /**
+     * Baca + resolve param dept (SAP code dari dropdown) ke cost_center internal.
+     */
+    private function resolveDeptParam(?string $dept): string
+    {
+        return (string) ($this->opexModel->resolveDept($dept) ?? '');
+    }
+
+    private function eligibleDeptParam(?string $dept, string $year): ?string
+    {
+        return $this->opexModel->resolveEligibleDept($dept, $year, (array) session()->get('auth_obj'));
     }
 
     /* ------------------------------------------------------------------
@@ -37,7 +53,7 @@ class OpexGaController extends BaseController
         return view('opex_ga/index', [
             'title'       => 'OPEX GA Summary & Budget Table',
             'workingYear' => $workingYear,
-            'costCenters' => $this->opexModel->getCostCenters(),
+            'costCenters' => $this->opexModel->getCostCenters($workingYear, (array) session()->get('auth_obj')),
         ]);
     }
 
@@ -51,7 +67,7 @@ class OpexGaController extends BaseController
         return view('opex_ga/entry_budget', [
             'title'       => 'Entry Budget OPEX GA',
             'workingYear' => $workingYear,
-            'costCenters' => $this->opexModel->getCostCenters(),
+            'costCenters' => $this->opexModel->getCostCenters($workingYear, (array) session()->get('auth_obj')),
             'coas'        => $this->opexModel->getCoas(),
         ]);
     }
@@ -72,7 +88,7 @@ class OpexGaController extends BaseController
             'headerAccount' => $header,
             'dept'          => $dept,
             'idx'           => $idx,
-            'costCenters'   => $this->opexModel->getCostCenters(),
+            'costCenters'   => $this->opexModel->getCostCenters($workingYear, (array) session()->get('auth_obj')),
         ]);
     }
 
@@ -82,16 +98,17 @@ class OpexGaController extends BaseController
     public function getEntryData(): ResponseInterface
     {
         $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
-        $dept = $this->request->getGet('dept') ?? '';
+        $dept = $this->eligibleDeptParam($this->request->getGet('dept'), (string) $year);
 
-        if (empty($dept)) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Cost Center wajib dipilih.']);
+        if ($dept === null) {
+            return $this->response->setStatusCode(403)->setJSON(['status' => 'error', 'message' => 'Cost Center tidak memiliki akses atau periode OPEX GA tidak aktif.']);
         }
 
-        return $this->response->setJSON([
+        $viewData = $this->opexModel->getEntryData((string) $year, $dept);
+
+        return $this->response->setJSON(array_merge([
             'status' => 'success',
-            'rows'   => $this->opexModel->getEntryData($year, $dept),
-        ]);
+        ], $viewData));
     }
 
     /**
@@ -100,15 +117,15 @@ class OpexGaController extends BaseController
     public function getHeaderAccounts(): ResponseInterface
     {
         $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
-        $dept = $this->request->getGet('dept') ?? '';
+        $dept = $this->eligibleDeptParam($this->request->getGet('dept'), (string) $year);
 
-        if (empty($dept)) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Cost Center wajib dipilih.']);
+        if ($dept === null) {
+            return $this->response->setStatusCode(403)->setJSON(['status' => 'error', 'message' => 'Cost Center tidak memiliki akses atau periode OPEX GA tidak aktif.']);
         }
 
         return $this->response->setJSON([
             'status'  => 'success',
-            'headers' => $this->opexModel->getHeaderAccounts($year, $dept),
+            'headers' => $this->opexModel->getHeaderAccounts((string) $year, $dept),
         ]);
     }
 
@@ -118,16 +135,18 @@ class OpexGaController extends BaseController
     public function getDetailMatrix(): ResponseInterface
     {
         $year   = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
-        $dept   = $this->request->getGet('dept') ?? '';
-        $header = $this->request->getGet('header') ?? '';
+        $dept   = $this->eligibleDeptParam($this->request->getGet('dept'), (string) $year);
+        $header = trim((string) ($this->request->getGet('header') ?? ''));
+        $idx    = trim((string) ($this->request->getGet('idx') ?? ''));
 
-        if (empty($dept) || empty($header)) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Parameter tidak lengkap.']);
+        if ($dept === null || $header === '' || $idx === '') {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Parameter dept, header, dan idx wajib valid.']);
         }
 
         return $this->response->setJSON([
             'status' => 'success',
-            'matrix' => $this->opexModel->getDetailMatrix($year, $dept, $header),
+            'header' => ['cost_center_header' => $header, 'id_cost_header' => $idx],
+            'matrix' => $this->opexModel->getDetailMatrix((string) $year, $dept, $header, OpexGaModel::SOURCE, $idx),
         ]);
     }
 
@@ -142,15 +161,19 @@ class OpexGaController extends BaseController
 
         $year   = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
         $userId = (int) (session()->get('user_id') ?? 0);
-        $dept   = $this->request->getPost('dept') ?? '';
+        $dept   = $this->eligibleDeptParam($this->request->getPost('dept'), (string) $year);
+        $header = trim((string) ($this->request->getPost('header') ?? ''));
+        $idx    = trim((string) ($this->request->getPost('idx') ?? $this->request->getPost('id_cost_header') ?? ''));
 
         $rowsRaw = $this->request->getPost('rows');
-        $rows    = is_string($rowsRaw)
-            ? (array) json_decode($rowsRaw, true)
-            : (array) ($rowsRaw ?? []);
+        $rows = is_string($rowsRaw) ? json_decode($rowsRaw, true) : $rowsRaw;
+        $rows = is_array($rows) ? $rows : [];
 
-        if (empty($dept)) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Cost Center wajib dipilih.']);
+        if ($dept === null) {
+            return $this->response->setStatusCode(403)->setJSON(['status' => 'error', 'message' => 'Cost Center tidak memiliki akses atau periode OPEX GA tidak aktif.']);
+        }
+        if ($header === '' || $idx === '') {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Header dan idx wajib dikirim.']);
         }
 
         $lock = (new AccessRestrict())->checkLock((string) $userId, 'opex-ga/entry', (int) $year);
@@ -158,17 +181,17 @@ class OpexGaController extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => $lock['message']]);
         }
 
-        $result = $this->opexModel->saveBudget($year, $dept, $rows, $userId);
+        $result = $this->opexModel->saveBudget((string) $year, $dept, $header, $idx, $rows, $userId);
 
         if ($result['success']) {
-            AuditLog::saved('opex-ga/saveBudget', "Budget OPEX GA {$year} CC {$dept} disimpan ({$result['count']} baris)");
+            AuditLog::saved('opex-ga/saveBudget', "Budget OPEX GA {$year} CC {$dept} header {$idx} disimpan ({$result['count']} baris)");
         }
 
-        return $this->response->setJSON([
-            'status'  => $result['success'] ? 'success' : 'error',
+        return $this->response->setJSON(array_merge([
+            'status' => $result['success'] ? 'success' : 'error',
             'message' => $result['message'],
-            'count'   => $result['count'] ?? 0,
-        ]);
+            'count' => $result['count'] ?? 0,
+        ], $result));
     }
 
     /**
@@ -184,25 +207,34 @@ class OpexGaController extends BaseController
         $userId      = (int) (session()->get('user_id') ?? 0);
         $entryDataId = (int) $this->request->getPost('entry_data_id');
         $itemsRaw    = $this->request->getPost('items');
-        $items       = is_string($itemsRaw) ? (array) json_decode($itemsRaw, true) : (array) ($itemsRaw ?? []);
+        $items       = is_string($itemsRaw) ? json_decode($itemsRaw, true) : $itemsRaw;
+        $items       = is_array($items) ? $items : [];
+        $deptInput   = trim((string) $this->request->getPost('dept'));
+        $dept        = $this->eligibleDeptParam($deptInput, (string) $year);
+        $header      = trim((string) $this->request->getPost('header'));
+        $headerId    = trim((string) ($this->request->getPost('idx') ?? $this->request->getPost('id_cost_header') ?? ''));
 
-        // id_coa/dept sebagai hint bila parent entry budget belum ada
-        // (model akan auto-create sebelum menyimpan detail).
+        if ($dept === null || $header === '' || $headerId === '') {
+            return $this->response->setStatusCode(403)->setJSON(['status' => 'error', 'message' => 'Cost Center, header, dan idx tidak eligible atau tidak lengkap.']);
+        }
+
         $result = $this->opexModel->saveDetailItemsBatch($entryDataId, $items, $userId, [
-            'id_coa'    => (int) $this->request->getPost('id_coa'),
-            'id_dept'   => (int) $this->request->getPost('dept'),
-            'year_code' => (int) $year,
+            'id_coa'         => (int) $this->request->getPost('id_coa'),
+            'id_dept'        => (int) $dept,
+            'year_code'      => (int) $year,
+            'header'         => $header,
+            'id_cost_header' => $headerId,
         ]);
 
         if ($result['success']) {
-            AuditLog::saved('opex-ga/saveDetailItems', "Detail breakdown OPEX GA entry_data_id={$entryDataId} disimpan ({$result['count']} item)");
+            AuditLog::saved('opex-ga/saveDetailItems', "Detail breakdown OPEX GA entry_data_id={$entryDataId} header={$headerId} disimpan ({$result['count']} item)");
         }
 
-        return $this->response->setJSON([
-            'status'  => $result['success'] ? 'success' : 'error',
+        return $this->response->setJSON(array_merge([
+            'status' => $result['success'] ? 'success' : 'error',
             'message' => $result['message'],
-            'count'   => $result['count'] ?? 0,
-        ]);
+            'count' => $result['count'] ?? 0,
+        ], $result));
     }
 
     /**
@@ -212,9 +244,12 @@ class OpexGaController extends BaseController
     {
         $year   = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
         $userId = (int) (session()->get('user_id') ?? 0);
-        $dept   = $this->request->getPost('dept') ?? '';
+        $dept   = $this->eligibleDeptParam($this->request->getPost('dept'), (string) $year);
+        if ($dept === null) {
+            return $this->response->setStatusCode(403)->setJSON(['status' => 'error', 'message' => 'Cost Center tidak eligible.']);
+        }
 
-        $result = $this->opexModel->submitBudget($year, $dept, $userId);
+        $result = $this->opexModel->submitBudget((string) $year, $dept, $userId);
 
         if ($result['success']) {
             AuditLog::submitted('opex-ga/submitBudget', "Budget OPEX GA {$year} CC {$dept} disubmit");
@@ -227,20 +262,66 @@ class OpexGaController extends BaseController
     }
 
     /* ------------------------------------------------------------------
-     * Actual Data
+     * Department Report
      * ------------------------------------------------------------------ */
 
-    /**
-     * Halaman Actual Data (legacy).
-     */
-    public function actual(): string
+    public function reportDepartment(): string
     {
-        return $this->actualBudget();
+        $year = (string) (session()->get('year_code') ?? session()->get('working_year') ?? date('Y'));
+        $selected = trim((string) ($this->request->getGet('cost_center') ?? ''));
+        $report = $selected !== '' ? $this->buildDepartmentReport($year, $selected) : $this->reportService->normalizeRows([]);
+
+        return view('reports/opex_department', [
+            'title'        => 'OPEX GA - Report Department',
+            'module'       => 'OPEX GA',
+            'workingYear'  => $year,
+            'costCenters'  => $this->opexModel->getCostCenters($year, (array) session()->get('auth_obj')),
+            'selected'     => $selected,
+            'report'       => $report,
+            'dataUrl'      => base_url('opex-ga/report-data'),
+        ]);
     }
 
-    /**
-     * Halaman Actual Budget Manager (3 sub-tabs).
-     */
+    public function reportData(): ResponseInterface
+    {
+        $year = (string) (session()->get('year_code') ?? session()->get('working_year') ?? date('Y'));
+        $dept = trim((string) ($this->request->getVar('cost_center') ?? $this->request->getVar('dept') ?? ''));
+
+        if ($dept === '') {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status'  => 'error',
+                'message' => 'Cost Center wajib dipilih.',
+            ]);
+        }
+
+        $resolved = $this->opexModel->resolveEligibleDept($dept, $year, (array) session()->get('auth_obj'));
+        if ($resolved === null) {
+            return $this->response->setStatusCode(403)->setJSON([
+                'status'  => 'error',
+                'message' => 'Cost Center tidak memiliki akses atau periode OPEX GA tidak aktif.',
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'year'   => $year,
+            'report' => $this->reportService->normalizeRows($this->opexModel->getEntryData($year, $resolved)['rows'] ?? []),
+        ]);
+    }
+
+    private function buildDepartmentReport(string $year, string $dept): array
+    {
+        $resolved = $this->opexModel->resolveEligibleDept($dept, $year, (array) session()->get('auth_obj'));
+        if ($resolved === null) {
+            return $this->reportService->normalizeRows([]);
+        }
+
+        return $this->reportService->normalizeRows($this->opexModel->getEntryData($year, $resolved)['rows'] ?? []);
+    }
+
+    /* ------------------------------------------------------------------
+     * Actual Data
+     * ------------------------------------------------------------------ */
     public function actualBudget(): string
     {
         $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
@@ -248,26 +329,32 @@ class OpexGaController extends BaseController
         return view('opex_ga/actual_budget', [
             'title'       => 'OPEX GA Actual Data Manager',
             'workingYear' => $workingYear,
-            'costCenters' => $this->opexModel->getCostCenters(),
+            'costCenters' => $this->opexModel->getCostCenters($workingYear, (array) session()->get('auth_obj')),
         ]);
     }
 
     /**
-     * AJAX: data actual OPEX GA per cost center.
+     * AJAX: data actual OPEX GA per cost center (server-side pagination).
+     *
+     * POST: dept, page, perPage, search.
+     * Query memakai LIMIT/OFFSET di Model — payload per halaman saja.
      */
     public function getActualData(): ResponseInterface
     {
-        $year = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
-        $dept = $this->request->getPost('dept') ?? '';
-        $page = max(1, (int) ($this->request->getPost('page') ?? 1));
+        $year    = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $dept    = $this->resolveDeptParam(trim((string) ($this->request->getPost('dept') ?? '')));
+        $page    = max(1, (int) ($this->request->getPost('page') ?? 1));
+        $perPage = max(5, min(100, (int) ($this->request->getPost('perPage') ?? 25)));
+        $search  = trim((string) ($this->request->getPost('search') ?? ''));
 
-        $perPage = 10;
-        $all     = $this->opexModel->getActualData($year, $dept);
+        if ($dept === '') {
+            return $this->response->setJSON(['status' => 'success', 'rows' => [], 'total' => 0]);
+        }
 
         return $this->response->setJSON([
             'status' => 'success',
-            'rows'   => array_slice($all, ($page - 1) * $perPage, $perPage),
-            'total'  => count($all),
+            'rows'   => $this->opexModel->getActualDataPaginated($year, $dept, ($page - 1) * $perPage, $perPage, $search),
+            'total'  => $this->opexModel->countActualData($year, $dept, $search),
         ]);
     }
 
@@ -377,6 +464,11 @@ class OpexGaController extends BaseController
     public function getDetailItems(): ResponseInterface
     {
         $entryDataId = (int) $this->request->getVar('entry_data_id');
+        $parent = $this->db->table('yp_plan__trans_budget_entry_data')->where('id', $entryDataId)->get()->getRowArray();
+        $year = (string) (session()->get('year_code') ?? session()->get('working_year') ?? date('Y'));
+        if (! $parent || $this->eligibleDeptParam((string) ($parent['id_dept'] ?? ''), $year) === null) {
+            return $this->response->setStatusCode(403)->setJSON(['status' => 'error', 'message' => 'Entry detail tidak dapat diakses.']);
+        }
 
         return $this->response->setJSON([
             'status' => 'success',
@@ -451,16 +543,20 @@ class OpexGaController extends BaseController
     public function exportExcel(): ResponseInterface
     {
         $year      = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
-        $dept      = $this->request->getGet('cost_center') ?? $this->request->getGet('dept') ?? '';
+        $dept      = $this->eligibleDeptParam($this->request->getGet('cost_center') ?? $this->request->getGet('dept') ?? '', (string) $year);
         $monthKeys = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+        if ($dept === null) {
+            return $this->response->setStatusCode(403)->setBody('Cost Center tidak eligible.');
+        }
 
-        $rows = $this->opexModel->getEntryData($year, $dept);
-        $data = array_map(function ($r) use ($monthKeys) {
-            $line = [$r['acct_code'] ?? $r['id_coa'], $r['coa_desc'] ?? '', $r['id_dept']];
+        $viewData = $this->opexModel->getEntryData((string) $year, $dept);
+        $rows = $viewData['rows'] ?? [];
+        $data = array_map(function (array $r) use ($monthKeys) {
+            $line = [$r['account'] ?? $r['id_coa'], $r['description'] ?? '', $r['cost_center_header'] ?? ''];
             foreach ($monthKeys as $m) {
-                $line[] = (float) ($r[$m] ?? 0);
+                $line[] = (float) ($r['budget_' . $m] ?? 0);
             }
-            $line[] = (float) $r['total'];
+            $line[] = (float) ($r['budget_total'] ?? 0);
 
             return $line;
         }, $rows);
@@ -487,13 +583,14 @@ class OpexGaController extends BaseController
             ['TOTAL', 'NOTES']
         );
 
-        $rows = $this->opexModel->getEntryData($year, $dept);
-        $data = array_map(function ($r) use ($monthKeys) {
-            $line = [$r['id_coa'], $r['id_dept'], $r['coa_desc'] ?? ''];
+        $viewData = $this->opexModel->getEntryData((string) $year, $dept);
+        $rows = $viewData['rows'] ?? [];
+        $data = array_map(function (array $r) use ($monthKeys) {
+            $line = [$r['id_coa'], $r['id_dept'] ?? $r['cost_center_header'], $r['description'] ?? ''];
             foreach ($monthKeys as $m) {
-                $line[] = (float) ($r[$m] ?? 0);
+                $line[] = (float) ($r['budget_' . $m] ?? 0);
             }
-            $line[] = (float) $r['total'];
+            $line[] = (float) ($r['budget_total'] ?? 0);
             $line[] = '';
 
             return $line;

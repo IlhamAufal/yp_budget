@@ -204,14 +204,19 @@ class RoleModel extends Model
      */
     public function getMenuIdsByRole(int $roleId): array
     {
-        $rows = $this->db->table('gw_sm__rolemenu')
-            ->select('rolemenu_menu_id')
-            ->where('rolemenu_role_id', $roleId)
-            ->where('rolemenu_active', 'Y')
+        $rows = $this->db->table('gw_sm__rolemenu rm')
+            ->select('rm.rolemenu_menu_id')
+            ->join('gw_sm__role r', 'r.role_id = rm.rolemenu_role_id', 'inner')
+            ->join('gw_sm__menu m', 'm.menu_id = rm.rolemenu_menu_id', 'inner')
+            ->where('rm.rolemenu_role_id', $roleId)
+            ->where('rm.rolemenu_active', 'Y')
+            ->where('r.role_active', 'Y')
+            ->where('r.role_type', 'menu')
+            ->where('m.menu_active', 'Y')
             ->get()
             ->getResultArray();
 
-        return array_map(fn($r) => (int) $r['rolemenu_menu_id'], $rows);
+        return array_values(array_unique(array_map(static fn(array $row): int => (int) $row['rolemenu_menu_id'], $rows)));
     }
 
     /**
@@ -219,7 +224,23 @@ class RoleModel extends Model
      */
     public function saveRoleMenus(int $roleId, array $menuIds): array
     {
+        $role = $this->db->table('gw_sm__role')
+            ->where('role_id', $roleId)
+            ->where('role_active', 'Y')
+            ->where('role_type', 'menu')
+            ->get()->getRowArray();
+        if (! $role) {
+            return ['success' => false, 'message' => 'Menu permission hanya dapat diberikan ke role menu yang aktif.'];
+        }
+
         $menuIds = array_values(array_unique(array_filter(array_map('intval', $menuIds))));
+        if ($menuIds !== []) {
+            $activeIds = array_map('intval', array_column($this->db->table('gw_sm__menu')
+                ->select('menu_id')->whereIn('menu_id', $menuIds)->where('menu_active', 'Y')->get()->getResultArray(), 'menu_id'));
+            if (array_diff($menuIds, $activeIds) !== []) {
+                return ['success' => false, 'message' => 'Menu permission yang dipilih tidak aktif atau tidak tersedia.'];
+            }
+        }
 
         $this->db->transStart();
 

@@ -202,7 +202,8 @@ class MppModel extends Model
                     IFNULL(c.`7`, 0) AS m7, IFNULL(c.`8`, 0) AS m8,
                     IFNULL(c.`9`, 0) AS m9, IFNULL(c.`10`, 0) AS m10,
                     IFNULL(c.`11`, 0) AS m11, IFNULL(c.`12`, 0) AS m12,
-                    IFNULL(c.grand_total, 0) AS grand_total
+                    IFNULL(c.grand_total, 0) AS grand_total,
+                    CASE WHEN c.id IS NULL THEN 0 ELSE 1 END AS has_entry
                 FROM yp_plan__master_group_mpp a
                 LEFT JOIN yp_plan__master_tipe_mpp b ON a.tipe_mppx = b.id_mpp
                 LEFT JOIN yp_plan__trans_mpp_header c
@@ -231,6 +232,92 @@ class MppModel extends Model
             'positions' => $positions,
             'note'      => $note,
         ];
+    }
+
+    /**
+     * Resolve posisi dari master dan pastikan posisi tersebut termasuk tipe MPP.
+     */
+    public function resolvePosition(int $positionId, int $tipeId): ?array
+    {
+        return $this->db->table('yp_plan__master_group_mpp')
+            ->select('id_mppx, desc_mppx, tipe_mppx')
+            ->where('id_mppx', $positionId)
+            ->where('tipe_mppx', $tipeId)
+            ->get()
+            ->getRowArray() ?: null;
+    }
+
+    /**
+     * Hapus transaksi satu posisi pada context tahun/departemen/tipe aktif.
+     * Master posisi dan note kategori sengaja tidak disentuh.
+     *
+     * @return array{success: bool, valid: bool, deleted: int, message?: string}
+     */
+    public function deleteMppPosition(string $yearCode, string $idDept, int $tipeId, int $positionId): array
+    {
+        $position = $this->resolvePosition($positionId, $tipeId);
+        if ($position === null) {
+            return [
+                'success' => false,
+                'valid'   => false,
+                'deleted' => 0,
+                'message' => 'Posisi tidak ditemukan atau tidak sesuai dengan tipe MPP.',
+            ];
+        }
+
+        try {
+            $this->db->transBegin();
+
+            $headerQuery = $this->db->table('yp_plan__trans_mpp_header')
+                ->select('id')
+                ->where('year_code', $yearCode)
+                ->where('id_dept', $idDept)
+                ->where('id_tipe', $tipeId)
+                ->where('staff_name', $position['desc_mppx'])
+                ->get();
+            $headers = $headerQuery->getResultArray();
+            $headerIds = array_map(static fn ($row): int => (int) $row['id'], $headers);
+
+            if ($headerIds !== []) {
+                if ($this->db->table('yp_plan__trans_mpp_detail')->whereIn('id_header', $headerIds)->delete() === false) {
+                    throw new \RuntimeException('Gagal menghapus detail transaksi MPP.');
+                }
+            }
+
+            $deleted = 0;
+            if ($this->db->table('yp_plan__trans_mpp_header')
+                ->where('year_code', $yearCode)
+                ->where('id_dept', $idDept)
+                ->where('id_tipe', $tipeId)
+                ->where('staff_name', $position['desc_mppx'])
+                ->delete() === false) {
+                throw new \RuntimeException('Gagal menghapus header transaksi MPP.');
+            } else {
+                $deleted = (int) $this->db->affectedRows();
+            }
+
+            if (! $this->db->transStatus()) {
+                throw new \RuntimeException('Transaksi penghapusan MPP gagal.');
+            }
+
+            $this->db->transCommit();
+
+            return [
+                'success' => true,
+                'valid'   => true,
+                'deleted' => $deleted,
+            ];
+        } catch (\Throwable $e) {
+            $this->db->transRollback();
+            log_message('error', 'MppModel::deleteMppPosition failed: ' . $e->getMessage());
+
+            return [
+                'success' => false,
+                'valid'   => true,
+                'deleted' => 0,
+                'message' => 'Penghapusan entry MPP gagal.',
+            ];
+        }
     }
 
     /**

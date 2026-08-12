@@ -164,54 +164,6 @@ class CapexController extends BaseController
 
         $dbData = $this->capexModel->getSummaryViewAll($year, $filterCc === 'ALL' ? null : $filterCc);
 
-        if (empty($dbData)) {
-            return $this->response->setJSON([
-                'status' => 'success',
-                'source' => 'mock_static',
-                'data'   => [
-                    [
-                        'id'          => 1,
-                        'description' => 'Pembangunan Gudang Baru',
-                        'account'     => '7710202',
-                        'cost_center' => '1000GP1100',
-                        'qty'         => 1,
-                        'unit_price'  => 5000.00,
-                        'remarks'     => '5 tahun',
-                        'jan' => 0.00, 'feb' => 0.00, 'mar' => 2500.00, 'apr' => 0.00,
-                        'may' => 0.00, 'jun' => 0.00, 'jul' => 0.00, 'aug' => 0.00,
-                        'sep' => 0.00, 'oct' => 0.00, 'nov' => 0.00, 'dec' => 0.00,
-                        'total' => 2500.00,
-                    ],
-                    [
-                        'id'          => 2,
-                        'description' => 'Mesin Produksi Line 9',
-                        'account'     => '7710203',
-                        'cost_center' => '1000KA1004',
-                        'qty'         => 2,
-                        'unit_price'  => 3200.00,
-                        'remarks'     => '10 tahun',
-                        'jan' => 100.00, 'feb' => 100.00, 'mar' => 100.00, 'apr' => 100.00,
-                        'may' => 100.00, 'jun' => 100.00, 'jul' => 100.00, 'aug' => 100.00,
-                        'sep' => 100.00, 'oct' => 100.00, 'nov' => 100.00, 'dec' => 100.00,
-                        'total' => 1200.00,
-                    ],
-                    [
-                        'id'          => 3,
-                        'description' => 'Komputer & Printer Kantor',
-                        'account'     => '7710204',
-                        'cost_center' => '1000GPF004',
-                        'qty'         => 10,
-                        'unit_price'  => 150.00,
-                        'remarks'     => '4 tahun',
-                        'jan' => 50.00, 'feb' => 50.00, 'mar' => 50.00, 'apr' => 50.00,
-                        'may' => 0.00, 'jun' => 0.00, 'jul' => 0.00, 'aug' => 0.00,
-                        'sep' => 0.00, 'oct' => 0.00, 'nov' => 0.00, 'dec' => 0.00,
-                        'total' => 200.00,
-                    ],
-                ],
-            ]);
-        }
-
         return $this->response->setJSON([
             'status' => 'success',
             'source' => 'database',
@@ -230,47 +182,6 @@ class CapexController extends BaseController
 
         $dbData = $this->capexModel->getSummaryAcquisition($year, $filterCc === 'ALL' ? null : $filterCc);
 
-        if (empty($dbData)) {
-            return $this->response->setJSON([
-                'status' => 'success',
-                'source' => 'mock_static',
-                'data'   => [
-                    [
-                        'category_code' => '7710000',
-                        'category_name' => 'Land',
-                        'jan' => 0.00, 'feb' => 0.00, 'mar' => 1500.00, 'apr' => 0.00,
-                        'may' => 0.00, 'jun' => 0.00, 'jul' => 0.00, 'aug' => 0.00,
-                        'sep' => 0.00, 'oct' => 0.00, 'nov' => 0.00, 'dec' => 0.00,
-                        'total' => 1500.00,
-                    ],
-                    [
-                        'category_code' => '7710202',
-                        'category_name' => 'Building And Facility',
-                        'jan' => 250.00, 'feb' => 0.00, 'mar' => 0.00, 'apr' => 500.00,
-                        'may' => 0.00, 'jun' => 0.00, 'jul' => 0.00, 'aug' => 0.00,
-                        'sep' => 0.00, 'oct' => 0.00, 'nov' => 0.00, 'dec' => 0.00,
-                        'total' => 750.00,
-                    ],
-                    [
-                        'category_code' => '7710203',
-                        'category_name' => 'Machinery Equipment',
-                        'jan' => 100.00, 'feb' => 200.00, 'mar' => 0.00, 'apr' => 0.00,
-                        'may' => 300.00, 'jun' => 0.00, 'jul' => 0.00, 'aug' => 0.00,
-                        'sep' => 0.00, 'oct' => 0.00, 'nov' => 0.00, 'dec' => 0.00,
-                        'total' => 600.00,
-                    ],
-                    [
-                        'category_code' => '7710204',
-                        'category_name' => 'Office Equipment',
-                        'jan' => 50.00, 'feb' => 50.00, 'mar' => 50.00, 'apr' => 50.00,
-                        'may' => 0.00, 'jun' => 0.00, 'jul' => 0.00, 'aug' => 0.00,
-                        'sep' => 0.00, 'oct' => 0.00, 'nov' => 0.00, 'dec' => 0.00,
-                        'total' => 200.00,
-                    ],
-                ],
-            ]);
-        }
-
         return $this->response->setJSON([
             'status' => 'success',
             'source' => 'database',
@@ -288,47 +199,6 @@ class CapexController extends BaseController
         $year     = $this->workingYear;
 
         $dbData = $this->capexModel->getSummaryDepreciation($year, $filterCc === 'ALL' ? null : $filterCc);
-
-        if (empty($dbData)) {
-            return $this->response->setJSON([
-                'status' => 'success',
-                'source' => 'mock_static',
-                'data'   => [
-                    [
-                        'category_code' => '7710000',
-                        'category_name' => 'Land',
-                        'jan' => 0.00, 'feb' => 0.00, 'mar' => 25.00, 'apr' => 0.00,
-                        'may' => 0.00, 'jun' => 0.00, 'jul' => 0.00, 'aug' => 0.00,
-                        'sep' => 0.00, 'oct' => 0.00, 'nov' => 0.00, 'dec' => 0.00,
-                        'total' => 25.00,
-                    ],
-                    [
-                        'category_code' => '7710202',
-                        'category_name' => 'Building And Facility',
-                        'jan' => 4.17, 'feb' => 4.17, 'mar' => 4.17, 'apr' => 4.17,
-                        'may' => 4.17, 'jun' => 4.17, 'jul' => 4.17, 'aug' => 4.17,
-                        'sep' => 4.17, 'oct' => 4.17, 'nov' => 4.17, 'dec' => 4.17,
-                        'total' => 50.00,
-                    ],
-                    [
-                        'category_code' => '7710203',
-                        'category_name' => 'Machinery Equipment',
-                        'jan' => 5.00, 'feb' => 5.00, 'mar' => 5.00, 'apr' => 5.00,
-                        'may' => 5.00, 'jun' => 5.00, 'jul' => 5.00, 'aug' => 5.00,
-                        'sep' => 5.00, 'oct' => 5.00, 'nov' => 5.00, 'dec' => 5.00,
-                        'total' => 60.00,
-                    ],
-                    [
-                        'category_code' => '7710204',
-                        'category_name' => 'Office Equipment',
-                        'jan' => 2.08, 'feb' => 2.08, 'mar' => 2.08, 'apr' => 2.08,
-                        'may' => 2.08, 'jun' => 2.08, 'jul' => 2.08, 'aug' => 2.08,
-                        'sep' => 2.08, 'oct' => 2.08, 'nov' => 2.08, 'dec' => 2.08,
-                        'total' => 25.00,
-                    ],
-                ],
-            ]);
-        }
 
         return $this->response->setJSON([
             'status' => 'success',

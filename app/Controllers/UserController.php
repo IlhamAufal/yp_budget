@@ -2,30 +2,36 @@
 
 namespace App\Controllers;
 
+use App\Libraries\AuditLog;
+use App\Libraries\AuthorizationService;
+use App\Models\MenuModel;
 use App\Models\RoleModel;
+use App\Models\UserMenuModel;
 use App\Models\UserModel;
 use App\Models\UserRoleModel;
-use App\Libraries\AuditLog;
 use CodeIgniter\HTTP\ResponseInterface;
 
 /**
- * Phase 1.1 — System Administration: User Management.
+ * System Administration: User Management.
  *
- * Mengelola user (gw_sm__user), penugasan role (gw_sm__user_role),
- * dan reset password. Role yang dipilih disimpan ke tabel relasi
- * yang akan dibaca RoleFilter (Phase 1.3).
+ * Mengelola akun user, role legacy (gw_sm__profile), dan override access
+ * menu/feature per user (gw_sm__usermenu).
  */
 class UserController extends BaseController
 {
     protected $userModel;
     protected $roleModel;
     protected $userRoleModel;
+    protected $menuModel;
+    protected $userMenuModel;
 
     public function __construct()
     {
         $this->userModel     = new UserModel();
         $this->roleModel     = new RoleModel();
         $this->userRoleModel = new UserRoleModel();
+        $this->menuModel     = new MenuModel();
+        $this->userMenuModel = new UserMenuModel();
     }
 
     public function index()
@@ -57,48 +63,73 @@ class UserController extends BaseController
 
     /**
      * Form partial untuk Global Modal — Tambah / Edit User.
-     *
-     * Endpoint: GET /sys-admin/form?id=xxx (optional)
-     * Hanya bisa diakses via AJAX. Mengembalikan partial view tanpa layout.
-     *
-     * @return string|ResponseInterface
      */
     public function formModal()
     {
-        // Guard: hanya terima request AJAX
         if (! $this->request->isAJAX()) {
             return redirect()->to(base_url('sys-admin/user'));
         }
 
         $allRoles = $this->roleModel->getAll(['status' => 'Y']);
+        $roles = array_values(array_filter(
+            $allRoles,
+            static fn(array $role): bool => ($role['role_type'] ?? 'menu') === 'menu'
+        ));
+        $rolesObj = array_values(array_filter(
+            $allRoles,
+            static fn(array $role): bool => ($role['role_type'] ?? 'menu') === 'object'
+        ));
 
-        // Pisahkan role menu vs object
-        $roles    = array_values(array_filter($allRoles, fn($r) => ($r['role_type'] ?? 'menu') === 'menu'));
-        $rolesObj = array_values(array_filter($allRoles, fn($r) => ($r['role_type'] ?? 'menu') === 'object'));
+        $roles = array_map(static fn(array $role): array => [
+            'role_id'       => (int) $role['role_id'],
+            'role_name_idn' => $role['role_name_idn'],
+        ], $roles);
+        $rolesObj = array_map(static fn(array $role): array => [
+            'role_id'       => (int) $role['role_id'],
+            'role_name_idn' => $role['role_name_idn'],
+        ], $rolesObj);
 
-        // Format untuk frontend
-        $roles    = array_map(fn($r) => ['role_id' => (int) $r['role_id'], 'role_name_idn' => $r['role_name_idn']], $roles);
-        $rolesObj = array_map(fn($r) => ['role_id' => (int) $r['role_id'], 'role_name_idn' => $r['role_name_idn']], $rolesObj);
+        $menuService = new AuthorizationService();
+        $roleBaselines = [];
+        foreach ($roles as $role) {
+            $roleBaselines[(int) $role['role_id']] = $menuService->getBaselineMenuIdsForRole((int) $role['role_id']);
+        }
 
-        // Jika edit mode (id parameter ada)
         $user = null;
         $id   = (int) $this->request->getGet('id');
         if ($id > 0) {
-            $users = $this->userModel->getAllUsers([]);
-            foreach ($users as $u) {
-                if ((int) $u['user_id'] === $id) {
-                    // Parse role_ids string ke array
-                    $u['role_ids']     = array_filter(explode(',', $u['menu_role_ids'] ?? ''));
-                    $u['obj_role_ids'] = array_filter(explode(',', $u['obj_role_ids'] ?? ''));
-                    $user = $u;
-                    break;
+            foreach ($this->userModel->getAllUsers([]) as $candidate) {
+                if ((int) $candidate['user_id'] !== $id) {
+                    continue;
                 }
+
+                $candidate['role_ids']     = array_filter(explode(',', $candidate['menu_role_ids'] ?? ''));
+                $candidate['obj_role_ids'] = array_filter(explode(',', $candidate['obj_role_ids'] ?? ''));
+                $menuAccess = $menuService->getMenuAccessState($id);
+                $candidate['main_menu_role_id']      = $menuAccess['main_menu_role_id'];
+                if ($candidate['main_menu_role_id'] !== null) {
+                    $candidate['role_ids'] = array_values(array_unique(array_merge(
+                        [(string) $candidate['main_menu_role_id']],
+                        $candidate['role_ids']
+                    )));
+                }
+                $candidate['baseline_menu_ids']      = $menuAccess['baseline_menu_ids'];
+                $candidate['override_map']           = $menuAccess['override_map'];
+                $candidate['effective_menu_ids']     = $menuAccess['effective_menu_ids'] ?? [];
+                // Kept as a compatibility flag for older modal consumers; the
+                // form now always edits the final effective checkbox state.
+                $candidate['has_custom_menu_access'] = true;
+                $candidate['custom_menu_ids']        = $candidate['effective_menu_ids'];
+                $user = $candidate;
+                break;
             }
         }
 
         return view('sys-admin/user-form', [
             'roles'    => $roles,
             'rolesObj' => $rolesObj,
+            'roleBaselines' => $roleBaselines,
+            'menus'    => $this->menuModel->getAll(['status' => 'Y']),
             'user'     => $user,
             'baseUrl'  => base_url(),
         ]);
@@ -106,15 +137,90 @@ class UserController extends BaseController
 
     public function save(): ResponseInterface
     {
-        $data = $this->request->getPost();
-        $id   = ! empty($data['id']) ? (int) $data['id'] : null;
-        $result = $this->userModel->saveUser($data, $id);
+        $data                = $this->request->getPost();
+        $id                  = ! empty($data['id']) ? (int) $data['id'] : null;
+        $hasRoleUpdate       = $this->request->getPost('has_role_ids') !== null;
+        $hasCustomMenuUpdate = $this->request->getPost('has_custom_menu_access') !== null;
+        $menuRoleIds         = array_values(array_unique(array_filter(array_map('intval', (array) $this->request->getPost('menu_role_ids')))));
+        $objectRoleIds       = array_values(array_unique(array_filter(array_map('intval', (array) $this->request->getPost('object_role_ids')))));
+        $roleIds             = array_values(array_unique(array_merge($menuRoleIds, $objectRoleIds)));
 
-        // Simpan role user (create & update) bila form mengirimkan penanda role_ids.
-        // Penanda has_role_ids memungkinkan mengosongkan seluruh role sekaligus.
-        if ($result['success'] && ! empty($result['id']) && $this->request->getPost('has_role_ids') !== null) {
-            $roleIds = (array) $this->request->getPost('role_ids');
-            $this->userRoleModel->saveUserRoles((int) $result['id'], $roleIds);
+        if ($hasRoleUpdate) {
+            $assignment = $this->userRoleModel->validateAssignments($menuRoleIds, $objectRoleIds);
+            if (! $assignment['success']) {
+                return $this->jsonResult($assignment, 'sys-admin/user/save');
+            }
+        }
+
+        // Validasi hanya memastikan role yang dikirim benar-benar aktif dan
+        // bertipe sesuai. User tanpa menu role tetap valid bila checkbox akhir
+        // menyimpan minimal satu override Y.
+        if ($hasRoleUpdate) {
+            $activeRoles = $this->roleModel->getAll(['status' => 'Y']);
+            $rolesById   = [];
+            foreach ($activeRoles as $role) {
+                $rolesById[(int) $role['role_id']] = $role;
+            }
+
+            foreach ($roleIds as $roleId) {
+                if (! isset($rolesById[$roleId])) {
+                    return $this->jsonResult([
+                        'success' => false,
+                        'message' => 'Role yang dipilih tidak tersedia atau tidak aktif.',
+                    ], 'sys-admin/user/save');
+                }
+            }
+
+        }
+
+        // Hindari perubahan user/role parsial bila migration akses khusus belum diterapkan.
+        if ($hasCustomMenuUpdate && ! $this->userMenuModel->isAvailable()) {
+            return $this->jsonResult([
+                'success' => false,
+                'message' => 'Tabel akses khusus user belum tersedia. Jalankan migration database terlebih dahulu.',
+            ], 'sys-admin/user/save');
+        }
+
+        // Semua model memakai koneksi yang sama; transaction ini menjadi satu-satunya boundary commit.
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $result = $this->userModel->saveUser($data, $id);
+        if (! $result['success'] || empty($result['id'])) {
+            $db->transRollback();
+            return $this->jsonResult($result, 'sys-admin/user/save');
+        }
+
+        $userId = (int) $result['id'];
+        if ($hasRoleUpdate) {
+            $roleResult = $this->userRoleModel->saveUserRoles($userId, $roleIds);
+            if (! $roleResult['success']) {
+                $db->transRollback();
+                return $this->jsonResult($roleResult, 'sys-admin/user/save');
+            }
+        }
+
+        if ($hasCustomMenuUpdate) {
+            $menuAccess = (new AuthorizationService())->getMenuAccessState($userId);
+            $selectedMenuIds = (array) $this->request->getPost('menu_ids');
+            $menuResult = $this->userMenuModel->saveConfiguration(
+                $userId,
+                (array) ($menuAccess['baseline_menu_ids'] ?? []),
+                $selectedMenuIds
+            );
+            if (! $menuResult['success']) {
+                $db->transRollback();
+                return $this->jsonResult($menuResult, 'sys-admin/user/save');
+            }
+            $result['message'] = $menuResult['message'];
+        }
+
+        $db->transComplete();
+        if ($db->transStatus() === false) {
+            return $this->jsonResult([
+                'success' => false,
+                'message' => 'Gagal menyimpan user beserta konfigurasi aksesnya.',
+            ], 'sys-admin/user/save');
         }
 
         return $this->jsonResult($result, 'sys-admin/user/save');
@@ -136,20 +242,32 @@ class UserController extends BaseController
         return $this->jsonResult($result, 'sys-admin/user/delete');
     }
 
-    /**
-     * Simpan role milik user (mode replace).
-     */
+    /** Simpan role milik user (mode replace). */
     public function saveRoles(): ResponseInterface
     {
-        $userId  = (int) $this->request->getPost('user_id');
-        $roleIds = (array) $this->request->getPost('role_ids');
-
+        $userId = (int) $this->request->getPost('user_id');
         $user = $this->userModel->find($userId);
         if (! $user) {
             return $this->jsonResult(['success' => false, 'message' => 'User tidak ditemukan.']);
         }
 
-        $result = $this->userRoleModel->saveUserRoles($userId, $roleIds);
+        $menuRoleIds = (array) $this->request->getPost('menu_role_ids');
+        $objectRoleIds = (array) $this->request->getPost('object_role_ids');
+        $assignment = $this->userRoleModel->validateAssignments($menuRoleIds, $objectRoleIds);
+        if (! $assignment['success']) {
+            return $this->jsonResult($assignment, 'sys-admin/user/saveRoles');
+        }
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+        $result = $this->userRoleModel->saveUserRoles($userId, array_merge(
+            $assignment['menu_role_ids'],
+            $assignment['object_role_ids']
+        ));
+        $db->transComplete();
+        if ($db->transStatus() === false) {
+            return $this->jsonResult(['success' => false, 'message' => 'Gagal menyimpan role user.'], 'sys-admin/user/saveRoles');
+        }
 
         return $this->jsonResult($result, 'sys-admin/user/saveRoles');
     }

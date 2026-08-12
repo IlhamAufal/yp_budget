@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Libraries\ExcelExporter;
+use App\Libraries\CsvExporter;
 use App\Libraries\ExcelImporter;
 use App\Libraries\AuditLog;
 use App\Models\CoaModel;
@@ -238,16 +239,8 @@ class MasterController extends BaseController
         ];
 
         $rows = $this->coa->getAll($filters);
-        $filename = 'COA_Export_' . date('Ymd_His') . '.csv';
-
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-
-        $out = fopen('php://output', 'w');
-        fputcsv($out, ['ID', 'Main Account', 'SAP Code', 'Header', 'Sub Account', 'Description', 'Year', 'Type', 'Category', 'Status']);
-
-        foreach ($rows as $r) {
-            fputcsv($out, [
+        $data = array_map(static function (array $r): array {
+            return [
                 $r['id_cost_center'] ?? '',
                 $r['main_account'] ?? '',
                 $r['id_acct_ext'] ?? '',
@@ -258,10 +251,14 @@ class MasterController extends BaseController
                 $r['type'] ?? '',
                 $r['category'] ?? '',
                 ($r['status'] === 'A') ? 'Active' : 'Inactive',
-            ]);
-        }
-        fclose($out);
-        exit;
+            ];
+        }, $rows);
+
+        return CsvExporter::response(
+            ['ID', 'Main Account', 'SAP Code', 'Header', 'Sub Account', 'Description', 'Year', 'Type', 'Category', 'Status'],
+            $data,
+            'COA_Export_' . date('Ymd_His') . '.csv'
+        );
     }
 
     public function costCenterExport()
@@ -274,16 +271,8 @@ class MasterController extends BaseController
         ];
 
         $rows = $this->costCenter->getAll($filters);
-        $filename = 'CostCenter_Export_' . date('Ymd_His') . '.csv';
-
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-
-        $out = fopen('php://output', 'w');
-        fputcsv($out, ['ID', 'Cost Center Code', 'SAP Code', 'Description', 'Location', 'Year', 'Type', 'Status']);
-
-        foreach ($rows as $r) {
-            fputcsv($out, [
+        $data = array_map(static function (array $r): array {
+            return [
                 $r['id_cost_center'] ?? '',
                 $r['cost_center'] ?? '',
                 $r['cost_center_sap'] ?? '',
@@ -292,10 +281,14 @@ class MasterController extends BaseController
                 $r['year'] ?? '',
                 $r['type'] ?? '',
                 ($r['status'] === 'A') ? 'Active' : 'Inactive',
-            ]);
-        }
-        fclose($out);
-        exit;
+            ];
+        }, $rows);
+
+        return CsvExporter::response(
+            ['ID', 'Cost Center Code', 'SAP Code', 'Description', 'Location', 'Year', 'Type', 'Status'],
+            $data,
+            'CostCenter_Export_' . date('Ymd_His') . '.csv'
+        );
     }
 
     public function departmentExport()
@@ -306,24 +299,20 @@ class MasterController extends BaseController
         ];
 
         $rows = $this->department->getAll($filters);
-        $filename = 'Department_Export_' . date('Ymd_His') . '.csv';
-
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-
-        $out = fopen('php://output', 'w');
-        fputcsv($out, ['ID', 'Department Code', 'Department Name', 'Status']);
-
-        foreach ($rows as $r) {
-            fputcsv($out, [
+        $data = array_map(static function (array $r): array {
+            return [
                 $r['id_dept'] ?? '',
                 $r['dept_code'] ?? '',
                 $r['dept_desc'] ?? '',
                 ($r['status'] === 'A') ? 'Active' : 'Inactive',
-            ]);
-        }
-        fclose($out);
-        exit;
+            ];
+        }, $rows);
+
+        return CsvExporter::response(
+            ['ID', 'Department Code', 'Department Name', 'Status'],
+            $data,
+            'Department_Export_' . date('Ymd_His') . '.csv'
+        );
     }
 
     public function productExport()
@@ -336,16 +325,8 @@ class MasterController extends BaseController
         ];
 
         $rows = $this->product->getAll($filters);
-        $filename = 'Product_Export_' . date('Ymd_His') . '.csv';
-
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-
-        $out = fopen('php://output', 'w');
-        fputcsv($out, ['ID', 'Product Name', 'Channel', 'Key Product', 'MID Product', 'Default Box (DB)', 'Pcs / Box', 'Gramasi (Gr)', 'Year', 'Status']);
-
-        foreach ($rows as $r) {
-            fputcsv($out, [
+        $data = array_map(static function (array $r): array {
+            return [
                 $r['id_product'] ?? '',
                 $r['product_name'] ?? '',
                 $r['id_channel'] ?? '',
@@ -356,10 +337,14 @@ class MasterController extends BaseController
                 $r['gr'] ?? '',
                 $r['year'] ?? '',
                 ($r['status'] === 'A') ? 'Active' : 'Inactive',
-            ]);
-        }
-        fclose($out);
-        exit;
+            ];
+        }, $rows);
+
+        return CsvExporter::response(
+            ['ID', 'Product Name', 'Channel', 'Key Product', 'MID Product', 'Default Box (DB)', 'Pcs / Box', 'Gramasi (Gr)', 'Year', 'Status'],
+            $data,
+            'Product_Export_' . date('Ymd_His') . '.csv'
+        );
     }
 
     public function salaryMppExport()
@@ -373,27 +358,23 @@ class MasterController extends BaseController
         ];
 
         $rows = $this->salaryMpp->getAll($filters);
-        $filename = 'SalaryMPP_Export_' . date('Ymd_His') . '.csv';
-
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-
-        $out = fopen('php://output', 'w');
-        fputcsv($out, ['ID', 'Position Description', 'Department', 'Type', 'Salary Rate (Rp)', 'Year', 'Status']);
-
-        foreach ($rows as $r) {
-            fputcsv($out, [
+        $data = array_map(static function (array $r): array {
+            return [
                 $r['id'] ?? '',
                 $r['desc'] ?? '',
                 $r['dept_desc'] ?? ($r['dept_code'] ?? ''),
-                $r['type_name'] ?? $r['type'],
+                $r['type_name'] ?? ($r['type'] ?? ''),
                 $r['salary'] ?? 0,
                 $r['year_code'] ?? '',
                 ($r['status'] === 'A') ? 'Active' : 'Inactive',
-            ]);
-        }
-        fclose($out);
-        exit;
+            ];
+        }, $rows);
+
+        return CsvExporter::response(
+            ['ID', 'Position Description', 'Department', 'Type', 'Salary Rate (Rp)', 'Year', 'Status'],
+            $data,
+            'SalaryMPP_Export_' . date('Ymd_His') . '.csv'
+        );
     }
 
     /* ------------------------------------------------------------------

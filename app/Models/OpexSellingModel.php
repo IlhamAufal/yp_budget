@@ -41,6 +41,187 @@ class OpexSellingModel extends Model
             ->getResultArray();
     }
 
+    /**
+     * Cost center OPEX Selling yang valid pada periode aktif.
+     *
+     * Nilai yang dikirim ke client adalah cost_center_sap agar sama dengan
+     * identifier yang dipakai sistem lama. Bila tidak ada periode aktif,
+     * gunakan seluruh cost center aktif bertipe OPEX sebagai fallback.
+     */
+    public function getCostCentersForEntry(): array
+    {
+        try {
+            $today = date('Y-m-d');
+            $hasActivePeriod = $this->db->table('yp_plan__master_period')
+                ->where('tipe', 'OPEX_SELLING')
+                ->where('status', 'A')
+                ->where('begda <=', $today)
+                ->where('endda >=', $today)
+                ->countAllResults() > 0;
+
+            if ($hasActivePeriod) {
+                return $this->db->query(
+                    "SELECT DISTINCT cc.cost_center, cc.cost_center_sap, cc.cost_desc
+                     FROM gw_plan__master_cost_center cc
+                     INNER JOIN yp_plan__master_period p
+                       ON p.tipe = 'OPEX_SELLING'
+                      AND p.status = 'A'
+                      AND ? BETWEEN p.begda AND p.endda
+                      AND (p.id_cost_center = '*'
+                           OR p.id_cost_center = cc.cost_center
+                           OR p.id_cost_center = cc.cost_center_sap)
+                     WHERE cc.status = 'A'
+                       AND cc.type = 'OPEX'
+                     ORDER BY cc.cost_center ASC",
+                    [$today]
+                )->getResultArray();
+            }
+
+            return $this->db->table('gw_plan__master_cost_center')
+                ->select('cost_center, cost_center_sap, cost_desc')
+                ->where('status', 'A')
+                ->where('type', 'OPEX')
+                ->orderBy('cost_center', 'ASC')
+                ->get()
+                ->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'OpexSellingModel::getCostCentersForEntry: ' . $e->getMessage());
+
+            return [];
+        }
+    }
+
+    /**
+     * Resolve cost_center_sap atau cost_center internal ke ID cost center DB.
+     * Dropdown Entry memakai kode SAP, sedangkan tabel transaksi menyimpan
+     * cost_center internal.
+     */
+    /**
+     * Cost centers visible to the report, constrained by the user's object
+     * scope. Admin callers pass $isAdmin=true and bypass the object list.
+     */
+    public function getReportCostCenters(?string $year = null, ?array $authObj = null, bool $isAdmin = false): array
+    {
+        $allowed = $isAdmin ? ['*'] : $this->authorizedReportValues((array) ($authObj ?? session()->get('auth_obj')));
+        if ($allowed === []) {
+            return [];
+        }
+
+        return array_values(array_filter($this->getCostCentersForEntry(), function (array $row) use ($allowed): bool {
+            if (in_array('*', $allowed, true) || in_array('ALL', array_map('strtoupper', $allowed), true)) {
+                return true;
+            }
+            $internal = trim((string) ($row['cost_center'] ?? ''));
+            $sap = trim((string) ($row['cost_center_sap'] ?? ''));
+            return in_array($internal, $allowed, true) || ($sap !== '' && in_array($sap, $allowed, true));
+        }));
+    }
+
+    /** Resolve an internal/SAP report filter only when it is in scope. */
+    public function resolveReportCostCenter(?string $dept, ?string $year = null, ?array $authObj = null, bool $isAdmin = false): ?string
+    {
+        $dept = trim((string) ($dept ?? ''));
+        if ($dept === '' || $dept === '0') {
+            return '0';
+        }
+
+        $resolved = $this->resolveCostCenter($dept);
+        foreach ($this->getReportCostCenters($year, $authObj, $isAdmin) as $row) {
+            if ((string) ($row['cost_center'] ?? '') === $resolved
+                || (string) ($row['cost_center_sap'] ?? '') === $dept) {
+                return (string) ($row['cost_center'] ?? $resolved);
+            }
+        }
+
+        return null;
+    }
+
+    /** Return only report rows within the caller's cost-center scope. */
+    public function getReportRows(string $year, ?string $dept = null, ?array $authObj = null, bool $isAdmin = false): array
+    {
+        $resolved = $this->resolveReportCostCenter($dept, $year, $authObj, $isAdmin);
+        if ($resolved === null) {
+            return [];
+        }
+
+        if ($resolved !== '0') {
+            return $this->getViewDataFlat($year, $resolved);
+        }
+
+        $rows = [];
+        foreach ($this->getReportCostCenters($year, $authObj, $isAdmin) as $row) {
+            $internal = trim((string) ($row['cost_center'] ?? ''));
+            if ($internal !== '') {
+                $rows = array_merge($rows, $this->getViewDataFlat($year, $internal));
+            }
+        }
+
+        return $rows;
+    }
+
+    /** @return string[] */
+    private function authorizedReportValues(array $authObj): array
+    {
+        $values = [];
+        foreach ($authObj as $object) {
+            $raw = is_array($object) ? ($object['role_object_value'] ?? '') : $object;
+            if (! is_scalar($raw)) {
+                continue;
+            }
+            $raw = trim((string) $raw);
+            if ($raw === '') {
+                continue;
+            }
+            if (preg_match_all("/'([^']+)'/", $raw, $matches)) {
+                $parts = $matches[1];
+            } else {
+                $parts = preg_split('/\\s*,\\s*/', trim($raw, "'\\\" ")) ?: [];
+            }
+            foreach ($parts as $part) {
+                $part = trim((string) $part, "'\\\" ");
+                if ($part !== '') {
+                    $values[] = $part;
+                }
+            }
+        }
+
+        return array_values(array_unique($values));
+    }
+
+    public function resolveCostCenter(string $dept): string
+    {
+        $dept = trim($dept);
+        if ($dept === '') {
+            return '';
+        }
+
+        try {
+            $row = $this->db->table('gw_plan__master_cost_center')
+                ->select('cost_center')
+                ->where('status', 'A')
+                ->where('cost_center', $dept)
+                ->get()
+                ->getRowArray();
+
+            if (! empty($row['cost_center'])) {
+                return (string) $row['cost_center'];
+            }
+
+            $row = $this->db->table('gw_plan__master_cost_center')
+                ->select('cost_center')
+                ->where('status', 'A')
+                ->where('cost_center_sap', $dept)
+                ->get()
+                ->getRowArray();
+
+            return ! empty($row['cost_center']) ? (string) $row['cost_center'] : $dept;
+        } catch (\Throwable $e) {
+            log_message('error', 'OpexSellingModel::resolveCostCenter: ' . $e->getMessage());
+
+            return $dept;
+        }
+    }
+
     public function getCoas(): array
     {
         return $this->db->table('gw_plan__master_coa')
@@ -100,6 +281,90 @@ class OpexSellingModel extends Model
     }
 
     /**
+     * Data actual OPEX Selling dikelompokkan per cost center header.
+     *
+     * Dept input adalah cost_center_sap. Query juga menerima cost_center
+     * internal melalui subquery resolusi agar hasil identik dengan sistem lama.
+     */
+    public function getEntryDataGrouped(string $year, string $deptInput): array
+    {
+        if ($deptInput === '') {
+            return [];
+        }
+
+        $sql = "SELECT
+                    cost_center_header,
+                    id_cost_header,
+                    SUM(jan) AS jan,
+                    SUM(feb) AS feb,
+                    SUM(mar) AS mar,
+                    SUM(apr) AS apr,
+                    SUM(may) AS may,
+                    SUM(jun) AS jun,
+                    SUM(jul) AS jul,
+                    SUM(aug) AS aug,
+                    SUM(jan + feb + mar + apr + may + jun + jul + aug) AS total,
+                    MAX(indicator) AS indicator
+                FROM (
+                    SELECT
+                        a.id_acct_ext,
+                        a.id_cost_header,
+                        a.cost_center_header,
+                        a.cost_center_desc,
+                        IFNULL(bb.`1`, 0) AS jan,
+                        IFNULL(bb.`2`, 0) AS feb,
+                        IFNULL(bb.`3`, 0) AS mar,
+                        IFNULL(bb.`4`, 0) AS apr,
+                        IFNULL(bb.`5`, 0) AS may,
+                        IFNULL(bb.`6`, 0) AS jun,
+                        IFNULL(bb.`7`, 0) AS jul,
+                        IFNULL(bb.`8`, 0) AS aug,
+                        CASE
+                            WHEN c.id_coa IS NULL THEN 'belum'
+                            ELSE 'sudah'
+                        END AS indicator
+                    FROM gw_plan__master_coa a
+                    LEFT JOIN yp_plan__trans_budget_actual b
+                        ON a.main_account = b.id_coa
+                    LEFT JOIN yp_plan__trans_budget_actual bb
+                        ON a.main_account = bb.id_coa
+                        AND bb.year_code = ?
+                        AND (bb.id_dept = ? OR bb.id_dept IN (
+                            SELECT cost_center
+                            FROM gw_plan__master_cost_center
+                            WHERE cost_center_sap = ?
+                        ))
+                    LEFT JOIN yp_plan__trans_budget_entry_data c
+                        ON b.id_coa = c.id_coa
+                        AND (c.id_dept = ? OR c.id_dept IN (
+                            SELECT cost_center
+                            FROM gw_plan__master_cost_center
+                            WHERE cost_center_sap = ?
+                        ))
+                        AND c.year_code = ?
+                    WHERE a.type = 'SELLING'
+                    GROUP BY a.id_acct_ext
+                ) aa
+                GROUP BY cost_center_header
+                ORDER BY id_acct_ext ASC";
+
+        try {
+            return $this->db->query($sql, [
+                $year,
+                $deptInput,
+                $deptInput,
+                $deptInput,
+                $deptInput,
+                $year,
+            ])->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'OpexSellingModel::getEntryDataGrouped: ' . $e->getMessage());
+
+            return [];
+        }
+    }
+
+    /**
      * Data budget selling tersimpan per tahun (+ opsional cost center).
      */
     public function getEntryData(string $year, ?string $dept = null, string $source = self::SOURCE): array
@@ -128,21 +393,182 @@ class OpexSellingModel extends Model
         return $builder->orderBy('t.id_coa', 'ASC')->get()->getResultArray();
     }
 
+    /* ------------------------------------------------------------------
+     * Actual
+     * ------------------------------------------------------------------ */
+
+    /**
+     * Actual Selling untuk tab Actual Data.
+     *
+     * Method ini sengaja terpisah dari query actual lama agar Entry Budget dan
+     * View Data tidak berubah. Endpoint Actual Selling membutuhkan seluruh
+     * baris COA SELLING, delapan bulan pertama, serta agregat AVG/TOTAL.
+     */
+    public function getActualSellingRows(string $year, string $dept): array
+    {
+        $sql = "SELECT
+                    b.id,
+                    a.main_account,
+                    COALESCE(a.cost_center_header, '') AS cost_center_header,
+                    COALESCE(a.cost_center_desc, '') AS cost_center_desc,
+                    IFNULL(b.`1`, 0) AS jan,
+                    IFNULL(b.`2`, 0) AS feb,
+                    IFNULL(b.`3`, 0) AS mar,
+                    IFNULL(b.`4`, 0) AS apr,
+                    IFNULL(b.`5`, 0) AS may,
+                    IFNULL(b.`6`, 0) AS jun,
+                    IFNULL(b.`7`, 0) AS jul,
+                    IFNULL(b.`8`, 0) AS aug,
+                    (
+                        IFNULL(b.`1`, 0) + IFNULL(b.`2`, 0) +
+                        IFNULL(b.`3`, 0) + IFNULL(b.`4`, 0) +
+                        IFNULL(b.`5`, 0) + IFNULL(b.`6`, 0) +
+                        IFNULL(b.`7`, 0) + IFNULL(b.`8`, 0)
+                    ) / 8 AS avg,
+                    (
+                        IFNULL(b.`1`, 0) + IFNULL(b.`2`, 0) +
+                        IFNULL(b.`3`, 0) + IFNULL(b.`4`, 0) +
+                        IFNULL(b.`5`, 0) + IFNULL(b.`6`, 0) +
+                        IFNULL(b.`7`, 0) + IFNULL(b.`8`, 0)
+                    ) AS total
+                FROM gw_plan__master_coa a
+                INNER JOIN yp_plan__trans_budget_actual b
+                    ON b.id_coa = a.main_account
+                   AND b.year_code = ?
+                   AND b.id_dept = ?
+                WHERE a.type = 'SELLING'
+                ORDER BY a.main_account ASC";
+
+        try {
+            $rows = $this->db->query($sql, [$year, $dept])->getResultArray();
+
+            return array_map(static function (array $row): array {
+                foreach (['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'avg', 'total'] as $key) {
+                    $row[$key] = (float) ($row[$key] ?? 0);
+                }
+                $row['id'] = (int) ($row['id'] ?? 0);
+                $row['main_account'] = (string) ($row['main_account'] ?? '');
+                $row['cost_center_header'] = (string) ($row['cost_center_header'] ?? '');
+                $row['cost_center_desc'] = (string) ($row['cost_center_desc'] ?? '');
+
+                return $row;
+            }, $rows);
+        } catch (\Throwable $e) {
+            log_message('error', 'OpexSellingModel::getActualSellingRows: ' . $e->getMessage());
+
+            return [];
+        }
+    }
+
+    /**
+     * Master COA Selling untuk template Actual. Data actual tidak menjadi
+     * syarat keberadaan baris template.
+     */
+    public function getActualSellingTemplateRows(string $dept): array
+    {
+        try {
+            return $this->db->table('gw_plan__master_coa')
+                ->select('main_account, cost_center_desc')
+                ->where('type', 'SELLING')
+                ->orderBy('main_account', 'ASC')
+                ->get()
+                ->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'OpexSellingModel::getActualSellingTemplateRows: ' . $e->getMessage());
+
+            return [];
+        }
+    }
+
+    public function getActualDataPaginated(string $year, ?string $dept = null, int $offset = 0, int $perPage = 25, string $search = ''): array
+    {
+        $builder = $this->db->table('yp_plan__trans_budget_actual a')
+            ->select('a.id, a.id_coa, a.id_dept')
+            ->select("COALESCE(NULLIF(c.id_acct_ext,''), CAST(a.id_coa AS CHAR)) AS acct_code")
+            ->select("COALESCE(c.cost_center_desc, '') AS description")
+            ->select('(IFNULL(a.`1`,0)+IFNULL(a.`2`,0)+IFNULL(a.`3`,0)+IFNULL(a.`4`,0)+IFNULL(a.`5`,0)+IFNULL(a.`6`,0)+IFNULL(a.`7`,0)+IFNULL(a.`8`,0)+IFNULL(a.`9`,0)+IFNULL(a.`10`,0)+IFNULL(a.`11`,0)+IFNULL(a.`12`,0)) AS total')
+            ->select("IFNULL(a.`1`,0) AS jan, IFNULL(a.`2`,0) AS feb, IFNULL(a.`3`,0) AS mar, IFNULL(a.`4`,0) AS apr, IFNULL(a.`5`,0) AS may, IFNULL(a.`6`,0) AS jun")
+            ->select("IFNULL(a.`7`,0) AS jul, IFNULL(a.`8`,0) AS aug, IFNULL(a.`9`,0) AS sep, IFNULL(a.`10`,0) AS oct, IFNULL(a.`11`,0) AS nov, IFNULL(a.`12`,0) AS `dec`")
+            ->join('gw_plan__master_coa c', 'c.main_account = a.id_coa', 'left')
+            ->where('a.year_code', $year);
+
+        if ($dept !== '') {
+            $builder->where('a.id_dept', $dept);
+        }
+
+        if ($search !== '') {
+            $builder->groupStart()
+                ->like('a.id_coa', $search)
+                ->orLike('c.id_acct_ext', $search)
+                ->orLike('c.cost_center_desc', $search)
+            ->groupEnd();
+        }
+
+        return $builder->orderBy('a.id_coa', 'ASC')
+            ->limit($perPage, $offset)
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * Jumlah total data actual sesuai filter (untuk server-side pagination).
+     */
+    public function countActualData(string $year, ?string $dept = null, string $search = ''): int
+    {
+        $builder = $this->db->table('yp_plan__trans_budget_actual a')
+            ->join('gw_plan__master_coa c', 'c.main_account = a.id_coa', 'left')
+            ->where('a.year_code', $year);
+
+        if ($dept !== '') {
+            $builder->where('a.id_dept', $dept);
+        }
+
+        if ($search !== '') {
+            $builder->groupStart()
+                ->like('a.id_coa', $search)
+                ->orLike('c.id_acct_ext', $search)
+                ->orLike('c.cost_center_desc', $search)
+            ->groupEnd();
+        }
+
+        return (int) $builder->countAllResults();
+    }
+
     /**
      * Matrix data per Sub-Account untuk sebuah Header Account OPEX Selling:
      * budget (12 bulan) + actual (realisasi) + simulated (breakdown detail).
      *
      * Header dikirim sebagai main_account (kode COA) — konsisten dengan modul GA/FOH.
      */
-    public function getDetailMatrix(string $year, ?string $dept, string $header, string $source = self::SOURCE): array
+    public function getDetailMatrix(string $year, ?string $dept, string $header, string $source = self::SOURCE, ?string $headerId = null): array
     {
+        $dept       = $this->resolveCostCenter((string) $dept);
         $headerAcct = (int) $header;
 
-        // Sub-accounts di bawah header ini (Master COA tipe SELLING).
-        // Kolom main_category hanya ada di skema baru — di skema legacy
-        // langkah ini dilewati dan langsung jatuh ke leaf fallback di bawah.
+        // Grouped Entry mengirim cost_center_header + id_cost_header,
+        // bukan main_account numerik seperti endpoint legacy.
         $subAccounts = [];
-        if (\App\Libraries\DbCompat::hasColumn('gw_plan__master_coa', 'main_category')) {
+        if (! is_numeric($header)) {
+            $groupQuery = $this->db->table('gw_plan__master_coa c')
+                ->select("c.main_account,
+                          COALESCE(NULLIF(c.id_acct_ext,''), CAST(c.main_account AS CHAR)) AS acct_code,
+                          c.cost_center_desc AS coa_name")
+                ->where('c.status', 'A')
+                ->where('c.type', 'SELLING')
+                ->where('c.cost_center_header', $header);
+
+            if ($headerId !== null && $headerId !== '') {
+                $groupQuery->where('c.id_cost_header', (int) $headerId);
+            }
+
+            $subAccounts = $groupQuery
+                ->orderBy('c.main_account', 'ASC')
+                ->get()
+                ->getResultArray();
+        }
+
+        // Legacy: sub-accounts di bawah main_account numerik.
+        if (empty($subAccounts) && \App\Libraries\DbCompat::hasColumn('gw_plan__master_coa', 'main_category')) {
             $subAccounts = $this->db->table('gw_plan__master_coa c')
                 ->select("c.main_account,
                           COALESCE(NULLIF(c.id_acct_ext,''), CAST(c.main_account AS CHAR)) AS acct_code,
@@ -233,6 +659,179 @@ class OpexSellingModel extends Model
         }
 
         return $result;
+    }
+
+    /**
+     * Flat View Data OPEX Selling yang kompatibel dengan endpoint legacy
+     * cari_actual_table.
+     *
+     * Tidak memakai filter source pada budget entry. Mode dept 0/empty
+     * mengagregasi semua cost center berdasarkan main_account.
+     */
+    public function getViewDataFlat(string $year, string $dept): array
+    {
+        $isAll = $dept === '' || $dept === '0';
+
+        $actualSelect = "
+            IFNULL(b.`1`, 0) AS JAN,
+            IFNULL(b.`2`, 0) AS FEB,
+            IFNULL(b.`3`, 0) AS MAR,
+            IFNULL(b.`4`, 0) AS APR,
+            IFNULL(b.`5`, 0) AS MAY,
+            IFNULL(b.`6`, 0) AS JUN,
+            IFNULL(b.`7`, 0) AS JUL,
+            IFNULL(b.`8`, 0) AS AUG,
+            IFNULL((IFNULL(b.`1`,0) + IFNULL(b.`2`,0) + IFNULL(b.`3`,0) + IFNULL(b.`4`,0) +
+                    IFNULL(b.`5`,0) + IFNULL(b.`6`,0) + IFNULL(b.`7`,0) + IFNULL(b.`8`,0)) / 8, 0) AS AVG,
+            IFNULL((IFNULL(b.`1`,0) + IFNULL(b.`2`,0) + IFNULL(b.`3`,0) + IFNULL(b.`4`,0) +
+                    IFNULL(b.`5`,0) + IFNULL(b.`6`,0) + IFNULL(b.`7`,0) + IFNULL(b.`8`,0)), 0) AS TOT";
+
+        $budgetSelect = "
+            IFNULL(c.`1`, 0) AS isi_1,
+            IFNULL(c.`2`, 0) AS isi_2,
+            IFNULL(c.`3`, 0) AS isi_3,
+            IFNULL(c.`4`, 0) AS isi_4,
+            IFNULL(c.`5`, 0) AS isi_5,
+            IFNULL(c.`6`, 0) AS isi_6,
+            IFNULL(c.`7`, 0) AS isi_7,
+            IFNULL(c.`8`, 0) AS isi_8,
+            IFNULL(c.`9`, 0) AS isi_9,
+            IFNULL(c.`10`, 0) AS isi_10,
+            IFNULL(c.`11`, 0) AS isi_11,
+            IFNULL(c.`12`, 0) AS isi_12,
+            IFNULL(c.total, 0) AS isi_tot";
+
+        $assumptionSelect = "
+            CASE
+                WHEN a.main_account = '7700011' THEN CONCAT(ass_b.amount, '%')
+                WHEN a.main_account = '7700024' THEN '1x Gaji'
+                WHEN a.main_account = '7700012' THEN ass_c.amount
+                WHEN a.main_account = '7700014' THEN CONCAT(ass_d.amount, '%')
+                WHEN a.main_account = '7700022' THEN CONCAT(ass_e.amount, '%')
+                WHEN a.main_account = '7700026' THEN CONCAT(ass_f.amount, '%')
+                ELSE IFNULL(CONCAT(ass.value, '%'), 0)
+            END AS assumption";
+
+        if ($isAll) {
+            $sql = "SELECT
+                        MAX(notes_value) AS notes_value,
+                        MAX(fx_notes) AS fx_notes,
+                        MAX(main_account) AS main_account,
+                        MAX(cost_center_header) AS cost_center_header,
+                        MAX(cost_center_desc) AS cost_center_desc,
+                        IFNULL(SUM(JAN), 0) AS JAN,
+                        IFNULL(SUM(FEB), 0) AS FEB,
+                        IFNULL(SUM(MAR), 0) AS MAR,
+                        IFNULL(SUM(APR), 0) AS APR,
+                        IFNULL(SUM(MAY), 0) AS MAY,
+                        IFNULL(SUM(JUN), 0) AS JUN,
+                        IFNULL(SUM(JUL), 0) AS JUL,
+                        IFNULL(SUM(AUG), 0) AS AUG,
+                        IFNULL(SUM(AVG), 0) AS AVG,
+                        IFNULL(SUM(TOT), 0) AS TOT,
+                        MAX(assumption) AS assumption,
+                        MAX(notes) AS notes,
+                        IFNULL(SUM(isi_1), 0) AS isi_1,
+                        IFNULL(SUM(isi_2), 0) AS isi_2,
+                        IFNULL(SUM(isi_3), 0) AS isi_3,
+                        IFNULL(SUM(isi_4), 0) AS isi_4,
+                        IFNULL(SUM(isi_5), 0) AS isi_5,
+                        IFNULL(SUM(isi_6), 0) AS isi_6,
+                        IFNULL(SUM(isi_7), 0) AS isi_7,
+                        IFNULL(SUM(isi_8), 0) AS isi_8,
+                        IFNULL(SUM(isi_9), 0) AS isi_9,
+                        IFNULL(SUM(isi_10), 0) AS isi_10,
+                        IFNULL(SUM(isi_11), 0) AS isi_11,
+                        IFNULL(SUM(isi_12), 0) AS isi_12,
+                        IFNULL(SUM(isi_tot), 0) AS isi_tot
+                    FROM (
+                        SELECT
+                            c.notes_value,
+                            c.fx_notes,
+                            a.main_account,
+                            a.cost_center_header,
+                            a.cost_center_desc,
+                            {$actualSelect},
+                            {$assumptionSelect},
+                            IFNULL(b.notes, '') AS notes,
+                            {$budgetSelect}
+                        FROM gw_plan__master_coa a
+                        LEFT JOIN yp_plan__trans_budget_actual b
+                            ON a.main_account = b.id_coa
+                           AND b.year_code = ?
+                        LEFT JOIN yp_plan__trans_budget_entry_data c
+                            ON a.main_account = c.id_coa
+                           AND c.year_code = ?
+                           AND b.id_dept = c.id_dept
+                        LEFT JOIN yp_plan__master_assumption ass
+                            ON ass.type_id = 3
+                           AND ass.year = ?
+                           AND a.cost_center_header NOT IN ('Salaries', 'Employee Fringe Benefit', 'Depreciation Amortization')
+                        LEFT JOIN yp_plan__trans_opex ass_b
+                            ON ass_b.type_opex = 1 AND ass_b.year_code = ?
+                        LEFT JOIN yp_plan__trans_opex ass_c
+                            ON ass_c.type_opex = 2 AND ass_c.year_code = ?
+                        LEFT JOIN yp_plan__trans_opex ass_d
+                            ON ass_d.type_opex = 5 AND ass_d.year_code = ?
+                        LEFT JOIN yp_plan__trans_opex ass_e
+                            ON ass_e.type_opex = 3 AND ass_e.year_code = ?
+                        LEFT JOIN yp_plan__trans_opex ass_f
+                            ON ass_f.type_opex = 6 AND ass_f.year_code = ?
+                        WHERE a.type = 'SELLING'
+                        GROUP BY a.main_account, b.id_dept, c.id_dept
+                    ) aa
+                    GROUP BY aa.main_account
+                    ORDER BY aa.main_account ASC";
+
+            $bindings = [$year, $year, $year, $year, $year, $year, $year, $year];
+        } else {
+            $sql = "SELECT
+                        c.notes_value,
+                        c.fx_notes,
+                        a.main_account,
+                        a.cost_center_header,
+                        a.cost_center_desc,
+                        {$actualSelect},
+                        {$assumptionSelect},
+                        IFNULL(b.notes, '') AS notes,
+                        {$budgetSelect}
+                    FROM gw_plan__master_coa a
+                    LEFT JOIN yp_plan__trans_budget_actual b
+                        ON a.main_account = b.id_coa
+                       AND b.year_code = ?
+                       AND b.id_dept = ?
+                    LEFT JOIN yp_plan__trans_budget_entry_data c
+                        ON a.main_account = c.id_coa
+                       AND c.year_code = ?
+                       AND c.id_dept = ?
+                    LEFT JOIN yp_plan__master_assumption ass
+                        ON ass.type_id = 3
+                       AND ass.year = ?
+                       AND a.cost_center_header NOT IN ('Salaries', 'Employee Fringe Benefit', 'Depreciation Amortization')
+                    LEFT JOIN yp_plan__trans_opex ass_b
+                        ON ass_b.type_opex = 1 AND ass_b.year_code = ?
+                    LEFT JOIN yp_plan__trans_opex ass_c
+                        ON ass_c.type_opex = 2 AND ass_c.year_code = ?
+                    LEFT JOIN yp_plan__trans_opex ass_d
+                        ON ass_d.type_opex = 5 AND ass_d.year_code = ?
+                    LEFT JOIN yp_plan__trans_opex ass_e
+                        ON ass_e.type_opex = 3 AND ass_e.year_code = ?
+                    LEFT JOIN yp_plan__trans_opex ass_f
+                        ON ass_f.type_opex = 6 AND ass_f.year_code = ?
+                    WHERE a.type = 'SELLING'
+                    GROUP BY a.main_account
+                    ORDER BY a.main_account ASC";
+
+            $bindings = [$year, $dept, $year, $dept, $year, $year, $year, $year, $year, $year];
+        }
+
+        try {
+            return $this->db->query($sql, $bindings)->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'OpexSellingModel::getViewDataFlat: ' . $e->getMessage());
+
+            return [];
+        }
     }
 
     /**
@@ -401,9 +1000,11 @@ class OpexSellingModel extends Model
     {
         // Validasi kelengkapan hint lebih awal (sebelum transaksi) untuk
         // kasus entry_data_id = 0, agar tidak membuka transaksi kosong.
+        $resolvedDept = (int) $this->resolveCostCenter((string) ($parentHint['id_dept'] ?? ''));
+
         if ($entryDataId <= 0) {
             $idCoa  = (int) ($parentHint['id_coa'] ?? 0);
-            $idDept = (int) ($parentHint['id_dept'] ?? 0);
+            $idDept = $resolvedDept;
             $year   = (int) ($parentHint['year_code'] ?? 0);
             if ($idCoa <= 0 || $idDept <= 0 || $year <= 0) {
                 return ['success' => false, 'message' => 'Entry budget tidak ditemukan dan data parent tidak lengkap.', 'count' => 0];
@@ -420,7 +1021,7 @@ class OpexSellingModel extends Model
             // Auto-create parent dari hint agar detail bisa disimpan tanpa
             // harus mengisi budget terlebih dahulu.
             $idCoa  = (int) ($parentHint['id_coa'] ?? 0);
-            $idDept = (int) ($parentHint['id_dept'] ?? 0);
+            $idDept = $resolvedDept;
             $year   = (int) ($parentHint['year_code'] ?? 0);
 
             if ($idCoa <= 0 || $idDept <= 0 || $year <= 0) {

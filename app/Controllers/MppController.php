@@ -178,6 +178,74 @@ class MppController extends BaseController
     }
 
     /**
+     * AJAX: Hapus transaksi satu posisi MPP tanpa menghapus master posisi.
+     */
+    public function deleteMppPosition(): ResponseInterface
+    {
+        $json = $this->request->getJSON(true);
+        if (! is_array($json)) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status'  => 'error',
+                'success' => false,
+                'message' => 'Payload JSON tidak valid.',
+            ]);
+        }
+
+        $idDept    = trim((string) ($json['id_dept'] ?? ''));
+        $tipeId    = filter_var($json['tipe_id'] ?? null, FILTER_VALIDATE_INT);
+        $positionId = filter_var($json['position_id'] ?? null, FILTER_VALIDATE_INT);
+
+        if ($idDept === '' || ! preg_match('/^\d+$/', $idDept) || $tipeId === false || $tipeId <= 0 || $positionId === false || $positionId <= 0) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status'  => 'error',
+                'success' => false,
+                'message' => 'Department, tipe, dan posisi wajib berupa identifier yang valid.',
+            ]);
+        }
+
+        $yearCode = (string) (session()->get('year_code') ?? session()->get('working_year') ?? date('Y'));
+        $userId   = (int) (session()->get('user_id') ?? 0);
+        $lock     = (new AccessRestrict())->checkLock((string) $userId, 'mpp/entry', (int) $yearCode);
+        if (! $lock['allowed']) {
+            return $this->response->setStatusCode(409)->setJSON([
+                'status'  => 'error',
+                'success' => false,
+                'message' => $lock['message'],
+            ]);
+        }
+
+        $result = $this->mppModel->deleteMppPosition($yearCode, $idDept, (int) $tipeId, (int) $positionId);
+        if (! $result['valid']) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status'  => 'error',
+                'success' => false,
+                'message' => $result['message'],
+            ]);
+        }
+
+        if (! $result['success']) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'success' => false,
+                'message' => $result['message'] ?? 'Penghapusan entry MPP gagal.',
+            ]);
+        }
+
+        AuditLog::log(
+            'DELETE',
+            'mpp/deleteMppPosition',
+            "Entry posisi MPP {$yearCode} CC {$idDept} tipe {$tipeId} posisi {$positionId} dihapus (" . $result['deleted'] . ' header)'
+        );
+
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'success' => true,
+            'message' => 'Entry posisi MPP berhasil dihapus.',
+            'deleted' => $result['deleted'],
+        ]);
+    }
+
+    /**
      * AJAX: Data ringkasan untuk tab View MPP Data
      */
     public function getViewData(): ResponseInterface

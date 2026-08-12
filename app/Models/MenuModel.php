@@ -276,6 +276,13 @@ class MenuModel extends Model
             ->where('rolemenu_menu_id', $id)
             ->delete();
 
+        // Hapus override akses user bila migration permission per-user telah aktif.
+        if ($this->db->tableExists('gw_sm__usermenu')) {
+            $this->db->table('gw_sm__usermenu')
+                ->where('usermenu_menu_id', $id)
+                ->delete();
+        }
+
         $this->db->table('gw_sm__menu')->where('menu_id', $id)->delete();
 
         $this->db->transComplete();

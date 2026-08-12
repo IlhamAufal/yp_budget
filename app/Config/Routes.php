@@ -21,7 +21,7 @@ $routes->setDefaultController('Dashboard');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
 $routes->set404Override();
-$routes->setAutoRoute(true);
+$routes->setAutoRoute(false);
 
 /*
  * --------------------------------------------------------------------
@@ -30,19 +30,29 @@ $routes->setAutoRoute(true);
  */
 
 // Working Year Context Route
-$routes->post('set-year', 'PeriodController::setYear');
+$routes->post('set-year', 'PeriodController::setYear', ['filter' => 'auth']);
 $routes->get('api/active-years', 'PeriodController::getActiveYears');
-
+`
 // Login routes (public)
 $routes->get('login', 'LoginController::index');
 $routes->post('login/process', 'LoginController::process');
 $routes->get('logout', 'LoginController::logout');
-$routes->post('auth/changePassword', 'LoginController::changePassword');
-$routes->get('auth/change-password-form', 'LoginController::changePasswordForm');
+$routes->post('auth/changePassword', 'LoginController::changePassword', ['filter' => 'auth']);
+$routes->get('auth/change-password-form', 'LoginController::changePasswordForm', ['filter' => 'auth']);
 
 // Protected routes (require auth)
 $routes->get('/', 'DashboardController::index', ['filter' => 'auth']);
 $routes->get('dashboard', 'DashboardController::index', ['filter' => 'auth']);
+
+// Legacy menu links — direct aliases, no redirect.
+$routes->get('foh-summary', 'FohController::summary', ['filter' => 'auth']);
+$routes->get('mpp-entry', 'MppController::index', ['filter' => 'auth']);
+$routes->get('mpp-summary', 'MppController::summary', ['filter' => 'auth']);
+$routes->get('configure-period', 'MasterController::configurePeriod', ['filter' => 'auth']);
+$routes->get('master/mpp', 'MasterController::salaryMpp', ['filter' => 'auth']);
+$routes->get('report-grand-opex', 'OpexReportController::grand', ['filter' => 'auth']);
+$routes->match(['GET', 'POST'], 'report-grand-opex/data', 'OpexReportController::grandData', ['filter' => 'auth']);
+$routes->get('report-profit-loss', 'PlController::summary', ['filter' => 'auth']);
 
 // Master Data (COA, Cost Center, Departemen, Periode)
 $routes->group('master', ['filter' => 'auth'], function ($routes) {
@@ -103,6 +113,7 @@ $routes->group('sys-admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('api/user/toggle', 'UserController::toggle');
     $routes->post('api/user/delete', 'UserController::delete');
     $routes->post('api/user/reset-password', 'UserController::resetPassword');
+    $routes->post('api/user/roles', 'UserController::saveRoles');
 });
 
 // -------------------------------------------------------------------
@@ -121,6 +132,7 @@ $routes->group('mpp', ['filter' => 'auth'], function ($routes) {
     $routes->get('getMppMatrix', 'MppController::getMppMatrix');
     $routes->get('getMppBreakdown', 'MppController::getMppBreakdown');
     $routes->post('saveMppBreakdown', 'MppController::saveMppBreakdown');
+    $routes->post('deleteMppPosition', 'MppController::deleteMppPosition');
     $routes->get('getViewData', 'MppController::getViewData');
 });
 
@@ -171,9 +183,11 @@ $routes->group('opex-ga', ['filter' => 'auth'], function ($routes) {
     $routes->post('saveDetailItems', 'OpexGaController::saveDetailItems');
     $routes->post('submitBudget', 'OpexGaController::submitBudget');
 
+    // Department Report
+    $routes->get('report-department', 'OpexGaController::reportDepartment');
+    $routes->match(['GET', 'POST'], 'report-data', 'OpexGaController::reportData');
+
     // Actual Data
-    $routes->get('actual', 'OpexGaController::actual');
-    $routes->get('actual-budget', 'OpexGaController::actualBudget');
     $routes->post('getActualData', 'OpexGaController::getActualData');
     $routes->post('uploadActual', 'OpexGaController::uploadActual');
 
@@ -201,6 +215,7 @@ $routes->group('foh', ['filter' => 'auth'], function ($routes) {
     $routes->get('getConfigPeriod', 'FohController::getConfigPeriod');
     $routes->get('getHeaderAccounts', 'FohController::getHeaderAccounts');
     $routes->get('getDetailMatrix', 'FohController::getDetailMatrix');
+    $routes->get('actual-foh', 'FohController::actual');
     $routes->post('saveBudget', 'FohController::saveBudget');
     $routes->post('saveDetailItems', 'FohController::saveDetailItems');
     $routes->post('submit', 'FohController::submit');
@@ -210,6 +225,7 @@ $routes->group('foh', ['filter' => 'auth'], function ($routes) {
 
     // Actual
     $routes->get('actual', 'FohController::actual');
+    $routes->get('actual-budget', 'FohController::actual');
     $routes->post('cariActualTable', 'FohController::cariActualTable');
     $routes->post('uploadActual', 'FohController::uploadActual');
 
@@ -220,6 +236,8 @@ $routes->group('foh', ['filter' => 'auth'], function ($routes) {
     // Summary
     $routes->get('summary', 'FohController::summary');
     $routes->get('summary/export', 'FohController::summaryExport');
+    $routes->post('summaryCostCenter', 'FohController::summaryCostCenter');
+    $routes->post('summaryAccount', 'FohController::summaryAccount');
 
     // Breakdown (standar 1.5)
     $routes->get('getDetailItems', 'FohController::getDetailItems');
@@ -252,9 +270,17 @@ $routes->group('opex-selling', ['filter' => 'auth'], function ($routes) {
     $routes->get('entry-budget', 'OpexSellingController::index');
     $routes->get('entry-budget-detail', 'OpexSellingController::entryBudgetDetail');
     $routes->get('actual', 'OpexSellingController::actual');
+    $routes->get('actual-budget', 'OpexSellingController::actualBudget');
+    $routes->get('report-department', 'OpexSellingController::reportDepartment');
+    $routes->match(['GET', 'POST'], 'report-data', 'OpexSellingController::reportData');
+
+    // AJAX Actual Data
+    $routes->post('getActualData', 'OpexSellingController::getActualData');
 
     // AJAX Entry Data
     $routes->get('getHeaderAccounts', 'OpexSellingController::getHeaderAccounts');
+    $routes->get('getEntryDataGrouped', 'OpexSellingController::getEntryDataGrouped');
+    $routes->post('cariActualTable', 'OpexSellingController::cariActualTable');
     $routes->get('getViewData', 'OpexSellingController::getViewData');
     $routes->get('getDetailMatrix', 'OpexSellingController::getDetailMatrix');
     $routes->post('saveBudget', 'OpexSellingController::saveBudget');
@@ -263,6 +289,8 @@ $routes->group('opex-selling', ['filter' => 'auth'], function ($routes) {
 
     // Actual & Export
     $routes->post('uploadActual', 'OpexSellingController::uploadActual');
+    $routes->get('download-template', 'OpexSellingController::downloadTemplate');
+    $routes->get('exportActual', 'OpexSellingController::exportActual');
     $routes->get('exportExcel', 'OpexSellingController::exportExcel');
 
     // Breakdown (standar 1.5)
@@ -277,13 +305,19 @@ $routes->group('opex_selling', ['filter' => 'auth'], function ($routes) {
     $routes->get('entry_budget', 'OpexSellingController::index');
     $routes->get('entry_budget_detail', 'OpexSellingController::entryBudgetDetail');
     $routes->get('actual_budget', 'OpexSellingController::actual');
+    $routes->post('get_actual_data', 'OpexSellingController::getActualData');
     $routes->post('save_entry_detail', 'OpexSellingController::saveEntryDetail');
     $routes->post('upload_actual', 'OpexSellingController::uploadActual');
     $routes->post('upload_actual_process', 'OpexSellingController::uploadActual');
     $routes->get('export_excel', 'OpexSellingController::exportExcel');
-    $routes->get('export_actual', 'OpexSellingController::exportExcel');
+    $routes->get('export_actual', 'OpexSellingController::exportActual');
     $routes->get('download_template', 'OpexSellingController::downloadTemplate');
+    $routes->post('cari_actual_table', 'OpexSellingController::cariActualTable');
 });
+
+// Sales legacy aliases — direct handlers, no redirect.
+$routes->get('sales-domestic/entry', 'SalesController::entryDomestic', ['filter' => 'auth']);
+$routes->get('sales-export/entry', 'SalesController::entryExport', ['filter' => 'auth']);
 
 // Sales
 $routes->group('sales', ['filter' => 'auth'], function ($routes) {

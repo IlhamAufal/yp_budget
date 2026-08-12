@@ -54,7 +54,7 @@
       <div x-show="activeTab === 'entry'" x-cloak class="space-y-6">
 
         <!-- Workflow Approval -->
-        <div class="rounded-xl border p-4 text-sm"
+        <!-- <div class="rounded-xl border p-4 text-sm"
              :class="workflowBadge.bg"
              x-show="selectedDept">
           <div class="flex flex-wrap items-center justify-between gap-3">
@@ -90,7 +90,7 @@
               </button>
             </div>
           </div>
-        </div>
+        </div> -->
 
         <!-- Info Periode Submit -->
         <div class="flex items-center justify-between rounded-xl border p-4 text-sm"

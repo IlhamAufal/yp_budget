@@ -8,11 +8,9 @@
                 </label>
                 <select x-model="filters.channel" @change="applyFilters()" class="w-full text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white py-2.5 px-3.5 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
                     <option value="">- All Channel -</option>
-                    <option value="GT">GT - General Trade</option>
-                    <option value="MT">MT - Modern Trade</option>
-                    <option value="OEM">OEM - Original Equipment Mfg</option>
-                    <option value="ECOM">ECOM - E-Commerce</option>
-                    <option value="YTI">YTI - Yupi Trading International</option>
+                    <?php foreach ($channels ?? [] as $ch): ?>
+                        <option value="<?= esc($ch['channel_code']) ?>"><?= esc($ch['channel_code']) ?> - <?= esc($ch['channel_name']) ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             <div class="relative flex-1 min-w-[300px]">

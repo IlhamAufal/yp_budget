@@ -37,6 +37,7 @@
                             <th class="py-2.5 px-3 text-left font-bold text-black dark:text-white w-[140px] border-r border-stroke dark:border-strokedark">DESCRIPTION</th>
                             <th colspan="12" class="py-1.5 text-center font-bold text-blue-800 dark:text-blue-300 bg-blue-50/70 dark:bg-blue-950/40 border-b border-r border-stroke dark:border-strokedark">NUMBER OF HEADCOUNTS</th>
                             <th class="py-2.5 px-2 text-center font-bold text-black dark:text-white w-[60px]">TOTAL</th>
+                            <th rowspan="2" class="py-2.5 px-2 text-center font-bold text-black dark:text-white w-[90px]">ACTION</th>
                         </tr>
                         <tr class="bg-gray-50 dark:bg-meta-4/80 text-gray-600 dark:text-gray-400 font-bold uppercase text-[10px] border-b border-stroke dark:border-strokedark">
                             <th class="py-1.5 px-3 border-r border-stroke dark:border-strokedark"></th>
@@ -68,6 +69,19 @@
                                     </td>
                                 </template>
                                 <td class="py-2 px-2 text-center font-bold text-black dark:text-white bg-gray-50 dark:bg-meta-4" x-text="pos.months.reduce((a, b) => Number(a) + Number(b), 0)"></td>
+                                <td class="py-2 px-2 text-center">
+                                    <button type="button"
+                                            x-show="pos.has_entry"
+                                            @click.stop="deleteMppPosition(pos)"
+                                            :disabled="deletingPositionId !== null"
+                                            class="inline-flex items-center justify-center gap-1 rounded bg-red-600 px-2 py-1 text-[10px] font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                            title="Hapus entry posisi">
+                                        <i x-show="deletingPositionId === pos.id_mppx" class="fa-solid fa-spinner fa-spin"></i>
+                                        <i x-show="deletingPositionId !== pos.id_mppx" class="fa-solid fa-trash"></i>
+                                        <span x-text="deletingPositionId === pos.id_mppx ? 'Deleting...' : 'Delete'"></span>
+                                    </button>
+                                    <span x-show="!pos.has_entry" class="text-[10px] text-gray-400">-</span>
+                                </td>
                             </tr>
                         </template>
                     </tbody>

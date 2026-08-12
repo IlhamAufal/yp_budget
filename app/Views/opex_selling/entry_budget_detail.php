@@ -258,7 +258,7 @@ function opexSellingDetailApp() {
             if (!this.headerAccount || !this.costCenterCode) return;
             this.loading = true;
             try {
-                const res = await fetch(`<?= base_url('opex-selling/getDetailMatrix') ?>?dept=${encodeURIComponent(this.costCenterCode)}&header=${encodeURIComponent(this.headerAccount)}`, {
+                const res = await fetch(`<?= base_url('opex-selling/getDetailMatrix') ?>?dept=${encodeURIComponent(this.costCenterCode)}&header=${encodeURIComponent(this.headerAccount)}&idx=${encodeURIComponent(this.idx)}`, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
                 const data = await res.json();

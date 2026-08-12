@@ -227,8 +227,6 @@ class UserModel extends Model
             return ['success' => false, 'message' => 'Password wajib diisi untuk user baru.'];
         }
 
-        $this->db->transStart();
-
         if ($id) {
             $fields = [
                 'user_username' => $username,
@@ -268,12 +266,6 @@ class UserModel extends Model
 
             $this->db->table('gw_sm__user')->insert($fields);
             $id = (int) $this->db->insertID();
-        }
-
-        $this->db->transComplete();
-
-        if ($this->db->transStatus() === false) {
-            return ['success' => false, 'message' => 'Gagal menyimpan user.'];
         }
 
         return [
@@ -326,6 +318,9 @@ class UserModel extends Model
         $this->db->transStart();
 
         $this->db->table('gw_sm__profile')->where('profile_user_id', $id)->delete();
+        if ($this->db->tableExists('gw_sm__usermenu')) {
+            $this->db->table('gw_sm__usermenu')->where('usermenu_user_id', $id)->delete();
+        }
         $this->db->table('gw_sm__user')->where('user_id', $id)->delete();
 
         $this->db->transComplete();

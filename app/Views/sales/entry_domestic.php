@@ -119,8 +119,7 @@ function domesticSalesEntry(initialProducts = [], initialRegional = []) {
                 { id_channel: 'MT', key_product: 'MARSHMALLOW', code: 'INV-03', name: 'Yupi Marshmallow Choco 80g', qty: 2000, rev: 24000000 },
                 { id_channel: 'MT', key_product: 'MARSHMALLOW', code: 'INV-04', name: 'Yupi Marshmallow Twist 90g', qty: 1800, rev: 21600000 },
                 { id_channel: 'OEM', key_product: 'BOLI', code: 'INV-05', name: 'Yupi Boli Gummy OEM Client A', qty: 3000, rev: 36000000 },
-                { id_channel: 'ECOM', key_product: 'EXTR', code: 'INV-06', name: 'Yupi Festive Gift Box Limited', qty: 800, rev: 16000000 },
-                { id_channel: 'YTI', key_product: 'GUMMY', code: 'INV-07', name: 'Yupi Neon Stix Export Grade', qty: 2500, rev: 32000000 }
+                { id_channel: 'ECOM', key_product: 'EXTR', code: 'INV-06', name: 'Yupi Festive Gift Box Limited', qty: 800, rev: 16000000 }
             ];
             return mockList.map((m, idx) => {
                 const monthly = {};

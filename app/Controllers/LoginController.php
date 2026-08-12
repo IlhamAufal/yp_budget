@@ -123,18 +123,15 @@ class LoginController extends BaseController
          // 7b. Muat role dari tabel relasi gw_sm__profile (RBAC legacy — keputusan
          //     user 6 Agt 2026: skema legacy dipakai, bukan gw_sm__user_role).
          //     RoleFilter (Phase 1.3) akan memvalidasi hak akses URL dari sini.
-         $userRoleModel = new \App\Models\UserRoleModel();
-         $roleIds = $userRoleModel->getRoleIdsByUser((int) ($user['user_id'] ?? 0));
-         session()->set('role_ids', $roleIds);
-         if (! empty($roleIds)) {
-             session()->set('role_id', $roleIds[0]);
+         $authorizationService = new \App\Libraries\AuthorizationService();
+         try {
+             $authorizationService->refresh((int) ($user['user_id'] ?? 0));
+         } catch (\Throwable $e) {
+             log_message('error', 'Login authorization context failed: ' . $e->getMessage());
+             session()->destroy();
+             return redirect()->back()->withInput()->with('error', 'Authorization user tidak dapat dimuat. Silakan hubungi Administrator.');
          }
-
-         // 7c. Muat RBAC object-level dari gw_sm__role_object (via profile) ke
-         //     sesi 'auth_obj' — format sama dengan sesi legacy sehingga
-         //     controller existing (mis. CapexController::getUserDeptList) bekerja.
-         $authObj = $userRoleModel->getRoleObjectsByUser((int) ($user['user_id'] ?? 0));
-         session()->set('auth_obj', $authObj);
+         // Authorization context sudah dimuat dari database.
 
          // 8. Audit trail + Redirect ke Dashboard
          AuditLog::log('LOGIN', 'login/process', "User '{$login}' berhasil login", (string) ($user['user_id'] ?? ''));
