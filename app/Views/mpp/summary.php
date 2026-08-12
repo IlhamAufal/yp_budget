@@ -1,99 +1,197 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div x-data="mppSummary()" class="p-4 md:p-6 lg:p-8 space-y-8 pb-12">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-xs border border-gray-200/80 dark:border-gray-800">
+<div x-data="mppSummaryApp()" x-init="init()" class="space-y-6">
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h1 class="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">Summary Headcount & OPEX Sync</h1>
-            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Konsolidasi Alokasi Gaji & Sync ke Engine OPEX.</p>
+            <div class="flex items-center gap-2">
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <i class="fas fa-users text-lg text-primary"></i>
+                </div>
+                <h2 class="text-title-md2 font-bold text-black dark:text-white">Man Power Planning - Summary Headcount</h2>
+            </div>
+            <nav class="mt-1">
+                <ol class="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+                    <li><a class="hover:text-primary" href="<?= base_url('dashboard') ?>"><i class="fas fa-home mr-1"></i>Home</a></li>
+                    <li><i class="fas fa-chevron-right text-[10px]"></i></li>
+                    <li class="text-primary font-semibold">MPP Summary</li>
+                </ol>
+            </nav>
         </div>
-        <button type="button" @click="syncToOpex()" :disabled="syncing"
-            class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-xl transition-colors shadow-xs flex items-center space-x-2">
-            <span x-show="!syncing">Process to OPEX Engine</span>
-            <span x-show="syncing">Sychronizing...</span>
-        </button>
+        <div class="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-1 dark:bg-boxdark dark:text-gray-200">
+            <i class="fas fa-calendar-alt text-primary"></i>
+            <span>Budget Plan Year :</span>
+            <span class="text-red-500 font-bold"><?= esc($workingYear) ?></span>
+        </div>
     </div>
 
-    <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-xs border border-gray-200/80 dark:border-gray-800 overflow-hidden">
-        <div class="px-6 py-5 border-b border-gray-200/80 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20">
-            <h2 class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Rekapitulasi Alokasi per Department & COA</h2>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs border-collapse">
-                <thead>
-                    <tr class="bg-gray-100/80 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 text-[11px] font-bold tracking-wider uppercase border-b border-gray-200 dark:border-gray-700">
-                        <th class="px-5 py-3.5">Department</th>
-                        <th class="px-5 py-3.5">Tipe Karyawan</th>
-                        <th class="px-5 py-3.5">COA Gaji</th>
-                        <th class="px-5 py-3.5 text-right">Tarif Monthly</th>
-                        <th class="px-5 py-3.5 text-center">Total HC (Jan-Des)</th>
-                        <th class="px-5 py-3.5 text-right">Est. Total Nominal (Rp)</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200/80 dark:divide-gray-800/80 text-gray-700 dark:text-gray-300">
-                    <?php if (empty($summary)): ?>
-                        <tr>
-                            <td colspan="6" class="p-16 text-center text-gray-400 dark:text-gray-500">Belum ada data summary MPP untuk tahun ini.</td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($summary as $row): 
-                            $totalHc = $row['jan'] + $row['feb'] + $row['mar'] + $row['apr'] + $row['may'] + $row['jun'] + $row['jul'] + $row['aug'] + $row['sep'] + $row['oct'] + $row['nov'] + $row['dec'];
-                            $totalNominal = $totalHc * (float)($row['monthly_salary'] ?? 0);
-                        ?>
-                            <tr class="hover:bg-slate-50/80 dark:hover:bg-gray-800/50 transition-colors">
-                                <td class="px-5 py-3.5 font-semibold text-gray-900 dark:text-white"><?= esc($row['id_dept']) ?> - <?= esc($row['department_name'] ?? 'N/A') ?></td>
-                                <td class="px-5 py-3.5 text-gray-600 dark:text-gray-300"><?= esc($row['employee_type']) ?></td>
-                                <td class="px-5 py-3.5"><span class="px-2.5 py-1 text-[10px] bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-md font-mono border border-blue-200/60 dark:border-blue-800/50 font-bold"><?= esc($row['coa_code'] ?? 'Unmapped') ?></span></td>
-                                <td class="px-5 py-3.5 text-right font-mono font-medium">Rp <?= number_format($row['monthly_salary'] ?? 0, 0, ',', '.') ?></td>
-                                <td class="px-5 py-3.5 text-center font-mono font-bold text-gray-900 dark:text-white"><?= number_format($totalHc, 0) ?></td>
-                                <td class="px-5 py-3.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">Rp <?= number_format($totalNominal, 0, ',', '.') ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-        <?php $totalPages = max(1, (int) ceil(($total ?? 0) / max(1, $perPage ?? 10))); ?>
-        <?php if (($total ?? 0) > 0): ?>
-        <div class="px-6 py-4 border-t border-gray-200/80 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20 flex items-center justify-between text-xs text-gray-500">
-            <span>Halaman <?= $page ?> dari <?= $totalPages ?></span>
-            <div class="flex items-center gap-1.5">
-                <a href="?page=<?= max(1, $page - 1) ?>" class="px-2.5 py-1 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 <?= $page <= 1 ? 'opacity-40 pointer-events-none' : '' ?>">Prev</a>
-                <?php for ($p = 1; $p <= $totalPages; $p++): ?>
-                    <a href="?page=<?= $p ?>" class="px-2.5 py-1 rounded-lg border <?= $p === $page ? 'bg-brand-500 text-white border-brand-500 font-bold' : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800' ?>"><?= $p ?></a>
-                <?php endfor; ?>
-                <a href="?page=<?= min($totalPages, $page + 1) ?>" class="px-2.5 py-1 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 <?= $page >= $totalPages ? 'opacity-40 pointer-events-none' : '' ?>">Next</a>
+    <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+        <div class="p-6 space-y-6">
+
+            <!-- Filter Cost Center -->
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div class="w-full sm:w-1/2 lg:w-1/3">
+                    <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-black dark:text-white">Department</label>
+                    <select x-model="selectedDept" @change="fetchData()"
+                        class="w-full rounded border border-stroke bg-white px-4 py-2.5 text-sm font-medium outline-none transition focus:border-primary dark:border-strokedark dark:bg-boxdark dark:text-white">
+                        <option value="">-- Pilih Cost Center --</option>
+                        <template x-for="item in costCenterList" :key="item.cost_center">
+                            <option :value="String(item.cost_center)" x-text="`${item.no}. [${item.cost_center_sap}]${item.cost_desc}`"></option>
+                        </template>
+                    </select>
+                </div>
+                <button @click="exportData()" :disabled="!selectedDept || rows.length === 0"
+                    class="inline-flex items-center justify-center gap-2 rounded bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 transition shrink-0 shadow disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-emerald-600">
+                    <i class="fas fa-file-excel"></i> Export Data
+                </button>
             </div>
+            <!-- Table -->
+            <div x-show="selectedDept" x-cloak class="max-w-full overflow-x-auto rounded-sm border border-stroke dark:border-strokedark">
+                <table class="w-full table-auto text-left text-xs border-collapse">
+                    <thead class="bg-gray-2 dark:bg-meta-4">
+                        <tr class="text-black dark:text-white font-bold uppercase border-b border-stroke dark:border-strokedark">
+                            <th rowspan="2" class="py-3 px-4 border-r border-stroke dark:border-strokedark min-w-[180px]">Staff</th>
+                            <th colspan="12" class="py-2 px-2 text-center border-b border-r border-stroke dark:border-strokedark bg-blue-50/60 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300">Number of Headcounts</th>
+                            <th rowspan="2" class="py-3 px-3 text-center border-r border-stroke dark:border-strokedark min-w-[70px] bg-gray-100 dark:bg-meta-4">TOTAL</th>
+                        </tr>
+                        <tr class="bg-gray-50 text-gray-600 dark:bg-meta-4/80 dark:text-gray-400 font-bold uppercase text-[10px] border-b border-stroke dark:border-strokedark">
+                            <th class="py-2 px-2 text-center border-r border-stroke dark:border-strokedark min-w-[50px]">JAN</th>
+                            <th class="py-2 px-2 text-center border-r border-stroke dark:border-strokedark min-w-[50px]">FEB</th>
+                            <th class="py-2 px-2 text-center border-r border-stroke dark:border-strokedark min-w-[50px]">MAR</th>
+                            <th class="py-2 px-2 text-center border-r border-stroke dark:border-strokedark min-w-[50px]">APR</th>
+                            <th class="py-2 px-2 text-center border-r border-stroke dark:border-strokedark min-w-[50px]">MAY</th>
+                            <th class="py-2 px-2 text-center border-r border-stroke dark:border-strokedark min-w-[50px]">JUN</th>
+                            <th class="py-2 px-2 text-center border-r border-stroke dark:border-strokedark min-w-[50px]">JUL</th>
+                            <th class="py-2 px-2 text-center border-r border-stroke dark:border-strokedark min-w-[50px]">AUG</th>
+                            <th class="py-2 px-2 text-center border-r border-stroke dark:border-strokedark min-w-[50px]">SEP</th>
+                            <th class="py-2 px-2 text-center border-r border-stroke dark:border-strokedark min-w-[50px]">OCT</th>
+                            <th class="py-2 px-2 text-center border-r border-stroke dark:border-strokedark min-w-[50px]">NOV</th>
+                            <th class="py-2 px-2 text-center border-r border-stroke dark:border-strokedark min-w-[50px]">DEC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr x-show="loading" x-cloak>
+                            <td colspan="14" class="py-12 text-center text-gray-500 dark:text-gray-400">
+                                <i class="fa-solid fa-spinner fa-spin text-xl mb-2"></i>
+                                <p class="font-semibold text-sm">Memuat data...</p>
+                            </td>
+                        </tr>
+                        <tr x-show="!loading && rows.length === 0" x-cloak>
+                            <td colspan="14" class="py-12 text-center text-gray-500 dark:text-gray-400">
+                                <i class="fa-solid fa-inbox text-xl mb-2"></i>
+                                <p class="font-semibold text-sm">Tidak ada data headcount untuk cost center ini.</p>
+                            </td>
+                        </tr>
+                        <template x-for="(row, idx) in rows" :key="idx">
+                            <tr class="border-b border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4 transition-colors">
+                                <td class="py-2.5 px-4 border-r border-stroke dark:border-strokedark font-medium text-black dark:text-white" x-text="row.tipe_name"></td>
+                                <td class="py-2.5 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="row.m1"></td>
+                                <td class="py-2.5 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="row.m2"></td>
+                                <td class="py-2.5 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="row.m3"></td>
+                                <td class="py-2.5 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="row.m4"></td>
+                                <td class="py-2.5 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="row.m5"></td>
+                                <td class="py-2.5 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="row.m6"></td>
+                                <td class="py-2.5 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="row.m7"></td>
+                                <td class="py-2.5 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="row.m8"></td>
+                                <td class="py-2.5 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="row.m9"></td>
+                                <td class="py-2.5 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="row.m10"></td>
+                                <td class="py-2.5 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="row.m11"></td>
+                                <td class="py-2.5 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="row.m12"></td>
+                                <td class="py-2.5 px-3 text-center border-r border-stroke dark:border-strokedark font-mono font-bold bg-gray-50 dark:bg-meta-4" x-text="row.grand_total"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                    <tfoot>
+                        <tr x-show="!loading && rows.length > 0" class="bg-gray-100/80 dark:bg-meta-4 font-bold text-black dark:text-white border-t-2 border-stroke dark:border-strokedark">
+                            <td class="py-3 px-4 border-r border-stroke dark:border-strokedark uppercase text-right">Grand Total</td>
+                            <td class="py-3 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="totals[0]"></td>
+                            <td class="py-3 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="totals[1]"></td>
+                            <td class="py-3 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="totals[2]"></td>
+                            <td class="py-3 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="totals[3]"></td>
+                            <td class="py-3 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="totals[4]"></td>
+                            <td class="py-3 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="totals[5]"></td>
+                            <td class="py-3 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="totals[6]"></td>
+                            <td class="py-3 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="totals[7]"></td>
+                            <td class="py-3 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="totals[8]"></td>
+                            <td class="py-3 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="totals[9]"></td>
+                            <td class="py-3 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="totals[10]"></td>
+                            <td class="py-3 px-2 text-center border-r border-stroke dark:border-strokedark font-mono" x-text="totals[11]"></td>
+                            <td class="py-3 px-3 text-center border-r border-stroke dark:border-strokedark font-mono font-bold bg-gray-100 dark:bg-meta-4" x-text="totals[12]"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- Empty state when no CC selected -->
+            <div x-show="!selectedDept" class="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed border-gray-200 rounded-sm dark:border-strokedark">
+                <i class="fa-solid fa-users text-4xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">Silakan pilih Department untuk melihat data Summary Headcount.</p>
+            </div>
+
         </div>
-        <?php endif; ?>
     </div>
 </div>
 
 <script>
-function mppSummary() {
+function mppSummaryApp() {
     return {
-        syncing: false,
+        costCenterList: <?= json_encode(array_map(fn($d, $idx) => [
+            'cost_center'     => $d['cost_center'],
+            'cost_center_sap' => $d['cost_center_sap'] ?? $d['cost_center'],
+            'cost_desc'       => $d['cost_desc'] ?? '',
+            'no'              => $idx + 1,
+        ], $costCenterList ?? [], array_keys($costCenterList ?? [])), JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP) ?>,
+        selectedDept: '',
+        rows: [],
+        totals: Array(13).fill(0),
+        loading: false,
 
-        async syncToOpex() {
-            if (!confirm('Apakah Anda yakin ingin memproses dan mendorong (push) alokasi biaya gaji MPP ke Engine OPEX?')) return;
+        init() {},
 
-            this.syncing = true;
+        async fetchData() {
+            if (!this.selectedDept) {
+                this.rows = [];
+                this.totals = Array(13).fill(0);
+                return;
+            }
+            this.loading = true;
             try {
-                let response = await fetch('<?= base_url('mpp/syncToOpex') ?>', {
-                    method: 'POST',
+                const res = await fetch(`<?= base_url('mpp/getViewData') ?>?id_dept=${encodeURIComponent(this.selectedDept)}`, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
-                let result = await response.json();
-                alert(result.message);
-                if (result.status === 'success') {
-                    window.location.reload();
+                const json = await res.json();
+                if (json.status === 'success') {
+                    this.rows = json.data || [];
+                    this.totals = json.totals || Array(13).fill(0);
                 }
-            } catch (err) {
-                console.error(err);
-                alert('Gagal memproses sinkronisasi OPEX.');
+            } catch (e) {
+                console.error('Gagal memuat data:', e);
+                this.rows = [];
+                this.totals = Array(13).fill(0);
             } finally {
-                this.syncing = false;
+                this.loading = false;
             }
+        },
+
+        exportData() {
+            if (!this.selectedDept || this.rows.length === 0) return;
+            // Build CSV and download
+            const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+            let csv = 'Staff,' + months.join(',') + ',TOTAL\n';
+            for (const row of this.rows) {
+                csv += `"${row.tipe_name}",${row.m1},${row.m2},${row.m3},${row.m4},${row.m5},${row.m6},${row.m7},${row.m8},${row.m9},${row.m10},${row.m11},${row.m12},${row.grand_total}\n`;
+            }
+            csv += `"Grand Total",${this.totals.join(',')}\n`;
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const ccName = this.costCenterList.find(c => String(c.cost_center) === this.selectedDept)?.cost_desc || this.selectedDept;
+            a.download = `MPP_Summary_${ccName.replace(/\s+/g, '_')}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
         }
     }
 }

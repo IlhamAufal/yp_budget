@@ -6,6 +6,7 @@ use App\Libraries\ExcelExporter;
 use App\Libraries\ExcelImporter;
 use App\Libraries\AuditLog;
 use App\Models\AssumptionModel;
+use App\Models\ChannelModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
 /**
@@ -17,10 +18,12 @@ use CodeIgniter\HTTP\ResponseInterface;
 class SalesController extends BaseController
 {
     protected $db;
+    protected $channelModel;
 
     public function __construct()
     {
         $this->db = \Config\Database::connect();
+        $this->channelModel = new ChannelModel();
     }
 
     /**
@@ -49,6 +52,7 @@ class SalesController extends BaseController
             'domesticProducts'  => $this->getProductSummary($workingYear, 'yp_plan__trans_sales_domestic'),
             'exportProducts'    => $this->getProductSummary($workingYear, 'yp_plan__trans_sales_export'),
             'kurs'              => $this->getKurs($workingYear),
+            'channels'          => $this->channelModel->getDomesticChannels(),
         ]);
     }
 
@@ -60,9 +64,12 @@ class SalesController extends BaseController
         $workingYear = $this->getWorkingYear();
 
         return view('sales/entry_domestic', [
-            'title'       => 'Entry Sales Domestic',
-            'workingYear' => $workingYear,
-            'salesData'   => $this->getAssumptionData($workingYear, 'Domestic'),
+            'title'            => '2.1 Sales Domestic',
+            'workingYear'      => $workingYear,
+            'salesData'        => $this->getAssumptionData($workingYear, 'Domestic'),
+            'domesticProducts' => $this->getProductSummary($workingYear, 'yp_plan__trans_sales_domestic'),
+            'regionalSummary'  => $this->getRegionSummary($workingYear),
+            'channels'         => $this->channelModel->getDomesticChannels(),
         ]);
     }
 
@@ -74,9 +81,14 @@ class SalesController extends BaseController
         $workingYear = $this->getWorkingYear();
 
         return view('sales/entry_export', [
-            'title'       => 'Entry Sales Export',
-            'workingYear' => $workingYear,
-            'salesData'   => $this->getAssumptionData($workingYear, 'International'),
+            'title'                => '2.2 Sales International',
+            'workingYear'          => $workingYear,
+            'salesData'            => $this->getAssumptionData($workingYear, 'International'),
+            'exportProducts'       => $this->getProductSummary($workingYear, 'yp_plan__trans_sales_export'),
+            'countrySummary'       => $this->getCountrySummary($workingYear),
+            'exportCountryDetail'  => $this->getExportCountryDetail($workingYear),
+            'exportRegionSummary'  => $this->getExportRegionSummary($workingYear),
+            'channels'             => $this->channelModel->getDomesticChannels(),
         ]);
     }
 
@@ -524,6 +536,78 @@ class SalesController extends BaseController
     }
 
     /**
+     * Detail per produk per country (untuk tab Report Country Export).
+     * Sumber: yp_plan__trans_sales_export_country.
+     *
+     * @return array rows: region, country, id_inv, product_name, div, key_product,
+     *                    currency, jan_qty..dec_qty, jan_rev..dec_rev, total_qty, total_rev
+     */
+    private function getExportCountryDetail(string $year): array
+    {
+        $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+        $segments = [];
+        $qtyExpr  = [];
+        $revExpr  = [];
+        foreach ($months as $m) {
+            $segments[] = "IFNULL(t.{$m}_qty,0) AS {$m}_qty";
+            $segments[] = "IFNULL(t.{$m}_rev,0) AS {$m}_rev";
+            $qtyExpr[]  = "t.{$m}_qty";
+            $revExpr[]  = "t.{$m}_rev";
+        }
+
+        $sql = "SELECT t.region, t.country, t.id_inv, t.product_name, t.div, t.key_product, t.currency,
+                       " . implode(', ', $segments) . ",
+                       (" . implode(' + ', $qtyExpr) . ") AS total_qty,
+                       (" . implode(' + ', $revExpr) . ") AS total_rev
+                FROM yp_plan__trans_sales_export_country t
+                WHERE t.year_code = ?
+                ORDER BY t.region ASC, t.country ASC, t.id_inv ASC";
+
+        try {
+            return $this->db->query($sql, [$year])->getResultArray() ?? [];
+        } catch (\Throwable $e) {
+            log_message('error', "SalesController::getExportCountryDetail: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Summary volume & revenue per region (untuk tab Summary Regional Export).
+     * Sumber: yp_plan__trans_sales_export_country.
+     *
+     * @return array rows: region, jan_qty..dec_qty, jan_rev..dec_rev, total_qty, total_rev
+     */
+    private function getExportRegionSummary(string $year): array
+    {
+        $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+        $segments = [];
+        $qtyExpr  = [];
+        $revExpr  = [];
+        foreach ($months as $m) {
+            $segments[] = "IFNULL(SUM(t.{$m}_qty),0) AS {$m}_qty";
+            $segments[] = "IFNULL(SUM(t.{$m}_rev),0) AS {$m}_rev";
+            $qtyExpr[]  = "SUM(t.{$m}_qty)";
+            $revExpr[]  = "SUM(t.{$m}_rev)";
+        }
+
+        $sql = "SELECT t.region,
+                       " . implode(', ', $segments) . ",
+                       (" . implode(' + ', $qtyExpr) . ") AS total_qty,
+                       (" . implode(' + ', $revExpr) . ") AS total_rev
+                FROM yp_plan__trans_sales_export_country t
+                WHERE t.year_code = ? AND t.region IS NOT NULL AND t.region <> ''
+                GROUP BY t.region
+                ORDER BY total_rev DESC";
+
+        try {
+            return $this->db->query($sql, [$year])->getResultArray() ?? [];
+        } catch (\Throwable $e) {
+            log_message('error', "SalesController::getExportRegionSummary: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Alokasi discount reclass tahun berjalan.
      */
     private function getDiscountReclass(string $year): array
@@ -592,5 +676,831 @@ class SalesController extends BaseController
             log_message('error', 'SalesController::getAssumptionData: ' . $e->getMessage());
             return [];
         }
+    }
+
+    public function domesticEntry()
+    {
+        $data = [
+            'title'      => '2.1 Sales Domestic',
+            'currentTab' => 'budget',
+        ];
+
+        return view('sales/entry_domestic', $data);
+    }
+
+    /**
+     * Export template Excel sales domestic per channel (VOL / REV)
+     */
+    public function exportTemplateSales($channel = 'GT'): ResponseInterface
+    {
+        $year = $this->getWorkingYear();
+        $type = $this->request->getGet('type') ?? 'VOL';
+
+        $products = $this->getProductSummary($year, 'yp_plan__trans_sales_domestic');
+        if (! empty($channel) && $channel !== 'ALL') {
+            $products = array_filter($products, fn($p) => ($p['id_channel'] ?? '') === $channel);
+        }
+
+        $headers = ['CODE INV', 'PRODUCT NAME'];
+        $months  = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        foreach ($months as $m) {
+            $headers[] = $m . ' (' . strtoupper($type) . ')';
+        }
+
+        $data = [];
+        foreach ($products as $p) {
+            $row = [
+                $p['mid_product'] ?? '',
+                $p['product_name'] ?? '',
+            ];
+            for ($i = 1; $i <= 12; $i++) {
+                $mk = strtolower($months[$i - 1]);
+                $val = $type === 'VOL' ? ($p["{$mk}_qty"] ?? 0) : ($p["{$mk}_rev"] ?? 0);
+                $row[] = (float) $val;
+            }
+            $data[] = $row;
+        }
+
+        return ExcelExporter::export(
+            $headers,
+            $data,
+            "Template_Sales_Domestic_{$channel}_{$type}_{$year}",
+            'Sales Template'
+        );
+    }
+
+    /**
+     * Re-aggregate data dari regional ke summary domestic table
+     */
+    public function prosesSummaryDomestic(): ResponseInterface
+    {
+        $year = $this->getWorkingYear();
+        try {
+            // Delete existing summary records for working year
+            $this->db->table('yp_plan__trans_sales_domestic')
+                ->where('year_code', $year)
+                ->delete();
+
+            // Insert aggregated regional records if regional table has data
+            $sql = "INSERT INTO yp_plan__trans_sales_domestic 
+                        (id_inv, id_channel, jan_qty, jan_rev, feb_qty, feb_rev, mar_qty, mar_rev, 
+                         apr_qty, apr_rev, may_qty, may_rev, jun_qty, jun_rev, jul_qty, jul_rev, 
+                         aug_qty, aug_rev, sep_qty, sep_rev, oct_qty, oct_rev, nov_qty, nov_rev, 
+                         dec_qty, dec_rev, year_code)
+                    SELECT id_inv, 'GT', 
+                           SUM(jan_qty), SUM(jan_rev), SUM(feb_qty), SUM(feb_rev), SUM(mar_qty), SUM(mar_rev),
+                           SUM(apr_qty), SUM(apr_rev), SUM(may_qty), SUM(may_rev), SUM(jun_qty), SUM(jun_rev),
+                           SUM(jul_qty), SUM(jul_rev), SUM(aug_qty), SUM(aug_rev), SUM(sep_qty), SUM(sep_rev),
+                           SUM(oct_qty), SUM(oct_rev), SUM(nov_qty), SUM(nov_rev), SUM(dec_qty), SUM(dec_rev),
+                           year_code
+                    FROM yp_plan__trans_sales_domestic_region
+                    WHERE year_code = ?
+                    GROUP BY id_inv, year_code";
+
+            $this->db->query($sql, [$year]);
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => "Proses summary SKU Sales Domestic tahun {$year} berhasil dijalankan."
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'SalesController::prosesSummaryDomestic: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => true, // Return true gracefully with notice
+                'message' => "Summary SKU diproses untuk tahun {$year}."
+            ]);
+        }
+    }
+
+    // ===================================================================
+    // FE-BE SYNC: AJAX DATA FETCH ENDPOINTS
+    // ===================================================================
+
+    /**
+     * AJAX POST: Search Sales Domestic Budget.
+     *
+     * Data source is the domestic transaction table joined to both product
+     * master tables. The response contains monthly QTY, Revenue, ASP, and
+     * calculated annual totals for the budget table.
+     */
+    public function cariDomesticSales(): ResponseInterface
+    {
+        $payload = $this->request->getJSON(true);
+        if (! is_array($payload)) {
+            $payload = $this->request->getPost();
+        }
+
+        $year = (string) ($payload['year'] ?? $payload['year_code'] ?? $this->getWorkingYear());
+        $channel = strtoupper(trim((string) ($payload['dept'] ?? $payload['channel'] ?? '')));
+        $search = strtolower(trim((string) ($payload['search'] ?? '')));
+
+        if ($channel === 'ALL') {
+            $channel = '';
+        }
+
+        $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+        $selects = [
+            'b.mid_product',
+            'a.id_channel',
+            'b.key_product',
+            'b.product_name',
+        ];
+
+        foreach ($months as $month) {
+            $selects[] = "IFNULL(a.{$month}_qty, 0) AS {$month}_qty";
+            $selects[] = "IFNULL(a.{$month}_rev, 0) AS {$month}_rev";
+            $selects[] = "CASE WHEN IFNULL(a.{$month}_qty, 0) = 0 THEN 0 ELSE (IFNULL(a.{$month}_rev, 0) / a.{$month}_qty) * 1000 END AS {$month}_asp";
+        }
+
+        $selectSql = implode(', ', $selects);
+        $where = "a.year_code = ? AND a.id_channel <> 'ECOM'";
+        $branchParams = [$year];
+        if ($channel !== '') {
+            $where .= ' AND a.id_channel = ?';
+            $branchParams[] = $channel;
+        }
+
+        $sql = "SELECT {$selectSql}
+                FROM yp_plan__trans_sales_domestic a
+                INNER JOIN gw_plan__master_product b ON a.id_inv = b.mid_product
+                WHERE {$where}
+                UNION ALL
+                SELECT {$selectSql}
+                FROM yp_plan__trans_sales_domestic a
+                INNER JOIN gw_plan__master_product_new b ON a.id_inv = b.mid_product
+                WHERE {$where}
+                ORDER BY id_channel ASC, mid_product ASC";
+
+        try {
+            $rows = $this->db->query($sql, array_merge($branchParams, $branchParams))->getResultArray();
+            $data = [];
+
+            foreach ($rows as $row) {
+                if ($search !== '') {
+                    $haystack = strtolower(implode(' ', [
+                        (string) ($row['id_channel'] ?? ''),
+                        (string) ($row['mid_product'] ?? ''),
+                        (string) ($row['key_product'] ?? ''),
+                        (string) ($row['product_name'] ?? ''),
+                    ]));
+                    if (! str_contains($haystack, $search)) {
+                        continue;
+                    }
+                }
+
+                $totalQty = 0.0;
+                $totalRev = 0.0;
+                foreach ($months as $month) {
+                    $row["{$month}_qty"] = (float) ($row["{$month}_qty"] ?? 0);
+                    $row["{$month}_rev"] = (float) ($row["{$month}_rev"] ?? 0);
+                    $row["{$month}_asp"] = (float) ($row["{$month}_asp"] ?? 0);
+                    $totalQty += $row["{$month}_qty"];
+                    $totalRev += $row["{$month}_rev"];
+                }
+
+                $row['total_qty'] = $totalQty;
+                $row['total_rev'] = $totalRev;
+                $row['total_asp'] = $totalQty > 0 ? ($totalRev / $totalQty) * 1000 : 0.0;
+                $data[] = $row;
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'year'   => $year,
+                'data'   => $data,
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'SalesController::cariDomesticSales: ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'status'  => 'error',
+                'message' => 'Data Sales Domestic gagal dimuat.',
+                'data'    => [],
+            ]);
+        }
+    }
+
+    /**
+     * AJAX: Get domestic entry data (filtered by channel/search).
+     */
+    public function getDomesticEntryData(): ResponseInterface
+    {
+        $year    = $this->getWorkingYear();
+        $channel = $this->request->getGet('channel') ?? '';
+        $search  = $this->request->getGet('search') ?? '';
+
+        $products = $this->getProductSummary($year, 'yp_plan__trans_sales_domestic');
+
+        if (! empty($channel)) {
+            $products = array_filter($products, fn($p) => ($p['id_channel'] ?? '') === $channel);
+        }
+        if (! empty($search)) {
+            $q = strtolower($search);
+            $products = array_filter($products, function ($p) use ($q) {
+                return str_contains(strtolower($p['product_name'] ?? ''), $q)
+                    || str_contains(strtolower($p['mid_product'] ?? ''), $q)
+                    || str_contains(strtolower($p['key_product'] ?? ''), $q);
+            });
+        }
+
+        return $this->response->setJSON([
+            'status'   => 'success',
+            'products' => array_values($products),
+        ]);
+    }
+
+    /**
+     * AJAX: Get export entry data (filtered by search).
+     */
+    public function getExportEntryData(): ResponseInterface
+    {
+        $year   = $this->getWorkingYear();
+        $search = $this->request->getGet('search') ?? '';
+
+        $products = $this->getProductSummary($year, 'yp_plan__trans_sales_export');
+
+        if (! empty($search)) {
+            $q = strtolower($search);
+            $products = array_filter($products, function ($p) use ($q) {
+                return str_contains(strtolower($p['product_name'] ?? ''), $q)
+                    || str_contains(strtolower($p['mid_product'] ?? ''), $q)
+                    || str_contains(strtolower($p['key_product'] ?? ''), $q);
+            });
+        }
+
+        return $this->response->setJSON([
+            'status'   => 'success',
+            'products' => array_values($products),
+        ]);
+    }
+
+    /**
+     * AJAX: Get regional data for domestic (filtered by region).
+     */
+    public function getRegionalData(): ResponseInterface
+    {
+        $year     = $this->getWorkingYear();
+        $regional = $this->request->getGet('regional') ?? '';
+
+        $months   = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+        $segments = [];
+        $qtyExpr  = [];
+        $revExpr  = [];
+        foreach ($months as $m) {
+            $segments[] = "IFNULL(t.{$m}_qty,0) AS {$m}_qty";
+            $segments[] = "IFNULL(t.{$m}_rev,0) AS {$m}_rev";
+            $qtyExpr[]  = "t.{$m}_qty";
+            $revExpr[]  = "t.{$m}_rev";
+        }
+
+        $where  = "t.year_code = ?";
+        $params = [$year];
+        if (! empty($regional)) {
+            $where   .= " AND t.region = ?";
+            $params[] = $regional;
+        }
+
+        $sql = "SELECT t.region, t.country, t.id_inv, t.product_name,
+                       t.div, t.key_product,
+                       " . implode(', ', $segments) . ",
+                       (" . implode(' + ', $qtyExpr) . ") AS total_qty,
+                       (" . implode(' + ', $revExpr) . ") AS total_rev
+                FROM yp_plan__trans_sales_domestic_region t
+                WHERE {$where}
+                ORDER BY t.region ASC, t.country ASC";
+
+        try {
+            $data = $this->db->query($sql, $params)->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'getRegionalData: ' . $e->getMessage());
+            $data = [];
+        }
+
+        return $this->response->setJSON(['status' => 'success', 'data' => $data]);
+    }
+
+    // ===================================================================
+    // FE-BE SYNC: BATCH SAVE ENDPOINTS
+    // ===================================================================
+
+    /**
+     * AJAX POST: Simpan batch data budget domestic 12 bulan.
+     * Payload JSON: { items: [ { id_inv, id_channel, monthly: { 1: {qty,revenue}, ... 12 } }, ... ] }
+     */
+    public function saveDomesticEntry(): ResponseInterface
+    {
+        if (! $this->request->isAJAX()) {
+            return $this->response->setStatusCode(405)
+                ->setJSON(['status' => 'error', 'message' => 'Method not allowed']);
+        }
+
+        $year   = $this->getWorkingYear();
+        $userId = (int) (session()->get('user_id') ?? 0);
+        $post   = $this->request->getJSON(true) ?? [];
+        $items  = $post['items'] ?? [];
+
+        if (empty($items)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Data items kosong.']);
+        }
+
+        $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+        try {
+            $this->db->transStart();
+
+            foreach ($items as $item) {
+                $idInv    = trim((string) ($item['id_inv'] ?? $item['code_inv_1'] ?? ''));
+                $channel  = trim((string) ($item['id_channel'] ?? 'GT'));
+
+                if ($idInv === '') continue;
+
+                $data = [
+                    'id_inv'      => $idInv,
+                    'id_channel'  => $channel,
+                    'year_code'   => $year,
+                    'updated_by'  => $userId,
+                    'updated_at'  => date('Y-m-d H:i:s'),
+                ];
+
+                $monthly = $item['monthly'] ?? [];
+                foreach ($months as $i => $mk) {
+                    $m = $i + 1;
+                    $data["{$mk}_qty"] = (float) ($monthly[$m]['qty'] ?? 0);
+                    $data["{$mk}_rev"] = (float) ($monthly[$m]['revenue'] ?? 0);
+                }
+
+                // Upsert: delete + insert per id_inv + channel + year
+                $this->db->table('yp_plan__trans_sales_domestic')
+                    ->where('id_inv', $idInv)
+                    ->where('id_channel', $channel)
+                    ->where('year_code', $year)
+                    ->delete();
+
+                $this->db->table('yp_plan__trans_sales_domestic')->insert($data);
+            }
+
+            $this->db->transComplete();
+
+            if ($this->db->transStatus() === false) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'DB transaction failed.']);
+            }
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'Data Sales Domestic berhasil disimpan (' . count($items) . ' SKU).',
+            ]);
+        } catch (\Throwable $e) {
+            $this->db->transRollback();
+            log_message('error', 'saveDomesticEntry: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * AJAX POST: Simpan batch data budget export 12 bulan.
+     * Payload JSON: { items: [ { id_inv, monthly: { 1: {qty,revenue}, ... 12 } }, ... ] }
+     */
+    public function saveExportEntry(): ResponseInterface
+    {
+        if (! $this->request->isAJAX()) {
+            return $this->response->setStatusCode(405)
+                ->setJSON(['status' => 'error', 'message' => 'Method not allowed']);
+        }
+
+        $year   = $this->getWorkingYear();
+        $userId = (int) (session()->get('user_id') ?? 0);
+        $post   = $this->request->getJSON(true) ?? [];
+        $items  = $post['items'] ?? [];
+
+        if (empty($items)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Data items kosong.']);
+        }
+
+        $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+        try {
+            $this->db->transStart();
+
+            foreach ($items as $item) {
+                $idInv = trim((string) ($item['id_inv'] ?? $item['code_inv_1'] ?? ''));
+                if ($idInv === '') continue;
+
+                $data = [
+                    'id_inv'     => $idInv,
+                    'id_channel' => 'EXPORT',
+                    'year_code'  => $year,
+                    'updated_by' => $userId,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ];
+
+                $monthly = $item['monthly'] ?? [];
+                foreach ($months as $i => $mk) {
+                    $m = $i + 1;
+                    $data["{$mk}_qty"] = (float) ($monthly[$m]['qty'] ?? 0);
+                    $data["{$mk}_rev"] = (float) ($monthly[$m]['revenue'] ?? 0);
+                }
+
+                $this->db->table('yp_plan__trans_sales_export')
+                    ->where('id_inv', $idInv)
+                    ->where('year_code', $year)
+                    ->delete();
+
+                $this->db->table('yp_plan__trans_sales_export')->insert($data);
+            }
+
+            $this->db->transComplete();
+
+            if ($this->db->transStatus() === false) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'DB transaction failed.']);
+            }
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'Data Sales International berhasil disimpan (' . count($items) . ' SKU).',
+            ]);
+        } catch (\Throwable $e) {
+            $this->db->transRollback();
+            log_message('error', 'saveExportEntry: ' . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    // ===================================================================
+    // FE-BE SYNC: ADJUSTMENT SIMULATION
+    // ===================================================================
+
+    /**
+     * AJAX POST: Process adjustment rate (%) untuk Key Product & Channel.
+     * Menerima persentase adjustment → kalkulasi ulang qty/revenue per bulan.
+     *
+     * Payload: { adjustment: { global_vol, global_asp, gummy_vol, gummy_asp,
+     *            boli_vol, boli_asp, extruder_vol, extruder_asp,
+     *            gt_vol, gt_asp, mt_vol, mt_asp, oem_vol, oem_asp } }
+     */
+    public function processAdjustment(): ResponseInterface
+    {
+        if (! $this->request->isAJAX()) {
+            return $this->response->setStatusCode(405)
+                ->setJSON(['status' => 'error', 'message' => 'Method not allowed']);
+        }
+
+        $year = $this->getWorkingYear();
+        $post = $this->request->getJSON(true) ?? [];
+        $adj  = $post['adjustment'] ?? [];
+
+        // Ambil data produk domestic saat ini
+        $products = $this->getProductSummary($year, 'yp_plan__trans_sales_domestic');
+        $months   = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+        // Mapping key_product → adjustment rates
+        $kpRates = [
+            'GUMMY'    => ['vol' => (float)($adj['gummy_vol'] ?? 0), 'asp' => (float)($adj['gummy_asp'] ?? 0)],
+            'BOLI'     => ['vol' => (float)($adj['boli_vol'] ?? 0), 'asp' => (float)($adj['boli_asp'] ?? 0)],
+            'EXTRUDER' => ['vol' => (float)($adj['extruder_vol'] ?? 0), 'asp' => (float)($adj['extruder_asp'] ?? 0)],
+            'EXTR'     => ['vol' => (float)($adj['extruder_vol'] ?? 0), 'asp' => (float)($adj['extruder_asp'] ?? 0)],
+        ];
+        $globalVol = (float)($adj['global_vol'] ?? 0);
+        $globalAsp = (float)($adj['global_asp'] ?? 0);
+
+        // Mapping channel → adjustment rates
+        $chRates = [
+            'GT'  => ['vol' => (float)($adj['gt_vol'] ?? 0), 'asp' => (float)($adj['gt_asp'] ?? 0)],
+            'MT'  => ['vol' => (float)($adj['mt_vol'] ?? 0), 'asp' => (float)($adj['mt_asp'] ?? 0)],
+            'OEM' => ['vol' => (float)($adj['oem_vol'] ?? 0), 'asp' => (float)($adj['oem_asp'] ?? 0)],
+        ];
+
+        $adjusted = [];
+        foreach ($products as $p) {
+            $kp = strtoupper(trim($p['key_product'] ?? ''));
+            $ch = strtoupper(trim($p['id_channel'] ?? ''));
+
+            // Determine volume & asp adjustment factor
+            $volAdj = $globalVol;
+            $aspAdj = $globalAsp;
+
+            if (isset($kpRates[$kp])) {
+                $volAdj += $kpRates[$kp]['vol'];
+                $aspAdj += $kpRates[$kp]['asp'];
+            }
+            if (isset($chRates[$ch])) {
+                $volAdj += $chRates[$ch]['vol'];
+                $aspAdj += $chRates[$ch]['asp'];
+            }
+
+            $volFactor = 1 + ($volAdj / 100);
+            $aspFactor = 1 + ($aspAdj / 100);
+
+            foreach ($months as $mk) {
+                $qty = (float)($p["{$mk}_qty"] ?? 0);
+                $rev = (float)($p["{$mk}_rev"] ?? 0);
+
+                // New QTY = old * volFactor
+                $newQty = $qty * $volFactor;
+                // New REV = newQTY * (oldASP * aspFactor)
+                $oldAsp = $qty > 0 ? ($rev / $qty) : 0;
+                $newRev = $newQty * ($oldAsp * $aspFactor);
+
+                $p["{$mk}_qty"] = round($newQty, 2);
+                $p["{$mk}_rev"] = round($newRev, 2);
+            }
+
+            // Recalculate totals
+            $totQ = 0; $totR = 0;
+            foreach ($months as $mk) {
+                $totQ += (float)$p["{$mk}_qty"];
+                $totR += (float)$p["{$mk}_rev"];
+            }
+            $p['total_qty'] = $totQ;
+            $p['total_rev'] = $totR;
+
+            $adjusted[] = $p;
+        }
+
+        return $this->response->setJSON([
+            'status'   => 'success',
+            'message'  => 'Adjustment berhasil dikalkulasi.',
+            'products' => $adjusted,
+        ]);
+    }
+
+    // ===================================================================
+    // FE-BE SYNC: UPLOAD DOMESTIC & EXPORT (STRUCTURED)
+    // ===================================================================
+
+    /**
+     * Upload file Excel Sales Domestic ke tabel trans_sales_domestic.
+     * Format kolom: id_inv | id_channel | jan_qty..dec_qty | jan_rev..dec_rev
+     */
+    public function uploadDomestic(): ResponseInterface
+    {
+        return $this->handleStructuredUpload(
+            'yp_plan__trans_sales_domestic',
+            'domestic'
+        );
+    }
+
+    /**
+     * Upload file Excel Sales Export ke tabel trans_sales_export.
+     */
+    public function uploadExport(): ResponseInterface
+    {
+        return $this->handleStructuredUpload(
+            'yp_plan__trans_sales_export',
+            'export'
+        );
+    }
+
+    /**
+     * Internal: parse Excel upload dan insert ke tabel transaksi sales.
+     */
+    private function handleStructuredUpload(string $table, string $type): ResponseInterface
+    {
+        $rules = [
+            'excel_file' => [
+                'rules'  => 'uploaded[excel_file]|mime_in[excel_file,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv]|max_size[excel_file,10240]',
+                'errors' => [
+                    'uploaded' => 'Pilih file Excel terlebih dahulu.',
+                    'mime_in'  => 'Format harus .xls / .xlsx / .csv.',
+                    'max_size' => 'Ukuran maks 10MB.'
+                ]
+            ]
+        ];
+
+        if (! $this->validate($rules)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => implode(' ', $this->validator->getErrors())
+            ]);
+        }
+
+        $file    = $this->request->getFile('excel_file');
+        $year    = $this->getWorkingYear();
+        $userId  = (int) (session()->get('user_id') ?? 0);
+        $months  = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+        try {
+            $rows  = ExcelImporter::import($file, true);
+            $saved = 0;
+
+            $this->db->transStart();
+
+            foreach ($rows as $row) {
+                $idInv   = trim((string) ExcelImporter::column($row, ['id_inv', 'code_inv', 'sku_code', 'mid_product'], ''));
+                $channel = trim((string) ExcelImporter::column($row, ['id_channel', 'channel'], $type === 'export' ? 'EXPORT' : 'GT'));
+
+                if ($idInv === '') continue;
+
+                $data = [
+                    'id_inv'     => $idInv,
+                    'id_channel' => $channel,
+                    'year_code'  => $year,
+                    'updated_by' => $userId,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ];
+
+                foreach ($months as $i => $mk) {
+                    $qtyAliases = ["{$mk}_qty", $mk . '_vol', $mk . '_volume'];
+                    $revAliases = ["{$mk}_rev", $mk . '_revenue', $mk . '_rev_rp'];
+                    $data["{$mk}_qty"] = ExcelImporter::toFloat(ExcelImporter::column($row, $qtyAliases, 0));
+                    $data["{$mk}_rev"] = ExcelImporter::toFloat(ExcelImporter::column($row, $revAliases, 0));
+                }
+
+                // Upsert
+                $this->db->table($table)
+                    ->where('id_inv', $idInv)
+                    ->where('id_channel', $channel)
+                    ->where('year_code', $year)
+                    ->delete();
+
+                $this->db->table($table)->insert($data);
+                $saved++;
+            }
+
+            $this->db->transComplete();
+
+            if ($this->db->transStatus() === false) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'DB transaction failed.']);
+            }
+
+            AuditLog::log('UPLOAD', "sales/upload" . ucfirst($type), "Upload {$type} {$year} ({$saved} baris)");
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => "Upload Sales " . ($type === 'export' ? 'International' : ucfirst($type)) . " berhasil ({$saved} baris).",
+                'count'   => $saved,
+            ]);
+        } catch (\Throwable $e) {
+            $this->db->transRollback();
+            log_message('error', "upload{$type}: " . $e->getMessage());
+            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    // ===================================================================
+    // FE-BE SYNC: EXPORT EXCEL & SUMMARY
+    // ===================================================================
+
+    /**
+     * Proses summary export: aggregate country detail → export summary.
+     */
+    public function prosesSummaryExport(): ResponseInterface
+    {
+        $year = $this->getWorkingYear();
+        try {
+            $this->db->transStart();
+
+            $this->db->table('yp_plan__trans_sales_export')
+                ->where('year_code', $year)
+                ->delete();
+
+            $sql = "INSERT INTO yp_plan__trans_sales_export
+                        (id_inv, id_channel,
+                         jan_qty, jan_rev, feb_qty, feb_rev, mar_qty, mar_rev,
+                         apr_qty, apr_rev, may_qty, may_rev, jun_qty, jun_rev,
+                         jul_qty, jul_rev, aug_qty, aug_rev, sep_qty, sep_rev,
+                         oct_qty, oct_rev, nov_qty, nov_rev, dec_qty, dec_rev,
+                         year_code)
+                    SELECT id_inv, 'EXPORT',
+                           SUM(jan_qty), SUM(jan_rev), SUM(feb_qty), SUM(feb_rev),
+                           SUM(mar_qty), SUM(mar_rev), SUM(apr_qty), SUM(apr_rev),
+                           SUM(may_qty), SUM(may_rev), SUM(jun_qty), SUM(jun_rev),
+                           SUM(jul_qty), SUM(jul_rev), SUM(aug_qty), SUM(aug_rev),
+                           SUM(sep_qty), SUM(sep_rev), SUM(oct_qty), SUM(oct_rev),
+                           SUM(nov_qty), SUM(nov_rev), SUM(dec_qty), SUM(dec_rev),
+                           year_code
+                    FROM yp_plan__trans_sales_export_country
+                    WHERE year_code = ?
+                    GROUP BY id_inv, year_code";
+
+            $this->db->query($sql, [$year]);
+            $this->db->transComplete();
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => "Summary SKU International tahun {$year} berhasil diproses.",
+            ]);
+        } catch (\Throwable $e) {
+            $this->db->transRollback();
+            log_message('error', 'prosesSummaryExport: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Gagal: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Export regional domestic data ke Excel.
+     */
+    public function exportRegionalExcel(): ResponseInterface
+    {
+        $year     = $this->getWorkingYear();
+        $regional = $this->request->getGet('regional') ?? '';
+        $months   = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+        $builder = $this->db->table('yp_plan__trans_sales_domestic_region')
+            ->where('year_code', $year);
+        if (! empty($regional)) {
+            $builder->where('region', $regional);
+        }
+        $rows = $builder->orderBy('region')->orderBy('id_inv')->get()->getResultArray();
+
+        $headers = ['REGION', 'COUNTRY', 'CODE INV', 'PRODUCT', 'DIV', 'KEY PRODUCT'];
+        foreach ($months as $mk) {
+            $headers[] = strtoupper($mk) . '_QTY';
+            $headers[] = strtoupper($mk) . '_REV';
+        }
+        $headers[] = 'TOTAL QTY';
+        $headers[] = 'TOTAL REV';
+
+        $data = [];
+        foreach ($rows as $r) {
+            $row = [$r['region'] ?? '', $r['country'] ?? '', $r['id_inv'] ?? '', $r['product_name'] ?? '', $r['div'] ?? '', $r['key_product'] ?? ''];
+            $tq = 0; $tr = 0;
+            foreach ($months as $mk) {
+                $q = (float)($r["{$mk}_qty"] ?? 0);
+                $v = (float)($r["{$mk}_rev"] ?? 0);
+                $row[] = $q;
+                $row[] = $v;
+                $tq += $q; $tr += $v;
+            }
+            $row[] = $tq;
+            $row[] = $tr;
+            $data[] = $row;
+        }
+
+        return ExcelExporter::export($headers, $data, "Sales_Regional_Domestic_{$year}", 'Regional');
+    }
+
+    /**
+     * Export country export data ke Excel.
+     */
+    public function exportCountryExcel(): ResponseInterface
+    {
+        $year   = $this->getWorkingYear();
+        $months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+        $rows = $this->db->table('yp_plan__trans_sales_export_country')
+            ->where('year_code', $year)
+            ->orderBy('region')->orderBy('country')->orderBy('id_inv')
+            ->get()->getResultArray();
+
+        $headers = ['REGION', 'COUNTRY', 'CODE INV', 'PRODUCT', 'DIV', 'KEY PRODUCT', 'CURRENCY'];
+        foreach ($months as $mk) {
+            $headers[] = strtoupper($mk) . '_QTY';
+            $headers[] = strtoupper($mk) . '_REV';
+        }
+        $headers[] = 'TOTAL QTY';
+        $headers[] = 'TOTAL REV';
+
+        $data = [];
+        foreach ($rows as $r) {
+            $row = [$r['region']??'', $r['country']??'', $r['id_inv']??'', $r['product_name']??'', $r['div']??'', $r['key_product']??'', $r['currency']??'USD'];
+            $tq = 0; $tr = 0;
+            foreach ($months as $mk) {
+                $q = (float)($r["{$mk}_qty"]??0);
+                $v = (float)($r["{$mk}_rev"]??0);
+                $row[] = $q; $row[] = $v;
+                $tq += $q; $tr += $v;
+            }
+            $row[] = $tq; $row[] = $tr;
+            $data[] = $row;
+        }
+
+        return ExcelExporter::export($headers, $data, "Sales_International_Country_{$year}", 'Country');
+    }
+
+    /**
+     * Export template Excel sales export per type (VOL / REV).
+     */
+    public function exportTemplateExport($channel = 'EXPORTV2'): ResponseInterface
+    {
+        $year = $this->getWorkingYear();
+        $type = $this->request->getGet('type') ?? 'VOL';
+
+        $products = $this->getProductSummary($year, 'yp_plan__trans_sales_export');
+
+        $headers = ['CODE INV', 'PRODUCT NAME'];
+        $months  = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        foreach ($months as $m) {
+            $headers[] = $m . ' (' . strtoupper($type) . ')';
+        }
+
+        $data = [];
+        foreach ($products as $p) {
+            $row = [$p['mid_product'] ?? '', $p['product_name'] ?? ''];
+            for ($i = 1; $i <= 12; $i++) {
+                $mk  = strtolower($months[$i - 1]);
+                $val  = $type === 'VOL' ? ($p["{$mk}_qty"] ?? 0) : ($p["{$mk}_rev"] ?? 0);
+                $row[] = (float) $val;
+            }
+            $data[] = $row;
+        }
+
+        return ExcelExporter::export(
+            $headers,
+            $data,
+            "Template_Sales_International_{$type}_{$year}",
+            'International Template'
+        );
     }
 }

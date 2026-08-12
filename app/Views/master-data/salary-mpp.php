@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
 
-<div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-4" x-data="salaryMppPage()">
+<div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-4" x-data="salaryMppPage()" x-init="fetchTableData()">
 
   <!-- ============================================================ -->
   <!-- BREADCRUMB & HEADER -->
@@ -28,24 +28,13 @@
         Master rate standar gaji per jabatan/posisi, pemetaan departemen, serta klasifikasi Direct Labor, Indirect Labor, dan Staff.
       </p>
     </div>
-
-    <!-- Quick Action Buttons -->
-    <div class="flex flex-wrap items-center gap-2.5">
-      <a
-        href="<?= base_url('master/salary-mpp/export?' . http_build_query($filters ?? [])) ?>"
-        class="inline-flex items-center gap-2 rounded-xl border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/40 px-3.5 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-all shadow-xs"
-      >
-        <i class="fa-solid fa-file-excel text-emerald-600 dark:text-emerald-400"></i>
-        <span>Export CSV</span>
-      </a>
-    </div>
   </div>
 
   <!-- ============================================================ -->
   <!-- STATS CARDS -->
   <!-- ============================================================ -->
   <?php
-    $totalRows    = count($rows ?? []);
+    $totalRows    = (int) ($total ?? 0);
     $activeCount  = count(array_filter($rows ?? [], fn($r) => ($r['status'] ?? 'A') === 'A'));
     $totalSalary  = array_sum(array_column($rows ?? [], 'salary'));
     $avgSalary    = $totalRows > 0 ? ($totalSalary / $totalRows) : 0;
@@ -89,72 +78,120 @@
   </div>
 
   <!-- ============================================================ -->
-  <!-- FILTER & SEARCH BAR & DATA TABLE -->
+  <!-- FORM: MASTER SALARY (Collapsible) -->
   <!-- ============================================================ -->
-  <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
-    <!-- Filter Bar as table header -->
-    <div class="p-3 border-b border-gray-100 dark:border-gray-800">
-      <form method="GET" action="<?= base_url('master/salary-mpp') ?>" class="flex flex-wrap items-center gap-2">
-        <!-- Search Input -->
-        <div class="relative flex-1 min-w-[180px]">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400"></i>
-          <input
-            type="text"
-            name="search"
-            value="<?= esc($filters['search'] ?? '') ?>"
-            placeholder="Cari nama jabatan, posisi, departemen..."
-            class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 pl-9 pr-3 text-xs text-gray-800 placeholder-gray-400 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-colors"
-          />
+  <div class="rounded-2xl mb-5 mt-5 border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+    <button @click="formOpen = !formOpen" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
+      <h3 class="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+        <i class="fa-solid fa-caret-right transition-transform" :class="formOpen ? 'rotate-90' : ''"></i>
+        Master Salary
+      </h3>
+    </button>
+    <div x-show="formOpen" x-cloak x-collapse class="border-t border-gray-100 dark:border-gray-800">
+      <div class="p-5 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Nama Staff (multi-select tags) -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Nama Staff</label>
+            <div class="flex flex-wrap gap-1.5 mb-2" x-show="selectedStaffNames.length > 0">
+              <template x-for="(name, idx) in selectedStaffNames" :key="idx">
+                <span class="inline-flex items-center gap-1 rounded bg-blue-600 px-2 py-0.5 text-[11px] font-bold text-white">
+                  <span x-text="name"></span>
+                  <button type="button" @click="selectedStaffNames.splice(idx, 1)" class="hover:text-blue-200">&times;</button>
+                </span>
+              </template>
+            </div>
+            <div class="relative" x-data="{ open: false }">
+              <input type="text" x-model="staffSearchQuery"
+                @focus="open = true"
+                @input="open = true"
+                @keydown.escape="open = false"
+                placeholder="Ketik nama staff..."
+                class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors" />
+              <div x-show="open && filteredStaffOptions.length > 0"
+                @click.outside="open = false"
+                x-cloak
+                class="absolute z-50 left-0 top-full mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                <template x-for="opt in filteredStaffOptions" :key="opt">
+                  <button type="button"
+                    @mousedown.prevent="addStaffName(opt); open = staffSearchQuery.length > 0"
+                    class="w-full text-left px-3 py-2 text-xs hover:bg-blue-50 dark:hover:bg-blue-500/10 text-gray-800 dark:text-gray-200 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                    x-text="opt"></button>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tipe Staff -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Tipe Staff</label>
+            <select x-model="formData.type" class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors">
+              <?php foreach (($mppTypes ?? []) as $t): ?>
+                <option value="<?= esc($t['id_mpp']) ?>"><?= esc($t['desc_mpp']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <!-- Department (cost_center_sap) -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Department</label>
+            <select x-model="formData.dept_id" class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors">
+              <option value="">-- Pilih --</option>
+              <?php foreach (($costCenters ?? []) as $idx => $cc): ?>
+                <option value="<?= esc($cc['cost_center']) ?>"><?= ($idx + 1) . '. [' . esc($cc['cost_center_sap']) . ']' . esc($cc['cost_desc']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <!-- Rate Gaji -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Rate Gaji (In IDR Mio)</label>
+            <input type="number" step="any" x-model="formData.salary" placeholder="0" class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs font-mono focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors" />
+          </div>
         </div>
 
-        <!-- Filter Departemen -->
-        <select name="dept_id" class="rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 px-2.5 text-xs min-w-[140px] text-gray-800 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors">
-          <option value="">Semua Departemen</option>
-          <?php foreach (($departments ?? []) as $d): ?>
-            <option value="<?= esc($d['id_dept']) ?>" <?= (string)($filters['dept_id'] ?? '') === (string)$d['id_dept'] ? 'selected' : '' ?>>
-              <?= esc($d['dept_code']) ?> - <?= esc($d['dept_desc']) ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-
-        <!-- Filter Tipe MPP -->
-        <select name="type" class="rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 px-2.5 text-xs min-w-[120px] text-gray-800 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors">
-          <option value="">Semua Tipe MPP</option>
-          <?php foreach (($mppTypes ?? []) as $t): ?>
-            <option value="<?= esc($t['id_mpp']) ?>" <?= (string)($filters['type'] ?? '') === (string)$t['id_mpp'] ? 'selected' : '' ?>>
-              <?= esc($t['desc_mpp']) ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-
-        <!-- Filter Tahun -->
-        <select name="year" class="rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 px-2.5 text-xs min-w-[100px] text-gray-800 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors">
-          <option value="">Semua Tahun</option>
-          <?php foreach (($years ?? []) as $y): ?>
-            <option value="<?= esc($y) ?>" <?= (string)($filters['year'] ?? '') === (string)$y ? 'selected' : '' ?>>
-              <?= esc($y) ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-
-        <!-- Filter Status -->
-        <select name="status" class="rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 px-2.5 text-xs min-w-[100px] text-gray-800 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors">
-          <option value="">Semua Status</option>
-          <option value="A" <?= ($filters['status'] ?? '') === 'A' ? 'selected' : '' ?>>A</option>
-          <option value="D" <?= ($filters['status'] ?? '') === 'D' ? 'selected' : '' ?>>D</option>
-        </select>
-
-        <!-- Action Buttons -->
-        <button type="submit" class="rounded-lg bg-gray-900 dark:bg-brand-500 py-1.5 px-3 text-xs font-semibold text-white hover:bg-black dark:hover:bg-brand-600 transition-colors" title="Terapkan Filter">
-          <i class="fa-solid fa-filter text-[10px]"></i>
-        </button>
-        <?php if (! empty($has_filter)): ?>
-        <a href="<?= base_url('master/salary-mpp') ?>" class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-1.5 px-2.5 text-xs text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Reset Filter">
-          <i class="fa-solid fa-rotate-left text-[10px]"></i>
-        </a>
-        <?php endif; ?>
-      </form>
+        <!-- Actions -->
+        <div class="flex items-center gap-3">
+          <button type="button" @click="saveFromForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span x-text="saving ? 'Menyimpan...' : 'Save'"></span>
+          </button>
+          <a href="<?= base_url('master/salary-mpp/export?' . http_build_query($filters ?? [])) ?>" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <i class="fa-solid fa-file-excel text-emerald-600"></i>
+            Export Data
+          </a>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- ASYNC DATA TABLE -->
+  <!-- ============================================================ -->
+  <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+    <!-- Filter Bar -->
+    <div class="p-3 border-b border-gray-100 dark:border-gray-800">
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="relative flex-1 min-w-[180px]">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400"></i>
+          <input type="text" x-model="filter.search" @input.debounce.400ms="fetchTableData()" placeholder="Cari nama jabatan, posisi..." class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 pl-9 pr-3 text-xs text-gray-800 placeholder-gray-400 focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors" />
+        </div>
+        <select x-model="filter.dept_id" @change="fetchTableData()" class="rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 px-2.5 text-xs min-w-[160px] text-gray-800 focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors">
+          <option value="">Semua Cost Center</option>
+          <?php foreach (($costCenters ?? []) as $idx => $cc): ?>
+            <option value="<?= esc($cc['cost_center']) ?>">[<?= esc($cc['cost_center_sap']) ?>] <?= esc($cc['cost_desc']) ?></option>
+          <?php endforeach; ?>
+        </select>
+        <select x-model="filter.type" @change="fetchTableData()" class="rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 px-2.5 text-xs min-w-[120px] text-gray-800 focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors">
+          <option value="">Semua Tipe</option>
+          <?php foreach (($mppTypes ?? []) as $t): ?>
+            <option value="<?= esc($t['id_mpp']) ?>"><?= esc($t['desc_mpp']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+    </div>
+
+    <!-- Table -->
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead>
@@ -162,139 +199,46 @@
             <th class="py-3 px-4">Nama Staff</th>
             <th class="py-3 px-4 text-center">Tipe Staff</th>
             <th class="py-3 px-4">Cost Center</th>
-            <th class="py-3 px-4 text-right">Rate Gaji</th>
+            <th class="py-3 px-4 text-right">Rate Gaji (In IDR Mio)</th>
             <th class="py-3 px-4 text-right w-20">Action</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
-          <?php if (empty($rows)): ?>
-            <tr>
-              <td colspan="5" class="py-12 text-center text-gray-400 dark:text-gray-500">
-                <div class="flex flex-col items-center justify-center gap-2">
-                  <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400">
-                    <i class="fa-solid fa-users-slash text-xl"></i>
-                  </div>
-                  <p class="font-semibold text-gray-600 dark:text-gray-300">Tidak ada data Salary & MPP ditemukan</p>
-                  <p class="text-xs text-gray-400">Coba sesuaikan filter pencarian di atas.</p>
-                </div>
+          <tr x-show="tableLoading">
+            <td colspan="5" class="py-10 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Memuat data...</td>
+          </tr>
+          <tr x-show="!tableLoading && tableRows.length === 0">
+            <td colspan="5" class="py-12 text-center text-gray-400">
+              <div class="flex flex-col items-center gap-2">
+                <i class="fa-solid fa-inbox text-2xl text-gray-300"></i>
+                <p class="font-semibold text-gray-500">Tidak ada data</p>
+              </div>
+            </td>
+          </tr>
+          <template x-for="(row, idx) in tableRows" :key="row.id || idx">
+            <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+              <td class="py-3 px-4 font-bold text-gray-900 dark:text-white" x-text="row.desc"></td>
+              <td class="py-3 px-4 text-center">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold" :class="typeBadgeClass(row.type)" x-text="row.type_name || ('Tipe ' + row.type)"></span>
+              </td>
+              <td class="py-3 px-4 text-gray-700 dark:text-gray-300">
+                <span class="font-semibold" x-text="row.cost_center_sap ? '[' + row.cost_center_sap + '] ' + (row.cost_desc || '') : (row.dept_desc || '-')"></span>
+              </td>
+              <td class="py-3 px-4 text-right font-mono font-bold text-gray-900 dark:text-white" x-text="fmtRupiah(row.salary)"></td>
+              <td class="py-3 px-4 text-right">
+                <button type="button" @click="toggleStatus(row.id, 'hapus')" class="h-7 w-7 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-red-600 hover:bg-red-50 hover:border-red-200 dark:hover:bg-red-500/10 transition-colors flex items-center justify-center" title="Hapus">
+                  <i class="fa-solid fa-trash text-[11px]"></i>
+                </button>
               </td>
             </tr>
-          <?php else: ?>
-            <?php foreach ($rows as $index => $r): ?>
-              <?php
-                $tId = (int)($r['type'] ?? 1);
-                $typeBadge = 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
-                if ($tId === 1) {
-                    $typeBadge = 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20';
-                } elseif ($tId === 2) {
-                    $typeBadge = 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20';
-                } elseif ($tId === 3) {
-                    $typeBadge = 'bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20';
-                }
-              ?>
-              <tr x-show="isRowVisible(<?= $index ?>)" class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
-                <!-- Nama Staff -->
-                <td class="py-3 px-4 font-bold text-gray-900 dark:text-white">
-                  <?= esc($r['desc']) ?>
-                </td>
-
-                <!-- Tipe Staff -->
-                <td class="py-3 px-4 text-center">
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold <?= $typeBadge ?>">
-                    <?= esc($r['type_name'] ?? ('Tipe ' . $r['type'])) ?>
-                  </span>
-                </td>
-
-                <!-- Cost Center -->
-                <td class="py-3 px-4 text-gray-700 dark:text-gray-300">
-                  <?php if (! empty($r['dept_desc'])): ?>
-                    <span class="font-semibold"><?= esc($r['dept_desc']) ?></span>
-                    <?php if (! empty($r['dept_code'])): ?>
-                      <span class="text-gray-400 text-[11px]">(<?= esc($r['dept_code']) ?>)</span>
-                    <?php endif; ?>
-                  <?php else: ?>
-                    <span class="text-gray-400">-</span>
-                  <?php endif; ?>
-                </td>
-
-                <!-- Rate Gaji -->
-                <td class="py-3 px-4 text-right font-mono font-bold text-gray-900 dark:text-white">
-                  Rp <?= number_format((float)($r['salary'] ?? 0), 0, ',', '.') ?>
-                </td>
-
-                <!-- Action (delete only) -->
-                <td class="py-3 px-4 text-right">
-                  <div class="flex items-center justify-end">
-                    <button
-                      type="button"
-                      @click="toggleStatus(<?= (int)$r['id'] ?>, 'hapus')"
-                      class="h-7 w-7 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-red-600 hover:bg-red-50 hover:border-red-200 dark:hover:bg-red-500/10 transition-colors flex items-center justify-center shadow-2xs"
-                      title="Hapus Staff MPP"
-                    >
-                      <i class="fa-solid fa-trash text-[11px]"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            <?php endforeach; ?>
-          <?php endif; ?>
+          </template>
         </tbody>
       </table>
     </div>
 
-    <!-- Table Footer / Pagination -->
-    <div class="border-t border-gray-100 dark:border-gray-800 p-3.5 sm:p-4 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
-      <div class="flex items-center gap-1.5 text-xs">
-        <span>Menampilkan</span>
-        <span class="font-bold text-gray-800 dark:text-gray-200" x-text="totalItems === 0 ? 0 : ((currentPage - 1) * perPage + 1)"></span>
-        <span>-</span>
-        <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(currentPage * perPage, totalItems)"></span>
-        <span>dari</span>
-        <span class="font-bold text-gray-800 dark:text-gray-200"><?= number_format($totalRows) ?></span>
-        <span>entri Salary & MPP</span>
-      </div>
-
-      <div class="flex items-center gap-1" x-show="totalPages > 1">
-        <!-- Prev -->
-        <button
-          type="button"
-          @click="prevPage()"
-          :disabled="currentPage === 1"
-          class="h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-xs font-semibold flex items-center gap-1"
-        >
-          <i class="fa-solid fa-chevron-left text-[10px]"></i>
-          <span class="hidden sm:inline">Sebelumnya</span>
-        </button>
-
-        <!-- Page Numbers -->
-        <template x-for="(p, idx) in pageNumbers()" :key="idx">
-          <div>
-            <template x-if="p === '...'">
-              <span class="px-2 py-1 text-gray-400 font-bold">...</span>
-            </template>
-            <template x-if="p !== '...'">
-              <button
-                type="button"
-                @click="goToPage(p)"
-                :class="currentPage === p ? 'bg-brand-500 text-white font-bold shadow-xs' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
-                class="h-8 min-w-[32px] px-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center"
-                x-text="p"
-              ></button>
-            </template>
-          </div>
-        </template>
-
-        <!-- Next -->
-        <button
-          type="button"
-          @click="nextPage()"
-          :disabled="currentPage === totalPages"
-          class="h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-xs font-semibold flex items-center gap-1"
-        >
-          <span class="hidden sm:inline">Berikutnya</span>
-          <i class="fa-solid fa-chevron-right text-[10px]"></i>
-        </button>
-      </div>
+    <!-- Footer -->
+    <div x-show="tableRows.length > 0" class="border-t border-gray-100 dark:border-gray-800 p-3 bg-gray-50/50 dark:bg-gray-800/30 text-xs text-gray-500 dark:text-gray-400">
+      <span>Showing <span class="font-bold text-gray-800 dark:text-gray-200" x-text="tableRows.length"></span> entries</span>
     </div>
   </div>
 
@@ -478,45 +422,109 @@
     return {
       modalOpen: false,
       saving: false,
+      formOpen: true,
 
-      // Pagination
-      currentPage: 1,
-      perPage: 10,
-      totalItems: <?= (int)$totalRows ?>,
-      get totalPages() {
-        return Math.ceil(this.totalItems / this.perPage) || 1;
+      // Async table
+      filter: { search: '', dept_id: '', type: '' },
+      tableRows: [],
+      tableLoading: false,
+
+      // Master Salary Form
+      selectedStaffNames: [],
+      staffSearchQuery: '',
+      staffNameOptions: <?= json_encode($staffNames ?? [], JSON_HEX_TAG | JSON_HEX_QUOT | JSON_HEX_APOS | JSON_HEX_AMP) ?>,
+      formData: {
+        type: '<?= ($mppTypes[0]['id_mpp'] ?? 1) ?>',
+        dept_id: '',
+        salary: 0
       },
-      isRowVisible(index) {
-        return index >= (this.currentPage - 1) * this.perPage && index < this.currentPage * this.perPage;
+
+      get filteredStaffOptions() {
+        const q = (this.staffSearchQuery || '').toLowerCase();
+        return this.staffNameOptions.filter(n =>
+          n.toLowerCase().includes(q) && !this.selectedStaffNames.includes(n)
+        ).slice(0, 20);
       },
-      goToPage(page) {
-        if (page >= 1 && page <= this.totalPages) {
-          this.currentPage = page;
+
+      addStaffName(name) {
+        if (!this.selectedStaffNames.includes(name)) {
+          this.selectedStaffNames.push(name);
+        }
+        this.staffSearchQuery = '';
+      },
+
+      async saveFromForm() {
+        if (this.selectedStaffNames.length === 0) {
+          window.showToast('error', 'Pilih minimal satu nama staff.');
+          return;
+        }
+        if (!this.formData.dept_id) {
+          window.showToast('error', 'Pilih department.');
+          return;
+        }
+        this.saving = true;
+        try {
+          const body = new FormData();
+          this.selectedStaffNames.forEach(n => body.append('names[]', n));
+          body.append('type', this.formData.type);
+          body.append('dept_id', this.formData.dept_id);
+          body.append('salary', this.formData.salary);
+          body.append('year_code', '<?= $selectedYear ?>');
+          // Attach CSRF
+          const csrfName = document.querySelector('meta[name="csrf-token-name"]')?.content || 'csrf_test_name';
+          const csrfHash = document.querySelector('meta[name="csrf-hash"]')?.content || (document.cookie.match(/csrf_cookie_name=([^;]+)/)?.[1] || '');
+          if (csrfHash) body.append(csrfName, decodeURIComponent(csrfHash));
+
+          const res = await window.ypFetch('<?= base_url('master/api/salary-mpp/save') ?>', body);
+          if (res.success) {
+            window.showToast('success', res.message || 'Data berhasil disimpan');
+            this.selectedStaffNames = [];
+            this.formData.salary = 0;
+            this.fetchTableData();
+          } else {
+            window.showToast('error', res.message || 'Gagal menyimpan data');
+          }
+        } catch (e) {
+          window.showToast('error', 'Terjadi kesalahan sistem');
+        } finally {
+          this.saving = false;
         }
       },
-      prevPage() {
-        if (this.currentPage > 1) {
-          this.currentPage--;
+
+      // Table helpers
+      async fetchTableData() {
+        this.tableLoading = true;
+        try {
+          const params = new URLSearchParams({
+            search: this.filter.search,
+            dept_id: this.filter.dept_id,
+            type: this.filter.type,
+            year: '<?= $selectedYear ?>',
+            status: 'A'
+          });
+          const res = await fetch(`<?= base_url('master/api/salary-mpp/data') ?>?${params}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+          });
+          const json = await res.json();
+          this.tableRows = json.data || [];
+        } catch (e) {
+          console.error('Error fetching salary data:', e);
+          this.tableRows = [];
+        } finally {
+          this.tableLoading = false;
         }
       },
-      nextPage() {
-        if (this.currentPage < this.totalPages) {
-          this.currentPage++;
-        }
+
+      typeBadgeClass(type) {
+        const t = parseInt(type);
+        if (t === 1) return 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20';
+        if (t === 2) return 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20';
+        if (t === 3) return 'bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20';
+        return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
       },
-      pageNumbers() {
-        const total = this.totalPages;
-        const current = this.currentPage;
-        if (total <= 7) {
-          return Array.from({ length: total }, (_, i) => i + 1);
-        }
-        if (current <= 4) {
-          return [1, 2, 3, 4, 5, '...', total];
-        }
-        if (current >= total - 3) {
-          return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
-        }
-        return [1, '...', current - 1, current, current + 1, '...', total];
+
+      fmtRupiah(val) {
+        return new Intl.NumberFormat('id-ID', { style: 'decimal', maximumFractionDigits: 2 }).format(parseFloat(val) || 0);
       },
 
       form: {

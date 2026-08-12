@@ -53,11 +53,42 @@ class CostCenterModel extends Model
             $builder->where('status', $filters['status']);
         }
 
+        if (! empty($filters['limit'])) {
+            $builder->limit((int) $filters['limit'], (int) ($filters['offset'] ?? 0));
+        } else {
+            $builder->limit(500);
+        }
+
         return $builder->orderBy('cost_center', 'ASC')
             ->orderBy('id_cost_center', 'ASC')
-            ->limit(500)
             ->get()
             ->getResultArray();
+    }
+
+    public function countAll(array $filters = []): int
+    {
+        $builder = $this->builder();
+
+        if (! empty($filters['search'])) {
+            $like = trim($filters['search']);
+            $builder->groupStart()
+                ->like('cost_center', $like)
+                ->orLike('cost_center_sap', $like)
+                ->orLike('cost_desc', $like)
+                ->orLike('location', $like)
+                ->groupEnd();
+        }
+        if (! empty($filters['type'])) {
+            $builder->where('type', $filters['type']);
+        }
+        if (! empty($filters['year'])) {
+            $builder->where('year', (int) $filters['year']);
+        }
+        if (! empty($filters['status'])) {
+            $builder->where('status', $filters['status']);
+        }
+
+        return (int) $builder->countAllResults();
     }
 
     public function getYears(): array

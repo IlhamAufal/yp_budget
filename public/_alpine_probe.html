@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Alpine Probe</title>
+</head>
+<body style="font-family:sans-serif; padding:20px;">
+  <h3>Alpine x-model + @change probe</h3>
+  <p>This page auto-selects option A on init, then after ~1.2s programmatically switches the select to option B (1102) and dispatches a change event — mimicking a real user selection. Read the result cells below.</p>
+
+  <div x-data="probeApp()" x-init="init()">
+    <select id="ccSel" x-model="selectedCc" @change="fetchEntryData()">
+      <option value="">-- Pilih --</option>
+      <template x-for="item in costCenters" :key="item.id">
+        <option :value="item.id" x-text="item.text"></option>
+      </template>
+    </select>
+
+    <table border="1" cellspacing="0" cellpadding="6" style="margin-top:12px; border-collapse:collapse;">
+      <tbody>
+        <tr><td>Rows count after switch</td><td id="rowCount">-</td></tr>
+        <tr><td>First row label</td><td id="firstRow">-</td></tr>
+        <tr><td>selectedCc after switch</td><td id="lastSel">-</td></tr>
+        <tr><td>fetch count / info</td><td id="log">-</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+  function probeApp() {
+    return {
+      costCenters: [
+        { id: '1101', text: '1101 - CC A' },
+        { id: '1102', text: '1102 - CC B' },
+        { id: '1103', text: '1103 - CC C' }
+      ],
+      selectedCc: '',
+      entryAccounts: [],
+      fetchCount: 0,
+      init() {
+        this.selectedCc = this.costCenters[0].id;
+        this.fetchEntryData();
+        const self = this;
+        setTimeout(() => {
+          const el = document.getElementById('ccSel');
+          const before = el.value;
+          el.value = '1102';
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+          setTimeout(() => {
+            document.getElementById('rowCount').textContent = self.entryAccounts.length;
+            document.getElementById('firstRow').textContent = self.entryAccounts[0] ? self.entryAccounts[0].label : '(empty)';
+            document.getElementById('lastSel').textContent = self.selectedCc;
+            document.getElementById('log').textContent = 'before=' + before + ' fetchCount=' + self.fetchCount;
+          }, 400);
+        }, 1200);
+      },
+      fetchEntryData() {
+        if (!this.selectedCc) { this.entryAccounts = []; return; }
+        this.fetchCount++;
+        const data = this.selectedCc === '1101' ? ['A1','A2'] : this.selectedCc === '1102' ? ['B1','B2','B3'] : ['C1'];
+        this.entryAccounts = data.map((d, i) => ({ idx: i + 1, label: this.selectedCc + '-' + d }));
+      }
+    }
+  }
+  </script>
+  <script defer src="assets/js/bundle.js"></script>
+</body>
+</html>

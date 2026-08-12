@@ -45,7 +45,7 @@
   <!-- STATS BAR -->
   <!-- ============================================================ -->
   <?php
-    $totalRows    = count($rows ?? []);
+    $totalRows    = (int) ($total ?? 0);
     $activeCount  = count(array_filter($rows ?? [], fn($r) => ($r['status'] ?? 'A') === 'A'));
     $inactiveCount = $totalRows - $activeCount;
     $selectedYear = $filters['year'] ?? session()->get('year_code') ?? date('Y');
@@ -83,6 +83,29 @@
       <span class="font-bold text-brand-500 dark:text-brand-400"><?= esc($selectedYear) ?></span>
     </div>
   </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB NAVIGATION -->
+  <!-- ============================================================ -->
+  <div class="rounded-xl border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+    <div class="flex items-center gap-1 border-b border-gray-200/80 dark:border-gray-800 px-4 pt-3">
+      <button @click="activeTab = 'maintenance'"
+        :class="activeTab === 'maintenance' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+        class="border-b-2 px-4 pb-2.5 text-xs font-semibold transition-all">
+        <i class="fa-solid fa-table-list mr-1.5"></i>Maintenance Data Product
+      </button>
+      <button @click="activeTab = 'upload'"
+        :class="activeTab === 'upload' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+        class="border-b-2 px-4 pb-2.5 text-xs font-semibold transition-all">
+        <i class="fa-solid fa-cloud-arrow-up mr-1.5"></i>Upload Data Product
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 1: MAINTENANCE DATA PRODUCT -->
+  <!-- ============================================================ -->
+  <div x-show="activeTab === 'maintenance'" class="space-y-4">
 
   <!-- ============================================================ -->
   <!-- FILTER & DATA TABLE -->
@@ -253,60 +276,81 @@
     </div>
 
     <!-- Table Footer / Pagination -->
+    <?php
+      $pages   = max(1, (int) ceil(($total ?? 0) / max(1, $perPage ?? 10)));
+      $from    = ($total ?? 0) > 0 ? (($page - 1) * $perPage + 1) : 0;
+      $to      = min($page * $perPage, $total ?? 0);
+      $winStart = max(1, min($page - 2, max(1, $pages - 4)));
+      $winEnd   = min($pages, $winStart + 4);
+    ?>
+    <?php if (($total ?? 0) > 0): ?>
     <div class="border-t border-gray-100 dark:border-gray-800 p-3.5 sm:p-4 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
-      <div class="flex items-center gap-1.5 text-xs">
-        <span>Menampilkan</span>
-        <span class="font-bold text-gray-800 dark:text-gray-200" x-text="totalItems === 0 ? 0 : ((currentPage - 1) * perPage + 1)"></span>
-        <span>-</span>
-        <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(currentPage * perPage, totalItems)"></span>
-        <span>dari</span>
-        <span class="font-bold text-gray-800 dark:text-gray-200"><?= number_format($totalRows) ?></span>
-        <span>produk SKU</span>
-      </div>
-
-      <div class="flex items-center gap-1" x-show="totalPages > 1">
-        <!-- Prev -->
-        <button
-          type="button"
-          @click="prevPage()"
-          :disabled="currentPage === 1"
-          class="h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-xs font-semibold flex items-center gap-1"
-        >
-          <i class="fa-solid fa-chevron-left text-[10px]"></i>
-          <span class="hidden sm:inline">Sebelumnya</span>
-        </button>
-
-        <!-- Page Numbers -->
-        <template x-for="(p, idx) in pageNumbers()" :key="idx">
-          <div>
-            <template x-if="p === '...'">
-              <span class="px-2 py-1 text-gray-400 font-bold">...</span>
-            </template>
-            <template x-if="p !== '...'">
-              <button
-                type="button"
-                @click="goToPage(p)"
-                :class="currentPage === p ? 'bg-brand-500 text-white font-bold shadow-xs' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
-                class="h-8 min-w-[32px] px-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center"
-                x-text="p"
-              ></button>
-            </template>
-          </div>
-        </template>
-
-        <!-- Next -->
-        <button
-          type="button"
-          @click="nextPage()"
-          :disabled="currentPage === totalPages"
-          class="h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-xs font-semibold flex items-center gap-1"
-        >
-          <span class="hidden sm:inline">Berikutnya</span>
-          <i class="fa-solid fa-chevron-right text-[10px]"></i>
-        </button>
+      <span>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200"><?= $from ?></span> - <span class="font-bold text-gray-800 dark:text-gray-200"><?= $to ?></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= number_format($total) ?></span> produk SKU</span>
+      <div class="flex items-center gap-1">
+        <a href="?page=<?= max(1, $page - 1) ?>" class="h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 <?= $page <= 1 ? 'opacity-40 pointer-events-none' : '' ?> transition-colors text-xs font-semibold flex items-center gap-1"><i class="fa-solid fa-chevron-left text-[10px]"></i><span class="hidden sm:inline">Sebelumnya</span></a>
+        <?php for ($p = $winStart; $p <= $winEnd; $p++): ?>
+          <a href="?page=<?= $p ?>" class="h-8 min-w-[32px] px-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center <?= $p === $page ? 'bg-brand-500 text-white font-bold shadow-xs' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' ?>"><?= $p ?></a>
+        <?php endfor; ?>
+        <a href="?page=<?= min($pages, $page + 1) ?>" class="h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 <?= $page >= $pages ? 'opacity-40 pointer-events-none' : '' ?> transition-colors text-xs font-semibold flex items-center gap-1"><span class="hidden sm:inline">Berikutnya</span><i class="fa-solid fa-chevron-right text-[10px]"></i></a>
       </div>
     </div>
+    <?php endif; ?>
   </div>
+
+  </div><!-- END TAB 1: MAINTENANCE DATA PRODUCT -->
+
+  <!-- ============================================================ -->
+  <!-- TAB 2: UPLOAD DATA PRODUCT -->
+  <!-- ============================================================ -->
+  <div x-show="activeTab === 'upload'" x-cloak>
+    <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+      <div class="p-6 space-y-6">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+            <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-gray-900 dark:text-white">Upload Data Product</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Download template, isi data produk, lalu upload kembali file Excel.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Download Template -->
+          <div class="rounded-xl border border-dashed border-emerald-300 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/20 p-6 flex flex-col items-center text-center gap-3">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+              <i class="fa-solid fa-file-excel text-2xl"></i>
+            </div>
+            <h4 class="text-sm font-bold text-gray-900 dark:text-white">Template Data</h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400 max-w-xs">Download template Excel berisi format kolom yang harus diisi untuk import data produk.</p>
+            <a href="<?= base_url('master/product/download-template') ?>"
+              class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-emerald-700 transition-colors shadow-sm mt-2">
+              <i class="fa-solid fa-download"></i>
+              Download Template
+            </a>
+          </div>
+
+          <!-- Upload File -->
+          <div class="rounded-xl border border-dashed border-blue-300 dark:border-blue-700 bg-blue-50/50 dark:bg-blue-950/20 p-6 flex flex-col items-center text-center gap-3">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400">
+              <i class="fa-solid fa-upload text-2xl"></i>
+            </div>
+            <h4 class="text-sm font-bold text-gray-900 dark:text-white">Upload Data</h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400 max-w-xs">Upload file Excel yang sudah diisi sesuai format template untuk import data produk secara massal.</p>
+            <form method="POST" action="<?= base_url('master/product/upload') ?>" enctype="multipart/form-data" class="w-full max-w-xs mt-2 space-y-3">
+              <input type="file" name="excel_file" accept=".xlsx,.xls"
+                class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-xs text-gray-700 dark:text-gray-300 file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-blue-600 dark:file:bg-blue-500/10 dark:file:text-blue-400 hover:file:bg-blue-100 cursor-pointer" required />
+              <button type="submit"
+                class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-blue-700 transition-colors shadow-sm">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                Upload Data
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- END TAB 2: UPLOAD DATA PRODUCT -->
 
   <!-- ============================================================ -->
   <!-- MODAL: TAMBAH / EDIT PRODUK -->
@@ -520,6 +564,7 @@
 <script>
   function productPage() {
     return {
+      activeTab: 'maintenance',
       modalOpen: false,
       saving: false,
 

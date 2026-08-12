@@ -39,10 +39,48 @@ class RoleModel extends Model
      */
     public function getAll(array $filters = []): array
     {
-        $builder = $this->db->table('gw_sm__role r')
-            ->select("r.*,
-                (SELECT COUNT(*) FROM gw_sm__rolemenu rm WHERE rm.rolemenu_role_id = r.role_id AND rm.rolemenu_active = 'Y') AS menu_count,
-                (SELECT COUNT(*) FROM gw_sm__profile p WHERE p.profile_role_id = r.role_id) AS user_count");
+        try {
+            $builder = $this->db->table('gw_sm__role r')
+                ->select("r.*,
+                    (SELECT COUNT(*) FROM gw_sm__rolemenu rm WHERE rm.rolemenu_role_id = r.role_id AND rm.rolemenu_active = 'Y') AS menu_count,
+                    (SELECT COUNT(*) FROM gw_sm__profile p WHERE p.profile_role_id = r.role_id) AS user_count");
+
+            $search = trim($filters['search'] ?? '');
+            if ($search !== '') {
+                $builder->groupStart()
+                    ->like('r.role_name_idn', $search)
+                    ->orLike('r.role_name_eng', $search)
+                ->groupEnd();
+            }
+
+            if (($filters['status'] ?? '') !== '') {
+                $builder->where('r.role_active', $filters['status']);
+            }
+
+            if (! empty($filters['limit'])) {
+                $builder->limit((int) $filters['limit'], (int) ($filters['offset'] ?? 0));
+            }
+
+            return $builder
+                ->orderBy('r.role_id', 'ASC')
+                ->get()
+                ->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'RoleModel::getAll: ' . $e->getMessage());
+            try {
+                $fb = $this->db->table('gw_sm__role r')->select('r.*, 0 AS menu_count, 0 AS user_count');
+                if (!empty($filters['status'])) $fb->where('r.role_active', $filters['status']);
+                if (!empty($filters['limit'])) $fb->limit((int)$filters['limit'], (int)($filters['offset'] ?? 0));
+                return $fb->orderBy('r.role_id', 'ASC')->get()->getResultArray();
+            } catch (\Throwable $e2) {
+                return [];
+            }
+        }
+    }
+
+    public function countAll(array $filters = []): int
+    {
+        $builder = $this->db->table('gw_sm__role r');
 
         $search = trim($filters['search'] ?? '');
         if ($search !== '') {
@@ -56,10 +94,7 @@ class RoleModel extends Model
             $builder->where('r.role_active', $filters['status']);
         }
 
-        return $builder
-            ->orderBy('r.role_id', 'ASC')
-            ->get()
-            ->getResultArray();
+        return (int) $builder->countAllResults();
     }
 
     /**
@@ -169,14 +204,19 @@ class RoleModel extends Model
      */
     public function getMenuIdsByRole(int $roleId): array
     {
-        $rows = $this->db->table('gw_sm__rolemenu')
-            ->select('rolemenu_menu_id')
-            ->where('rolemenu_role_id', $roleId)
-            ->where('rolemenu_active', 'Y')
+        $rows = $this->db->table('gw_sm__rolemenu rm')
+            ->select('rm.rolemenu_menu_id')
+            ->join('gw_sm__role r', 'r.role_id = rm.rolemenu_role_id', 'inner')
+            ->join('gw_sm__menu m', 'm.menu_id = rm.rolemenu_menu_id', 'inner')
+            ->where('rm.rolemenu_role_id', $roleId)
+            ->where('rm.rolemenu_active', 'Y')
+            ->where('r.role_active', 'Y')
+            ->where('r.role_type', 'menu')
+            ->where('m.menu_active', 'Y')
             ->get()
             ->getResultArray();
 
-        return array_map(fn($r) => (int) $r['rolemenu_menu_id'], $rows);
+        return array_values(array_unique(array_map(static fn(array $row): int => (int) $row['rolemenu_menu_id'], $rows)));
     }
 
     /**
@@ -184,7 +224,23 @@ class RoleModel extends Model
      */
     public function saveRoleMenus(int $roleId, array $menuIds): array
     {
+        $role = $this->db->table('gw_sm__role')
+            ->where('role_id', $roleId)
+            ->where('role_active', 'Y')
+            ->where('role_type', 'menu')
+            ->get()->getRowArray();
+        if (! $role) {
+            return ['success' => false, 'message' => 'Menu permission hanya dapat diberikan ke role menu yang aktif.'];
+        }
+
         $menuIds = array_values(array_unique(array_filter(array_map('intval', $menuIds))));
+        if ($menuIds !== []) {
+            $activeIds = array_map('intval', array_column($this->db->table('gw_sm__menu')
+                ->select('menu_id')->whereIn('menu_id', $menuIds)->where('menu_active', 'Y')->get()->getResultArray(), 'menu_id'));
+            if (array_diff($menuIds, $activeIds) !== []) {
+                return ['success' => false, 'message' => 'Menu permission yang dipilih tidak aktif atau tidak tersedia.'];
+            }
+        }
 
         $this->db->transStart();
 

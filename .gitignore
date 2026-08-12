@@ -86,7 +86,10 @@ role_vs_object.md
 PRD_Master_Migration_Blueprint_YP_Budget_CI4.md
 project_progress.md
 app/Database/Seeds/QaUserSeeder.php
+PRD_SALES_DATA_SUMMARY.md
 /.agents/
+/tests
+/writable
 
 test_*.php
 tmp_*.php

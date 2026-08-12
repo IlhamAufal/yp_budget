@@ -91,6 +91,7 @@
   x-cloak
   @keydown.escape.window="handleEscape()"
 >
+  <template x-teleport="body">
   <!-- Overlay -->
   <div
     x-show="open"
@@ -171,6 +172,7 @@
       </div>
     </div>
   </div>
+  </template>
 </div>
 
 <!-- ================================================================ -->

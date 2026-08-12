@@ -46,6 +46,7 @@
   "
   @keydown.escape.window="if (!forced) open = false"
 >
+  <template x-teleport="body">
   <!-- Backdrop -->
   <div
     x-show="open"
@@ -154,4 +155,5 @@
       </form>
     </div>
   </div>
+  </template>
 </div>

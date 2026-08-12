@@ -2,153 +2,71 @@
 
 namespace App\Filters;
 
+use App\Libraries\AuthorizationService;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Filters\FilterInterface;
 
 /**
- * RoleFilter — Validasi hak akses URL berdasarkan role user (PRD Phase 1.3).
- *
- * Alur:
- *   1. Bypass endpoint publik (login, set-year, api/active-years, logout).
- *   2. Admin (is_admin = Y) dapat mengakses seluruh halaman.
- *   3. Fail-open selama masa migrasi RBAC: user tanpa role belum dibatasi.
- *   4. User ber-role: segmen pertama URL harus termasuk modul yang diizinkan
- *      dari permission menu (gw_sm__rolemenu → gw_sm__menu.menu_link).
- *
- * Pendekatan berbasis segmen modul dipilih agar endpoint AJAX di dalam
- * modul yang diizinkan (mis. opex-ga/getEntryData) tetap berfungsi, sementara
- * modul yang tidak diizinkan diblokir secara konsisten.
+ * Enforces the legacy module gate and exact gw_sm__menu.menu_link lookup.
  */
 class RoleFilter implements FilterInterface
 {
-    /**
-     * Segmen pertama yang dianggap modul bisnis terproteksi.
-     * URL di luar daftar ini (endpoint umum) tidak diblokir.
-     */
-    private const BUSINESS_MODULES = [
-        'dashboard',
-        'monitoring',
-        'pl',
-        'foh',
-        'opex-ga',
-        'opexga',
-        'opex_ga',
-        'opex-selling',
-        'opex_selling',
-        'capex',
-        'sales',
-        'mpp',
-        'master',
-        'sys-admin',
-        'new-head-account',
-    ];
-
     public function before(RequestInterface $request, $arguments = null)
     {
-        $session = session();
-        $uri     = trim((string) uri_string(), '/');
-
-        // 1. Endpoint publik / non-aplikasi / belum login → biarkan filter auth menangani
-        if ($uri === '' || ! $session->get('user_logged_in') || $this->isPublicPath($uri)) {
+        if (! session()->get('user_logged_in') || $this->isPublic($request)) {
             return;
         }
 
-        // 2. Admin melihat semua
-        if ($session->get('is_admin')) {
-            return;
-        }
-
-        // 3. Fail-open selama masa migrasi RBAC (user tanpa role)
-        $roleIds = array_values(array_filter((array) ($session->get('role_ids') ?? [])));
-        if (empty($roleIds)) {
-            log_message('warning', 'RoleFilter: user tanpa role diizinkan sementara (fail-open) — URI: ' . $uri);
-            return;
-        }
-
-        // 4. Kumpulkan segmen modul yang diizinkan dari permission menu
-        $db              = \Config\Database::connect();
-        $allowedSegments = [];
-        foreach ($roleIds as $roleId) {
-            $rows = $db->table('gw_sm__rolemenu rm')
-                ->select('m.menu_link')
-                ->join('gw_sm__menu m', 'm.menu_id = rm.rolemenu_menu_id', 'inner')
-                ->where('rm.rolemenu_role_id', (int) $roleId)
-                ->where('rm.rolemenu_active', 'Y')
-                ->where('m.menu_active', 'Y')
-                ->get()
-                ->getResultArray();
-
-            foreach ($rows as $row) {
-                $link = trim((string) ($row['menu_link'] ?? ''), '/');
-                if ($link === '' || $link === '#') {
-                    continue;
-                }
-                $allowedSegments[] = explode('/', $link)[0];
+        try {
+            // Re-read authorization for the decision instead of trusting the
+            // session snapshot. AuthorizationContextFilter already performs a
+            // refresh for the request lifecycle; this guarantees the guard is
+            // still DB-backed when invoked independently in tests or routes.
+            $service = new AuthorizationService();
+            $context = $service->refresh();
+            $uri = ltrim((string) uri_string(), '/');
+            if ($service->authorizeRequest($request->getMethod(), $uri, $context)) {
+                return;
             }
-        }
-        $allowedSegments = array_unique($allowedSegments);
-
-        // Diizinkan jika segmen pertama termasuk modul yang boleh diakses
-        $firstSegment = explode('/', $uri)[0];
-        if (in_array($firstSegment, $allowedSegments, true)) {
-            return;
+        } catch (\App\Exceptions\AuthorizationException $e) {
+            return $this->deny($request, 'Sesi authorization tidak valid.', 401);
+        } catch (\Throwable $e) {
+            log_message('error', 'RoleFilter authorization failed: ' . $e->getMessage());
+            return $this->deny($request, 'Authorization tidak tersedia. Akses ditolak.', 503);
         }
 
-        // Segmen pertama bukan modul bisnis → endpoint umum, izinkan
-        if (! in_array($firstSegment, self::BUSINESS_MODULES, true)) {
-            return;
-        }
-
-        // Modul bisnis yang tidak diizinkan → blokir
-        log_message('warning', "RoleFilter: akses diblokir untuk URI '{$uri}' (modul '{$firstSegment}' tidak diizinkan).");
-
-        if ($request->isAJAX()) {
-            return service('response')
-                ->setStatusCode(403)
-                ->setJSON([
-                    'success' => false,
-                    'message' => 'Anda tidak memiliki hak akses ke modul ini.',
-                ]);
-        }
-
-        $session->setFlashdata('error', 'Anda tidak memiliki hak akses ke halaman ini.');
-
-        // Target aman: hindari redirect loop bila role user tidak mengizinkan 'dashboard'.
-        // Prioritas: dashboard → segmen modul pertama yang diizinkan → halaman login.
-        $target = '/login';
-        if (in_array('dashboard', $allowedSegments, true)) {
-            $target = '/dashboard';
-        } elseif (! empty($allowedSegments)) {
-            $target = '/' . reset($allowedSegments);
-        }
-
-        return redirect()->to($target);
+        return $this->deny($request, 'Anda tidak memiliki hak akses ke halaman ini.');
     }
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        // Tidak ada post-processing
     }
 
-    /**
-     * Path publik yang tidak perlu validasi role.
-     */
-    private function isPublicPath(string $uri): bool
+    private function isPublic(RequestInterface $request): bool
     {
-        if ($uri === 'login' || str_starts_with($uri, 'login/')) {
-            return true;
-        }
-        if ($uri === 'logout') {
-            return true;
-        }
-        if ($uri === 'set-year' || str_starts_with($uri, 'set-year/')) {
-            return true;
-        }
-        if ($uri === 'api/active-years' || str_starts_with($uri, 'api/')) {
-            return true;
+        $key = strtoupper($request->getMethod()) . ' ' . trim((string) uri_string(), '/');
+        return in_array($key, [
+            'GET login',
+            'POST login/process',
+            'GET logout',
+            'GET api/active-years',
+        ], true);
+    }
+
+    private function deny(RequestInterface $request, string $message, int $status = 403)
+    {
+        if ($request->isAJAX() || str_starts_with(trim((string) uri_string(), '/'), 'api/')) {
+            return service('response')->setStatusCode($status)->setJSON([
+                'success' => false,
+                'status'  => 'error',
+                'message' => $message,
+            ]);
         }
 
-        return false;
+        return service('response')->setStatusCode($status)->setBody(view('errors/html/error_403', [
+            'title'   => 'Akses Ditolak',
+            'message' => $message,
+        ]));
     }
 }

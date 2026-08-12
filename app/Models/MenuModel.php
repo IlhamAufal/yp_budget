@@ -44,10 +44,11 @@ class MenuModel extends Model
      */
     public function getAll(array $filters = []): array
     {
-        $builder = $this->db->table('gw_sm__menu m')
-            ->select('m.*, p.menu_name_idn AS parent_name, p.menu_id AS parent_id')
-            ->join('gw_sm__menu_structure s', 's.structure_child_menu_id = m.menu_id', 'left')
-            ->join('gw_sm__menu p', 'p.menu_id = s.structure_menu_id', 'left');
+        try {
+            $builder = $this->db->table('gw_sm__menu m')
+                ->select('m.*, p.menu_name_idn AS parent_name, p.menu_id AS parent_id')
+                ->join('gw_sm__menu_structure s', 's.structure_child_menu_id = m.menu_id', 'left')
+                ->join('gw_sm__menu p', 'p.menu_id = s.structure_menu_id', 'left');
 
         $search = trim($filters['search'] ?? '');
         if ($search !== '') {
@@ -63,12 +64,63 @@ class MenuModel extends Model
         }
 
         // Kolom menu_group tidak ada di skema legacy — urutkan per level & order.
+        if (! empty($filters['limit'])) {
+            $builder->limit((int) $filters['limit'], (int) ($filters['offset'] ?? 0));
+        }
+
         return $builder
             ->orderBy('m.menu_level', 'ASC')
             ->orderBy('m.menu_order', 'ASC')
             ->orderBy('m.menu_id', 'ASC')
             ->get()
             ->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', 'MenuModel::getAll: ' . $e->getMessage());
+            // Fallback: query tanpa join structure
+            try {
+                $fb = $this->db->table('gw_sm__menu m')->select('m.*, NULL AS parent_name, NULL AS parent_id');
+                if (!empty($filters['search'])) {
+                    $fb->groupStart()->like('m.menu_name_idn', $filters['search'])->orLike('m.menu_link', $filters['search'])->groupEnd();
+                }
+                if (!empty($filters['status'])) $fb->where('m.menu_active', $filters['status']);
+                if (!empty($filters['limit'])) $fb->limit((int)$filters['limit'], (int)($filters['offset'] ?? 0));
+                return $fb->orderBy('m.menu_level', 'ASC')->orderBy('m.menu_order', 'ASC')->get()->getResultArray();
+            } catch (\Throwable $e2) {
+                return [];
+            }
+        }
+    }
+
+    public function countAll(array $filters = []): int
+    {
+        try {
+            $builder = $this->db->table('gw_sm__menu m')
+                ->selectCount('DISTINCT m.menu_id', 'c')
+                ->join('gw_sm__menu_structure s', 's.structure_child_menu_id = m.menu_id', 'left');
+
+        $search = trim($filters['search'] ?? '');
+        if ($search !== '') {
+            $builder->groupStart()
+                ->like('m.menu_name_idn', $search)
+                ->orLike('m.menu_name_eng', $search)
+                ->orLike('m.menu_link', $search)
+            ->groupEnd();
+        }
+
+        if (($filters['status'] ?? '') !== '') {
+            $builder->where('m.menu_active', $filters['status']);
+        }
+
+        $row = $builder->get()->getRowArray();
+        return (int) ($row['c'] ?? 0);
+        } catch (\Throwable $e) {
+            log_message('error', 'MenuModel::countAll: ' . $e->getMessage());
+            try {
+                return (int) $this->db->table('gw_sm__menu')->countAllResults();
+            } catch (\Throwable $e2) {
+                return 0;
+            }
+        }
     }
 
     /**
@@ -223,6 +275,13 @@ class MenuModel extends Model
         $this->db->table('gw_sm__rolemenu')
             ->where('rolemenu_menu_id', $id)
             ->delete();
+
+        // Hapus override akses user bila migration permission per-user telah aktif.
+        if ($this->db->tableExists('gw_sm__usermenu')) {
+            $this->db->table('gw_sm__usermenu')
+                ->where('usermenu_menu_id', $id)
+                ->delete();
+        }
 
         $this->db->table('gw_sm__menu')->where('menu_id', $id)->delete();
 

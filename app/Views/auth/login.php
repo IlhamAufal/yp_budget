@@ -66,13 +66,20 @@
           </div>
 
           <div x-data="{ showPassword: false }">
-            <label for="password" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label
+              for="password"
+              class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Password
             </label>
+
             <div class="relative">
-              <span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              <span
+                class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+              >
                 <i class="fa-solid fa-lock"></i>
               </span>
+
               <input
                 :type="showPassword ? 'text' : 'password'"
                 id="password"
@@ -81,13 +88,18 @@
                 required
                 class="w-full rounded-xl border border-gray-300 bg-gray-50 py-3 pl-11 pr-11 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900/50 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-brand-500 dark:focus:bg-gray-900"
               />
+
               <button
                 type="button"
                 @click="showPassword = !showPassword"
                 class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                 tabindex="-1"
               >
-                <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                <i
+                  :class="showPassword
+                    ? 'fa-solid fa-eye-slash'
+                    : 'fa-solid fa-eye'"
+                ></i>
               </button>
             </div>
           </div>

@@ -192,7 +192,7 @@
         <!-- Dark Mode Toggler -->
 
         <!-- Notification Menu Area -->
-        <div
+        <!-- <div
           class="relative"
           x-data="{ dropdownOpen: false, notifying: true }"
           @click.outside="dropdownOpen = false"
@@ -226,7 +226,6 @@
             </svg>
           </button>
 
-          <!-- Dropdown Start -->
           <div
             x-show="dropdownOpen"
             class="shadow-theme-lg dark:bg-gray-dark absolute -right-[240px] mt-[17px] flex h-[480px] w-[350px] flex-col rounded-2xl border border-gray-200 bg-white p-3 sm:w-[361px] lg:right-0 dark:border-gray-800"
@@ -607,8 +606,7 @@
               View All Notification
             </a>
           </div>
-          <!-- Dropdown End -->
-        </div>
+        </div> -->
         <!-- Notification Menu Area -->
       </div>
 
@@ -623,9 +621,9 @@
           href="#"
           @click.prevent="dropdownOpen = ! dropdownOpen"
         >
-          <span class="mr-3 h-11 w-11 overflow-hidden rounded-full">
+          <!-- <span class="mr-3 h-11 w-11 overflow-hidden rounded-full">
             <img src="<?= base_url('assets/images/user/owner.jpg') ?>" alt="User" />
-          </span>
+          </span> -->
 
           <span class="text-theme-sm mr-1 block font-medium"> <?= esc(session()->get('user_name') ?? 'User') ?> </span>
 
@@ -669,7 +667,7 @@
           <ul
             class="flex flex-col gap-1 border-b border-gray-200 pt-4 pb-3 dark:border-gray-800"
           >
-            <li>
+            <!-- <li>
               <a
                 href="<?= base_url('profile') ?>"
                 class="group text-theme-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
@@ -691,11 +689,12 @@
                 </svg>
                 Edit profile
               </a>
-            </li>
+            </li> -->
             <li>
-              <a
-                href="<?= base_url('settings') ?>"
-                class="group text-theme-sm flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+              <button
+                type="button"
+                @click="dropdownOpen = false; Modal.show({ url: '<?= base_url('auth/change-password-form') ?>', title: 'Change Password', size: 'sm' })"
+                class="group text-theme-sm flex w-full items-center gap-3 rounded-lg px-3 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
               >
                 <svg
                   class="fill-gray-500 group-hover:fill-gray-700 dark:fill-gray-400 dark:group-hover:fill-gray-300"
@@ -712,8 +711,23 @@
                     fill=""
                   />
                 </svg>
-                Settings
-              </a>
+                Change Password
+              </button>
+            </li>
+            <li>
+              <?php $changePasswordManualPath = 'assets/docs/manual_book/MANUAL BOOK - BUDGET SYSTEM - GANTI PASSWORD.pdf'; ?>
+              <?php if (is_file(FCPATH . $changePasswordManualPath)): ?>
+                <a href="<?= base_url($changePasswordManualPath) ?>" target="_blank" download
+                  class="group text-theme-sm flex w-full items-center gap-3 rounded-lg px-3 py-2 font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
+                  <i class="fa-solid fa-book-open w-6 text-center text-gray-500 group-hover:text-gray-700 dark:text-gray-400"></i>
+                  Manual Book Ganti Password
+                </a>
+              <?php else: ?>
+                <span class="group text-theme-sm flex w-full items-center gap-3 rounded-lg px-3 py-2 font-medium text-gray-400 dark:text-gray-600">
+                  <i class="fa-solid fa-file-circle-xmark w-6 text-center"></i>
+                  Manual Book Belum Tersedia
+                </span>
+              <?php endif; ?>
             </li>
           </ul>
           <a

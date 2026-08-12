@@ -40,11 +40,34 @@ class DepartmentModel extends Model
             $builder->where('status', $filters['status']);
         }
 
+        if (! empty($filters['limit'])) {
+            $builder->limit((int) $filters['limit'], (int) ($filters['offset'] ?? 0));
+        } else {
+            $builder->limit(500);
+        }
+
         return $builder->orderBy('dept_code', 'ASC')
             ->orderBy('id_dept', 'ASC')
-            ->limit(500)
             ->get()
             ->getResultArray();
+    }
+
+    public function countAll(array $filters = []): int
+    {
+        $builder = $this->builder();
+
+        if (! empty($filters['search'])) {
+            $like = trim($filters['search']);
+            $builder->groupStart()
+                ->like('dept_code', $like)
+                ->orLike('dept_desc', $like)
+                ->groupEnd();
+        }
+        if (! empty($filters['status'])) {
+            $builder->where('status', $filters['status']);
+        }
+
+        return (int) $builder->countAllResults();
     }
 
     /**
