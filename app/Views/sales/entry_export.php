@@ -9,7 +9,7 @@
 ?>
 <div x-data="exportSalesEntry(<?= htmlspecialchars($dbProductsJson, ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars($dbCountryDetailJson, ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars($dbRegionSummaryJson, ENT_QUOTES, 'UTF-8') ?>)" 
      x-init="initData()" 
-     class="p-4 md:p-6 lg:p-8 space-y-6 pb-16">
+     class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
     <!-- ============================================================ -->
     <!-- 1. HEADER SECTION -->
@@ -18,13 +18,13 @@
         <div>
             <!-- Breadcrumbs -->
             <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
-                <a href="<?= base_url('dashboard') ?>" class="hover:text-primary transition-colors flex items-center gap-1">
+                <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors flex items-center gap-1">
                     <i class="fa-solid fa-gauge-high"></i> Dashboard
                 </a>
                 <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
-                <a href="<?= base_url('sales') ?>" class="hover:text-primary transition-colors">Sales</a>
+                <a href="<?= base_url('sales') ?>" class="hover:text-brand-500 transition-colors">Sales</a>
                 <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
-                <span class="text-primary font-bold">Sales International Entry</span>
+                <span class="text-brand-500 font-bold">Sales International Entry</span>
             </div>
 
             <!-- Page Title -->
@@ -33,7 +33,7 @@
                     <i class="fa-solid fa-plane-departure text-lg"></i>
                 </span>
                 <div>
-                    <h1 class="text-xl md:text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
+                    <h1 class="text-xl md:text-2xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
                         2.2 Sales International Entry
                         <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800">
                             USD ($) · FY <?= esc($workingYear) ?>
@@ -54,43 +54,43 @@
     <div class="bg-gray-100/80 dark:bg-gray-800/60 p-1.5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs">
         <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="International Sub Tabs">
             <button type="button" @click="subTab = 'budget'" 
-                    :class="subTab === 'budget' ? 'bg-white dark:bg-gray-900 text-primary dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
+                    :class="subTab === 'budget' ? 'bg-white dark:bg-gray-900 text-brand-600 dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
                     class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2">
                 <i class="fa-solid fa-table-cells text-sm"></i>
                 <span>Sales International - Budget ($)</span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary font-bold" x-text="filteredItems.length">0</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] bg-brand-500/10 text-brand-600 font-bold" x-text="filteredItems.length">0</span>
             </button>
 
             <button type="button" @click="subTab = 'key_product'" 
-                    :class="subTab === 'key_product' ? 'bg-white dark:bg-gray-900 text-primary dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
+                    :class="subTab === 'key_product' ? 'bg-white dark:bg-gray-900 text-brand-600 dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
                     class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2">
                 <i class="fa-solid fa-award text-sm text-amber-500"></i>
                 <span>Report Key Product ($)</span>
             </button>
 
             <button type="button" @click="subTab = 'country'" 
-                    :class="subTab === 'country' ? 'bg-white dark:bg-gray-900 text-primary dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
+                    :class="subTab === 'country' ? 'bg-white dark:bg-gray-900 text-brand-600 dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
                     class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2">
                 <i class="fa-solid fa-globe text-sm text-blue-500"></i>
                 <span>Report Country ($)</span>
             </button>
 
             <button type="button" @click="subTab = 'regional'" 
-                    :class="subTab === 'regional' ? 'bg-white dark:bg-gray-900 text-primary dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
+                    :class="subTab === 'regional' ? 'bg-white dark:bg-gray-900 text-brand-600 dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
                     class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2">
                 <i class="fa-solid fa-chart-pie text-sm text-indigo-500"></i>
                 <span>Summary Regional Area ($)</span>
             </button>
 
             <button type="button" @click="subTab = 'download'" 
-                    :class="subTab === 'download' ? 'bg-white dark:bg-gray-900 text-primary dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
+                    :class="subTab === 'download' ? 'bg-white dark:bg-gray-900 text-brand-600 dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
                     class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2">
                 <i class="fa-solid fa-file-excel text-sm text-emerald-600 dark:text-emerald-400"></i>
                 <span>Download Template</span>
             </button>
 
             <button type="button" @click="subTab = 'upload'" 
-                    :class="subTab === 'upload' ? 'bg-white dark:bg-gray-900 text-primary dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
+                    :class="subTab === 'upload' ? 'bg-white dark:bg-gray-900 text-brand-600 dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
                     class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2">
                 <i class="fa-solid fa-cloud-arrow-up text-sm text-sky-600 dark:text-sky-400"></i>
                 <span>Upload Data</span>

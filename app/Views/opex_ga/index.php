@@ -51,23 +51,23 @@
     <div class="rounded-xl border border-gray-200 bg-white shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs text-gray-600">
-                <thead class="bg-gray-50 text-gray-700 uppercase border-b border-gray-200">
-                    <tr>
-                        <th class="px-4 py-3 font-semibold min-w-[120px]">Account No</th>
-                        <th class="px-4 py-3 font-semibold min-w-[200px]">Account Name</th>
-                        <th class="px-3 py-3 text-right">Jan</th>
-                        <th class="px-3 py-3 text-right">Feb</th>
-                        <th class="px-3 py-3 text-right">Mar</th>
-                        <th class="px-3 py-3 text-right">Apr</th>
-                        <th class="px-3 py-3 text-right">May</th>
-                        <th class="px-3 py-3 text-right">Jun</th>
-                        <th class="px-3 py-3 text-right">Jul</th>
-                        <th class="px-3 py-3 text-right">Aug</th>
-                        <th class="px-3 py-3 text-right">Sep</th>
-                        <th class="px-3 py-3 text-right">Oct</th>
-                        <th class="px-3 py-3 text-right">Nov</th>
-                        <th class="px-3 py-3 text-right">Dec</th>
-                        <th class="px-4 py-3 text-right font-bold bg-gray-100">Total Budget</th>
+                <thead class="bg-brand-500 text-white text-xs font-semibold border-b border-brand-600">
+                    <tr class="bg-brand-500 text-white font-semibold">
+                        <th class="px-4 py-3 font-semibold min-w-[120px] text-white">Account No</th>
+                        <th class="px-4 py-3 font-semibold min-w-[200px] text-white">Account Name</th>
+                        <th class="px-3 py-3 text-right text-white">Jan</th>
+                        <th class="px-3 py-3 text-right text-white">Feb</th>
+                        <th class="px-3 py-3 text-right text-white">Mar</th>
+                        <th class="px-3 py-3 text-right text-white">Apr</th>
+                        <th class="px-3 py-3 text-right text-white">May</th>
+                        <th class="px-3 py-3 text-right text-white">Jun</th>
+                        <th class="px-3 py-3 text-right text-white">Jul</th>
+                        <th class="px-3 py-3 text-right text-white">Aug</th>
+                        <th class="px-3 py-3 text-right text-white">Sep</th>
+                        <th class="px-3 py-3 text-right text-white">Oct</th>
+                        <th class="px-3 py-3 text-right text-white">Nov</th>
+                        <th class="px-3 py-3 text-right text-white">Dec</th>
+                        <th class="px-4 py-3 text-right font-bold text-white bg-brand-600">Total Budget</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">

@@ -32,7 +32,7 @@ $routes->setAutoRoute(false);
 // Working Year Context Route
 $routes->post('set-year', 'PeriodController::setYear', ['filter' => 'auth']);
 $routes->get('api/active-years', 'PeriodController::getActiveYears');
-`
+
 // Login routes (public)
 $routes->get('login', 'LoginController::index');
 $routes->post('login/process', 'LoginController::process');
@@ -53,6 +53,19 @@ $routes->get('master/mpp', 'MasterController::salaryMpp', ['filter' => 'auth']);
 $routes->get('report-grand-opex', 'OpexReportController::grand', ['filter' => 'auth']);
 $routes->match(['GET', 'POST'], 'report-grand-opex/data', 'OpexReportController::grandData', ['filter' => 'auth']);
 $routes->get('report-profit-loss', 'PlController::summary', ['filter' => 'auth']);
+
+// Legacy top-level menu links dari gw_sm__menu — alias langsung ke sys-admin.
+$routes->get('menu', 'MenuController::index', ['filter' => 'auth']);
+$routes->get('role', 'RoleController::index', ['filter' => 'auth']);
+$routes->get('user', 'UserController::index', ['filter' => 'auth']);
+
+// Legacy "insert" menu links — form tambah kini berupa modal di halaman index masing-masing.
+$routes->get('menu/add-menu', 'MenuController::index', ['filter' => 'auth']);
+$routes->get('role/add-role', 'RoleController::index', ['filter' => 'auth']);
+$routes->get('user/add-user', 'UserController::index', ['filter' => 'auth']);
+
+// Parent "2. Sales" (menu_link: sales-data)
+$routes->get('sales-data', 'SalesController::index', ['filter' => 'auth']);
 
 // Master Data (COA, Cost Center, Departemen, Periode)
 $routes->group('master', ['filter' => 'auth'], function ($routes) {
@@ -371,6 +384,3 @@ $routes->group('pl', ['filter' => 'auth'], function ($routes) {
     $routes->get('export_excel', 'PlController::exportExcel');
 });
 
-if (file_exists(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php')) {
-    require APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php';
-}

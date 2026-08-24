@@ -23,47 +23,65 @@ $options = array_merge(
 );
 ?>
 
-<div x-data="fohSummaryPage()" class="space-y-6 p-4 sm:p-6">
+<div x-data="fohSummaryPage()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
   <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Summary FOH</h2>
-      <p class="text-sm text-gray-500 dark:text-gray-400">Konsolidasi data aktual dan anggaran Factory Overhead</p>
+      <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+        <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+        <span>FOH</span>
+        <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+        <span class="text-brand-500 font-bold">Summary</span>
+      </div>
+      <h1 class="text-xl md:text-2xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
+        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 shadow-xs">
+          <i class="fa-solid fa-chart-pie text-base"></i>
+        </span>
+        Summary FOH
+      </h1>
+      <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+        Konsolidasi data aktual dan anggaran Factory Overhead.
+      </p>
     </div>
-    <div class="flex items-center gap-2 text-sm text-gray-500">
-      <span class="font-medium text-brand-600">Budget Plan Year:</span>
-      <span class="rounded bg-brand-50 px-2.5 py-1 font-bold text-brand-700 dark:bg-brand-900/30 dark:text-brand-300"><?= esc($workingYear ?? date('Y')) ?></span>
+    <div class="flex items-center gap-2.5 rounded-xl border border-gray-200/80 bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-xs dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
+      <i class="fa-solid fa-calendar-days text-brand-500"></i>
+      <span>Budget Plan Year :</span>
+      <span class="text-brand-600 dark:text-brand-400 font-bold"><?= esc($workingYear ?? date('Y')) ?></span>
     </div>
   </div>
 
-  <div class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+  <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
 
-    <div class="border-b border-gray-200 px-6 pt-4 dark:border-gray-800">
-      <nav class="-mb-px flex gap-6 space-x-8" aria-label="Tabs">
+    <div class="border-b border-gray-100 dark:border-gray-800 px-6 pt-3">
+      <div class="flex items-center gap-4">
         <button
           @click="activeTab = 'view_data'"
-          :class="activeTab === 'view_data' ? 'border-brand-600 text-brand-600 dark:border-brand-400 dark:text-brand-400 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400'"
-          class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors">
+          :class="activeTab === 'view_data' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'"
+          class="flex items-center gap-1.5 border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
+          <i class="fa-solid fa-table-list mr-1"></i>
           View Data
         </button>
 
         <button
           @click="activeTab = 'by_cost_center'"
-          :class="activeTab === 'by_cost_center' ? 'border-brand-600 text-brand-600 dark:border-brand-400 dark:text-brand-400 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400'"
-          class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors">
+          :class="activeTab === 'by_cost_center' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'"
+          class="flex items-center gap-1.5 border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
+          <i class="fa-solid fa-sitemap mr-1"></i>
           Summary by Cost Center
         </button>
 
         <button
           @click="activeTab = 'by_account'"
-          :class="activeTab === 'by_account' ? 'border-brand-600 text-brand-600 dark:border-brand-400 dark:text-brand-400 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400'"
-          class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors">
+          :class="activeTab === 'by_account' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'"
+          class="flex items-center gap-1.5 border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
+          <i class="fa-solid fa-layer-group mr-1"></i>
           Summary by Account
         </button>
-      </nav>
+      </div>
     </div>
 
-    <div class="p-6">
+    <div class="p-5 md:p-6">
       <div x-show="activeTab === 'view_data'" x-cloak>
         <?= $this->include('foh/partials/summary_tab_view_data') ?>
       </div>

@@ -2,34 +2,36 @@
 
 <?= $this->section('content') ?>
 
-<div x-data="fohDetailEntry()" x-init="init()" class="p-4 md:p-8 mx-auto max-w-(--breakpoint-2xl) space-y-6 md:space-y-8">
+<div x-data="fohDetailEntry()" x-init="init()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
   <!-- HEADER -->
-  <div>
-    <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-3">
-      <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-      <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-      <a href="<?= base_url('foh/entry-budget') ?>" class="hover:text-brand-500 transition-colors">FOH</a>
-      <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-      <span>Entry Budget</span>
-      <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-      <span class="text-brand-500 font-bold" x-text="headerName"></span>
-    </div>
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <a href="<?= base_url('foh/entry-budget') ?>" class="inline-flex items-center gap-1.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 shadow-xs hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-          <i class="fa-solid fa-arrow-left text-[10px]"></i> Kembali
-        </a>
-        <h1 class="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-4">
-          <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-500 dark:bg-amber-500/10 dark:text-amber-400">
-            <i class="fa-solid fa-table-cells-large text-xl"></i>
-          </span>
-          <span x-text="headerName"></span>
-        </h1>
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+        <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+        <a href="<?= base_url('foh/entry-budget') ?>" class="hover:text-brand-500 transition-colors">FOH</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+        <span>Entry Budget</span>
+        <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+        <span class="text-brand-500 font-bold" x-text="headerName"></span>
       </div>
-      <div class="text-sm text-gray-500 dark:text-gray-400">
-        <span class="font-bold text-brand-500"><?= esc($workingYear) ?></span> &middot;
-        <span x-text="deptLabel"></span>
+      <h1 class="text-xl md:text-2xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
+        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 shadow-xs">
+          <i class="fa-solid fa-table-cells-large text-base"></i>
+        </span>
+        <span x-text="headerName"></span>
+      </h1>
+      <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5" x-text="deptLabel"></p>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="<?= base_url('foh/entry-budget') ?>" class="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-xs transition-all">
+        <i class="fa-solid fa-arrow-left text-[11px]"></i> Kembali
+      </a>
+      <div class="flex items-center gap-2 rounded-xl border border-gray-200/80 bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-xs dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
+        <i class="fa-solid fa-calendar-days text-brand-500"></i>
+        <span>Tahun Anggaran :</span>
+        <span class="text-brand-600 dark:text-brand-400 font-bold"><?= esc($workingYear) ?></span>
       </div>
     </div>
   </div>
@@ -37,55 +39,63 @@
   <!-- TABLE: Matrix Budget + Actual -->
   <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs overflow-hidden">
     <div class="overflow-x-auto">
-      <table class="w-full text-left text-xs border-collapse min-w-[1200px]">
-        <thead>
-          <tr class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200/80 dark:border-gray-800 text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-            <th rowspan="2" class="py-4 px-4 text-center w-12 border-r">DETAIL</th>
-            <th rowspan="2" class="py-4 px-4 min-w-[240px] border-r">Main Acount</th>
-            <th colspan="12" class="py-2 px-4 text-center bg-blue-50/60 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border-r">BUDGET (DALAM JUTAAN)</th>
-            <th colspan="12" class="py-2 px-4 text-center bg-gray-100/60 dark:bg-gray-800/60 border-r">ACTUAL (DALAM JUTAAN)</th>
+      <table class="w-full text-left text-xs border-collapse min-w-[1200px] text-gray-600 dark:text-gray-300">
+        <thead class="bg-brand-500 text-white text-xs font-semibold">
+          <tr class="bg-brand-500 text-white border-b border-brand-600 font-semibold text-xs">
+            <th rowspan="2" class="py-3 px-4 text-center w-16 border-r border-white/20 text-white font-semibold">Detail</th>
+            <th rowspan="2" class="py-3 px-4 min-w-[240px] border-r border-white/20 text-white font-semibold">Main Account</th>
+            <th colspan="12" class="py-2 px-4 text-center bg-sky-700/60 text-white border-r border-white/20 font-semibold">Budget (Dalam Jutaan)</th>
+            <th colspan="12" class="py-2 px-4 text-center bg-emerald-700/60 text-white font-semibold">Actual (Dalam Jutaan)</th>
           </tr>
-          <tr class="bg-gray-50 dark:bg-gray-800/50 border-b text-gray-500 dark:text-gray-400">
+          <tr class="bg-brand-600 text-white border-b border-brand-600 text-[10px] font-semibold">
             <template x-for="m in months" :key="m">
-              <th class="py-2 px-2 text-right font-semibold border-r" x-text="m"></th>
+              <th class="py-2 px-2 text-right border-r border-white/20 text-white font-semibold" x-text="m"></th>
             </template>
             <template x-for="m in months" :key="'act_'+m">
-              <th class="py-2 px-2 text-right font-semibold text-gray-400 border-r" x-text="m"></th>
+              <th class="py-2 px-2 text-right border-r border-white/20 text-white font-semibold" x-text="m"></th>
             </template>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
           <template x-if="matrixRows.length === 0 && !loading">
             <tr>
-              <td colspan="26" class="py-20 px-8 text-center text-gray-400 dark:text-gray-500">
-                <div class="flex flex-col items-center gap-5">
-                  <i class="fa-solid fa-file-circle-question text-3xl text-gray-300 dark:text-gray-600"></i>
-                  <p class="font-semibold text-gray-600 dark:text-gray-300">Belum ada data sub-account</p>
+              <td colspan="26" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+                <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                  <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                    <i class="fa-solid fa-table-cells-large text-xl"></i>
+                  </div>
+                  <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Belum Ada Data Sub-Account</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Tidak ditemukan rincian sub-account pada header ini.</p>
                 </div>
               </td>
             </tr>
           </template>
           <template x-if="loading">
             <tr>
-              <td colspan="26" class="py-16 text-center text-gray-400 dark:text-gray-500">
-                <i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i>
-                <p class="font-semibold text-gray-600 dark:text-gray-300">Memuat data matriks...</p>
+              <td colspan="26" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+                <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                  <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-brand-500">
+                    <i class="fa-solid fa-spinner fa-spin text-xl"></i>
+                  </div>
+                  <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Memuat Data Matriks...</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Mohon tunggu sebentar, sistem sedang memproses rincian FOH.</p>
+                </div>
               </td>
             </tr>
           </template>
           <template x-for="(row, idx) in matrixRows" :key="idx">
             <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
-              <td class="py-3 px-4 text-center border-r">
-                <button @click="openModalDetail(row, idx)" title="Edit Detail Item" class="inline-flex items-center justify-center rounded-lg bg-brand-500 hover:bg-brand-600 p-1.5 text-white shadow active:scale-[0.98] transition-all">
-                  <i class="fa-solid fa-pen-to-square text-[11px]"></i>
+              <td class="py-2.5 px-4 text-center border-r border-gray-100 dark:border-gray-800">
+                <button @click="openModalDetail(row, idx)" title="Edit Detail Item" class="h-8 w-8 rounded-lg inline-flex items-center justify-center bg-brand-500 text-white shadow-2xs hover:bg-brand-600 active:scale-[0.98] transition-all">
+                  <i class="fa-solid fa-pen-to-square text-xs"></i>
                 </button>
               </td>
-              <td class="py-3 px-4 font-semibold text-gray-900 dark:text-white border-r" x-text="row.acct_code + ' - ' + row.coa_name"></td>
+              <td class="py-2.5 px-4 font-medium text-gray-800 dark:text-gray-200 border-r border-gray-100 dark:border-gray-800" x-text="row.acct_code + ' - ' + row.coa_name"></td>
               <template x-for="m in 12" :key="m">
-                <td class="py-3 px-2 text-right font-mono border-r" x-text="formatNumber(row.budget['b'+m] || 0)"></td>
+                <td class="py-2.5 px-2 text-right font-mono border-r border-gray-100 dark:border-gray-800" x-text="formatNumber(row.budget['b'+m] || 0)"></td>
               </template>
               <template x-for="m in 12" :key="'act_'+m">
-                <td class="py-3 px-2 text-right font-mono border-r"
+                <td class="py-2.5 px-2 text-right font-mono border-r border-gray-100 dark:border-gray-800"
                     :class="hasActual(row) ? 'text-gray-700 dark:text-gray-300' : 'text-blue-500 dark:text-blue-400 italic'"
                     x-text="formatNumber(getActualValue(row, m))"></td>
               </template>
@@ -117,13 +127,13 @@
 
       <div class="overflow-x-auto max-h-96 rounded-lg border border-gray-200 dark:border-gray-700">
         <table class="w-full text-left text-xs">
-          <thead class="bg-gray-50 uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-            <tr>
-              <th class="px-3 py-2 border-b min-w-[180px]">DETAIL ITEM</th>
+          <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+            <tr class="bg-brand-500 text-white font-semibold">
+              <th class="px-3 py-2 border-r border-white/20 min-w-[180px] text-white">Detail Item</th>
               <template x-for="m in months" :key="m">
-                <th class="px-2 py-2 border-b text-center min-w-[75px]" x-text="m"></th>
+                <th class="px-2 py-2 border-r border-white/20 text-center min-w-[75px] text-white" x-text="m"></th>
               </template>
-              <th class="px-2 py-2 border-b text-center w-10">AKSI</th>
+              <th class="px-2 py-2 text-center w-10 text-white">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">

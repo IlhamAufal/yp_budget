@@ -32,28 +32,28 @@
 
             <div x-show="!modalLoading" class="max-w-full overflow-x-auto border border-stroke rounded-sm dark:border-strokedark">
                 <table class="w-full table-fixed text-xs border-collapse">
-                    <thead>
-                        <tr class="bg-gray-100 dark:bg-meta-4 border-b border-stroke dark:border-strokedark">
-                            <th class="py-2.5 px-3 text-left font-bold text-black dark:text-white w-[140px] border-r border-stroke dark:border-strokedark">DESCRIPTION</th>
-                            <th colspan="12" class="py-1.5 text-center font-bold text-blue-800 dark:text-blue-300 bg-blue-50/70 dark:bg-blue-950/40 border-b border-r border-stroke dark:border-strokedark">NUMBER OF HEADCOUNTS</th>
-                            <th class="py-2.5 px-2 text-center font-bold text-black dark:text-white w-[60px]">TOTAL</th>
-                            <th rowspan="2" class="py-2.5 px-2 text-center font-bold text-black dark:text-white w-[90px]">ACTION</th>
+                    <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+                        <tr class="bg-brand-500 text-white font-semibold">
+                            <th class="py-2.5 px-3 text-left font-semibold text-white w-[140px] border-r border-white/20">Description</th>
+                            <th colspan="12" class="py-1.5 text-center font-semibold text-white bg-emerald-700/60 border-r border-white/20">Number of Headcounts</th>
+                            <th class="py-2.5 px-2 text-center font-semibold text-white bg-brand-700 w-[60px] border-r border-white/20">Total</th>
+                            <th rowspan="2" class="py-2.5 px-2 text-center font-semibold text-white w-[90px]">Action</th>
                         </tr>
-                        <tr class="bg-gray-50 dark:bg-meta-4/80 text-gray-600 dark:text-gray-400 font-bold uppercase text-[10px] border-b border-stroke dark:border-strokedark">
-                            <th class="py-1.5 px-3 border-r border-stroke dark:border-strokedark"></th>
-                            <th class="py-1.5 px-1 text-center border-r border-stroke dark:border-strokedark">JAN</th>
-                            <th class="py-1.5 px-1 text-center border-r border-stroke dark:border-strokedark">FEB</th>
-                            <th class="py-1.5 px-1 text-center border-r border-stroke dark:border-strokedark">MAR</th>
-                            <th class="py-1.5 px-1 text-center border-r border-stroke dark:border-strokedark">APR</th>
-                            <th class="py-1.5 px-1 text-center border-r border-stroke dark:border-strokedark">MAY</th>
-                            <th class="py-1.5 px-1 text-center border-r border-stroke dark:border-strokedark">JUN</th>
-                            <th class="py-1.5 px-1 text-center border-r border-stroke dark:border-strokedark">JUL</th>
-                            <th class="py-1.5 px-1 text-center border-r border-stroke dark:border-strokedark">AUG</th>
-                            <th class="py-1.5 px-1 text-center border-r border-stroke dark:border-strokedark">SEP</th>
-                            <th class="py-1.5 px-1 text-center border-r border-stroke dark:border-strokedark">OCT</th>
-                            <th class="py-1.5 px-1 text-center border-r border-stroke dark:border-strokedark">NOV</th>
-                            <th class="py-1.5 px-1 text-center border-r border-stroke dark:border-strokedark">DEC</th>
-                            <th class="py-1.5 px-2 text-center"></th>
+                        <tr class="bg-brand-600 text-white font-semibold text-[10px]">
+                            <th class="py-1.5 px-3 border-r border-white/20"></th>
+                            <th class="py-1.5 px-1 text-center border-r border-white/20 text-white">Jan</th>
+                            <th class="py-1.5 px-1 text-center border-r border-white/20 text-white">Feb</th>
+                            <th class="py-1.5 px-1 text-center border-r border-white/20 text-white">Mar</th>
+                            <th class="py-1.5 px-1 text-center border-r border-white/20 text-white">Apr</th>
+                            <th class="py-1.5 px-1 text-center border-r border-white/20 text-white">May</th>
+                            <th class="py-1.5 px-1 text-center border-r border-white/20 text-white">Jun</th>
+                            <th class="py-1.5 px-1 text-center border-r border-white/20 text-white">Jul</th>
+                            <th class="py-1.5 px-1 text-center border-r border-white/20 text-white">Aug</th>
+                            <th class="py-1.5 px-1 text-center border-r border-white/20 text-white">Sep</th>
+                            <th class="py-1.5 px-1 text-center border-r border-white/20 text-white">Oct</th>
+                            <th class="py-1.5 px-1 text-center border-r border-white/20 text-white">Nov</th>
+                            <th class="py-1.5 px-1 text-center border-r border-white/20 text-white">Dec</th>
+                            <th class="py-1.5 px-2 text-center border-r border-white/20 bg-brand-700"></th>
                         </tr>
                     </thead>
                     <tbody>

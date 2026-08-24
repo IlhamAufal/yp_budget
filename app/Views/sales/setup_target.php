@@ -1,13 +1,25 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div x-data="{ section: 'base_index' }" class="p-4 md:p-6 lg:p-8 space-y-8 pb-12">
+<div x-data="{ section: 'base_index' }" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
     <!-- Page Header Card -->
-    <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
-        <div class="space-y-1.5">
-            <h2 class="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">Target & Showcase Configuration</h2>
-            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Setup Base Amount, Index Rate, and Showcase Inventory</p>
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
+        <div class="space-y-1">
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+                <a href="<?= base_url('sales') ?>" class="hover:text-brand-500 transition-colors">Sales</a>
+                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+                <span class="text-brand-500 font-bold">Target Setup</span>
+            </div>
+            <h1 class="text-xl md:text-2xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 shadow-xs">
+                    <i class="fa-solid fa-bullseye text-base"></i>
+                </span>
+                Target & Showcase Configuration
+            </h1>
+            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Setup Base Amount, Index Rate, and Showcase Inventory</p>
         </div>
     </div>
 

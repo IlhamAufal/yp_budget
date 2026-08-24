@@ -1,55 +1,58 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div x-data="opexGaActualApp()" x-init="init()" class="space-y-6">
+<div x-data="opexGaActualApp()" x-init="init()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <div class="flex items-center gap-2">
-                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <i class="fas fa-chart-column text-lg text-primary"></i>
-                </div>
-                <h2 class="text-title-md2 font-bold text-black dark:text-white">Actual Data OPEX GA</h2>
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors">
+                    <i class="fa-solid fa-gauge-high"></i> Dashboard
+                </a>
+                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+                <span>OPEX GA</span>
+                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+                <span class="text-brand-500 font-bold">Actual Data</span>
             </div>
-            <nav class="mt-1">
-                <ol class="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400">
-                    <li><a class="hover:text-primary" href="<?= base_url('dashboard') ?>"><i class="fas fa-home mr-1"></i>Home</a></li>
-                    <li><i class="fas fa-chevron-right text-[10px]"></i></li>
-                    <li>4.2 OPEX - GA</li>
-                    <li><i class="fas fa-chevron-right text-[10px]"></i></li>
-                    <li class="text-primary font-semibold">Actual Data</li>
-                </ol>
-            </nav>
+            <h1 class="text-xl md:text-2xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 shadow-xs">
+                    <i class="fa-solid fa-chart-column text-base"></i>
+                </span>
+                Actual Data OPEX GA
+            </h1>
+            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                Monitoring dan perbandingan data realisasi aktual OPEX GA.
+            </p>
         </div>
-        <div class="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-1 dark:bg-boxdark dark:text-gray-200">
-            <i class="fas fa-calendar-alt text-primary"></i>
+        <div class="flex items-center gap-2.5 rounded-xl border border-gray-200/80 bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-xs dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
+            <i class="fa-solid fa-calendar-days text-brand-500"></i>
             <span>Budget Plan Year :</span>
-            <span class="text-red-500 font-bold"><?= esc($workingYear ?? '') ?></span>
+            <span class="text-brand-600 dark:text-brand-400 font-bold"><?= esc($workingYear ?? '') ?></span>
         </div>
     </div>
 
-    <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-        <div class="border-b border-stroke px-6 py-3 dark:border-strokedark">
+    <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+        <div class="border-b border-gray-100 dark:border-gray-800 px-6 pt-3">
             <div class="flex items-center gap-4">
                 <button @click="activeTab = 'actual'"
-                    :class="activeTab === 'actual' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white'"
-                    class="border-b-2 px-2 py-2 text-sm font-medium transition-all duration-200">
-                    <i class="fas fa-table mr-1"></i>Actual Data
+                    :class="activeTab === 'actual' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'"
+                    class="border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
+                    <i class="fa-solid fa-table mr-1.5"></i>Actual Data
                 </button>
                 <button @click="activeTab = 'download'"
-                    :class="activeTab === 'download' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white'"
-                    class="border-b-2 px-2 py-2 text-sm font-medium transition-all duration-200">
-                    <i class="fas fa-download mr-1"></i>Download Template
+                    :class="activeTab === 'download' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'"
+                    class="border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
+                    <i class="fa-solid fa-download mr-1.5"></i>Download Template
                 </button>
                 <button @click="activeTab = 'upload'"
-                    :class="activeTab === 'upload' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white'"
-                    class="border-b-2 px-2 py-2 text-sm font-medium transition-all duration-200">
-                    <i class="fas fa-upload mr-1"></i>Upload Data
+                    :class="activeTab === 'upload' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'"
+                    class="border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
+                    <i class="fa-solid fa-cloud-arrow-up mr-1.5"></i>Upload Data
                 </button>
             </div>
         </div>
 
-        <div class="p-6">
+        <div class="p-5 md:p-6">
             <div x-show="activeTab === 'actual'" x-cloak>
                 <?= $this->include('opex_ga/partials/actual_tab_data') ?>
             </div>

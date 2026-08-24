@@ -6,17 +6,32 @@ $budgetMonths = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','no
 $report = $report ?? ['groups' => [], 'grand_total' => ['actual' => ['months' => [], 'avg' => 0, 'total' => 0], 'budget' => ['months' => [], 'total' => 0]]];
 $fmt = static fn($value): string => number_format((float) $value, 2, ',', '.');
 ?>
-<div class="mx-auto max-w-screen-2xl space-y-6 p-4 md:p-8">
-    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+<div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-            <p class="text-xs font-bold uppercase tracking-[0.18em] text-brand-500">Department Report</p>
-            <h1 class="mt-1 text-2xl font-black text-gray-900 dark:text-white"><?= esc($module ?? 'OPEX') ?></h1>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Actual Januari–Agustus dan Budget Januari–Desember untuk working year <?= esc($workingYear ?? '') ?>.</p>
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+                <span>Reports</span>
+                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+                <span class="text-brand-500 font-bold"><?= esc($module ?? 'OPEX') ?></span>
+            </div>
+            <h1 class="text-xl md:text-2xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 shadow-xs">
+                    <i class="fa-solid fa-building text-base"></i>
+                </span>
+                Department Report (<?= esc($module ?? 'OPEX') ?>)
+            </h1>
+            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                Actual Januari–Agustus dan Budget Januari–Desember untuk working year <?= esc($workingYear ?? '') ?>.
+            </p>
         </div>
-        <form method="get" class="flex flex-col gap-2 sm:flex-row sm:items-end">
-            <label class="text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Cost Center
-                <select name="cost_center" class="mt-1 block min-w-64 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+        <form method="get" class="flex flex-col sm:flex-row sm:items-end gap-3 bg-white dark:bg-gray-900 p-3.5 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                    Cost Center
+                </label>
+                <select name="cost_center" class="block w-full sm:min-w-64 rounded-xl border border-gray-200 bg-gray-50/50 px-3.5 py-2 text-xs font-medium text-gray-800 focus:border-brand-500 focus:bg-white outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition">
                     <?php if (($module ?? '') === 'OPEX SELLING'): ?>
                         <option value="0" <?= (string) ($selected ?? '0') === '0' ? 'selected' : '' ?>>All Cost Center</option>
                     <?php endif; ?>
@@ -27,40 +42,53 @@ $fmt = static fn($value): string => number_format((float) $value, 2, ',', '.');
                         </option>
                     <?php endforeach; ?>
                 </select>
-            </label>
-            <button class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-brand-700" type="submit">Tampilkan Report</button>
+            </div>
+            <button class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-500 hover:bg-brand-600 px-4 py-2 text-xs font-bold text-white shadow-xs transition active:scale-[0.98]" type="submit">
+                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                Tampilkan Report
+            </button>
         </form>
     </div>
 
-    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
-        <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-800">
+    <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+        <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
             <div>
-                <h2 class="font-bold text-gray-900 dark:text-white">Actual vs Budget</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Subtotal dihitung server-side per cost center header.</p>
+                <h2 class="font-bold text-sm text-gray-900 dark:text-white">Actual vs Budget</h2>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Subtotal dihitung server-side per cost center header.</p>
             </div>
-            <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300">26 kolom</span>
+            <span class="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-600 dark:text-gray-300">26 kolom</span>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-[2200px] w-full border-collapse text-xs">
-                <thead class="text-center font-bold uppercase tracking-wide">
-                    <tr class="bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200">
-                        <th rowspan="2" class="sticky left-0 z-10 border border-gray-200 bg-gray-100 px-3 py-3 text-left dark:border-gray-700 dark:bg-gray-800">Account</th>
-                        <th rowspan="2" class="border border-gray-200 px-3 py-3 text-left dark:border-gray-700">Description</th>
-                        <th colspan="10" class="border border-gray-200 bg-emerald-50 px-3 py-2 text-emerald-700 dark:border-gray-700 dark:bg-emerald-950/30 dark:text-emerald-300">Actual</th>
-                        <th rowspan="2" class="border border-gray-200 bg-amber-50 px-3 py-3 text-amber-700 dark:border-gray-700 dark:bg-amber-950/30 dark:text-amber-300">Assumption</th>
-                        <th colspan="13" class="border border-gray-200 bg-sky-50 px-3 py-2 text-sky-700 dark:border-gray-700 dark:bg-sky-950/30 dark:text-sky-300">Budget</th>
+                <thead class="text-center font-semibold text-xs bg-brand-500 text-white border-b border-brand-600">
+                    <tr class="bg-brand-500 text-white font-semibold">
+                        <th rowspan="2" class="sticky left-0 z-10 border border-white/20 bg-brand-500 px-3 py-3 text-left text-white">Account</th>
+                        <th rowspan="2" class="border border-white/20 px-3 py-3 text-left text-white min-w-[200px]">Description</th>
+                        <th colspan="10" class="border border-white/20 bg-emerald-700/60 px-3 py-2 text-white font-semibold text-center">Actual</th>
+                        <th rowspan="2" class="border border-white/20 bg-amber-700/60 px-3 py-3 text-white font-semibold text-center">Assumption</th>
+                        <th colspan="13" class="border border-white/20 bg-sky-700/60 px-3 py-2 text-white font-semibold text-center">Budget</th>
                     </tr>
-                    <tr class="bg-gray-50 text-gray-600 dark:bg-gray-900 dark:text-gray-300">
-                        <?php foreach ($actualMonths as $month): ?><th class="border border-gray-200 px-3 py-2 dark:border-gray-700"><?= strtoupper($month) ?></th><?php endforeach; ?>
-                        <th class="border border-gray-200 px-3 py-2 dark:border-gray-700">AVG</th>
-                        <th class="border border-gray-200 px-3 py-2 dark:border-gray-700">TOTAL</th>
-                        <?php foreach ($budgetMonths as $month): ?><th class="border border-gray-200 px-3 py-2 dark:border-gray-700"><?= strtoupper($month) ?></th><?php endforeach; ?>
-                        <th class="border border-gray-200 px-3 py-2 dark:border-gray-700">TOTAL</th>
+                    <tr class="bg-brand-600 text-white text-[11px] font-semibold">
+                        <?php foreach ($actualMonths as $month): ?><th class="border border-white/20 px-3 py-2 text-white"><?= $month ?></th><?php endforeach; ?>
+                        <th class="border border-white/20 px-3 py-2 text-white">Avg</th>
+                        <th class="border border-white/20 px-3 py-2 text-white">Total</th>
+                        <?php foreach ($budgetMonths as $month): ?><th class="border border-white/20 px-3 py-2 text-white"><?= $month ?></th><?php endforeach; ?>
+                        <th class="border border-white/20 px-3 py-2 text-white">Total</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($report['groups'])): ?>
-                        <tr><td colspan="26" class="px-4 py-12 text-center text-gray-500">Tidak ada data report untuk scope dan cost center yang dipilih.</td></tr>
+                        <tr>
+                            <td colspan="26" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+                                <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                                        <i class="fa-solid fa-building text-xl"></i>
+                                    </div>
+                                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Tidak Ada Data Report</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Tidak ada data report untuk scope dan cost center yang dipilih.</p>
+                                </div>
+                            </td>
+                        </tr>
                     <?php endif; ?>
                     <?php foreach (($report['groups'] ?? []) as $group): ?>
                         <tr class="bg-gray-50 font-bold text-gray-700 dark:bg-gray-800/70 dark:text-gray-200">

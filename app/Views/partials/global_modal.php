@@ -15,8 +15,9 @@
  *   options:
  *     url       (string)   — URL untuk fetch konten partial (required)
  *     title     (string)   — Judul modal (default: 'Detail')
- *     size      (string)   — 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full'
- *                             (default: 'md')
+ *     size      (string)   — 'auto' (default) | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full'
+ *                             'auto' : lebar mengikuti konten (clamp 20rem–72rem, ≤92vw),
+ *                                      tinggi mengikuti konten dengan scroll internal.
  *     onLoaded  (function) — Callback setelah HTML berhasil di-inject
  *     onClose   (function) — Callback setelah modal tertutup
  *
@@ -25,6 +26,10 @@
  *
  * Modal.setTitle(newTitle)
  *   Update judul modal.
+ *
+ * Modal.refit()
+ *   Hitung ulang lebar saat size 'auto' (panggil jika konten berubah
+ *   ukuran secara asinkron setelah onLoaded).
  * ===================================================================== */
 ?>
 
@@ -39,13 +44,14 @@
   <!-- Dialog -->
   <div
     id="globalModalDialog"
-    class="relative w-full rounded-2xl bg-white shadow-2xl dark:bg-gray-900 border border-gray-100 dark:border-gray-800 overflow-hidden my-8 transform scale-95 transition-all duration-200 max-w-md"
+    class="relative flex flex-col w-full rounded-2xl bg-white shadow-2xl dark:bg-gray-900 border border-gray-100 dark:border-gray-800 overflow-hidden my-8 transform scale-95 transition-all duration-200 max-w-md"
+    style="max-height: calc(100vh - 2rem);"
     role="dialog"
     aria-modal="true"
     aria-labelledby="globalModalTitle"
   >
     <!-- Header -->
-    <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
+    <div class="shrink-0 flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
       <h3
         id="globalModalTitle"
         class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-3"
@@ -63,7 +69,7 @@
     </div>
 
     <!-- Body -->
-    <div class="relative">
+    <div class="relative flex-1 overflow-y-auto" style="min-height: 0;">
       <!-- Loading State -->
       <div id="globalModalLoading" class="flex items-center justify-center p-12 hidden">
         <div class="flex flex-col items-center gap-3">
@@ -127,8 +133,39 @@
   function setModalSize(sizeKey) {
     if (!dialog) return;
     dialog.classList.remove(...sizeClasses);
+
+    if (sizeKey === 'auto') {
+      // Lebar diatur via inline style setelah konten termuat (fitAutoWidth).
+      // Sementara menunggu konten, pakai lebar provisional agar spinner rapi.
+      dialog.style.width = 'min(24rem, 92vw)';
+      return;
+    }
+
+    dialog.style.width = '';
     const targetClass = sizeMap[sizeKey] || sizeMap['md'];
     dialog.classList.add(targetClass);
+  }
+
+  /**
+   * Ukur lebar natural konten (mode 'auto') lalu terapkan pada dialog,
+   * dibatasi: minimal 20rem, maksimal 72rem dan tidak lebih dari 92vw.
+   */
+  function fitAutoWidth() {
+    if (!dialog || !contentEl) return;
+
+    const prevWidth = dialog.style.width;
+    const prevMaxWidth = dialog.style.maxWidth;
+
+    dialog.style.width = 'max-content';
+    dialog.style.maxWidth = 'none';
+    const natural = Math.ceil(dialog.getBoundingClientRect().width);
+
+    dialog.style.width = prevWidth;
+    dialog.style.maxWidth = prevMaxWidth;
+
+    const maxVw = Math.round(window.innerWidth * 0.92);
+    const target = Math.max(320, Math.min(natural + 2, maxVw, 1152));
+    dialog.style.width = 'min(' + target + 'px, 92vw)';
   }
 
   function executeInjectedScripts(container) {
@@ -150,7 +187,7 @@
      * @param {Object} options
      */
     async show(options = {}) {
-      const { url, title = 'Detail', size = 'md', onLoaded = null, onClose = null } = options;
+      const { url, title = 'Detail', size = 'auto', onLoaded = null, onClose = null } = options;
 
       if (!url) {
         console.warn('[Modal] url is required in Modal.show()');
@@ -208,6 +245,10 @@
           executeInjectedScripts(contentEl);
         }
 
+        if (size === 'auto') {
+          fitAutoWidth();
+        }
+
         if (onLoadedCallback) {
           onLoadedCallback();
         }
@@ -263,6 +304,14 @@
       if (titleEl) {
         titleEl.textContent = newTitle;
       }
+    },
+
+    /**
+     * Hitung ulang lebar modal pada mode 'auto'
+     * (panggil bila konten berubah ukuran secara asinkron).
+     */
+    refit() {
+      fitAutoWidth();
     }
   };
 

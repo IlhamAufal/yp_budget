@@ -8,11 +8,11 @@
 
     <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
         <table class="w-full text-left text-xs">
-            <thead class="bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 uppercase font-semibold">
-                <tr>
-                    <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800">Kode Akun</th>
-                    <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800">Uraian / Remarks</th>
-                    <th class="px-3 py-2 border-b border-gray-200 dark:border-gray-800 text-right">Nominal (Rp)</th>
+            <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+                <tr class="bg-brand-500 text-white font-semibold">
+                    <th class="px-3 py-2 border-r border-white/20 text-white">Kode Akun</th>
+                    <th class="px-3 py-2 border-r border-white/20 text-white">Uraian / Remarks</th>
+                    <th class="px-3 py-2 text-right text-white">Nominal (Rp)</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-gray-600 dark:text-gray-300">

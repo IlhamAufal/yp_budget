@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
 
-<div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-4" x-data="productPage()">
+<div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6" x-data="productPage()">
 
   <!-- ============================================================ -->
   <!-- BREADCRUMB & HEADER -->
@@ -87,7 +87,7 @@
   <!-- ============================================================ -->
   <!-- TAB NAVIGATION -->
   <!-- ============================================================ -->
-  <div class="rounded-xl border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+  <div class="rounded-2xl border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-hidden shadow-xs">
     <div class="flex items-center gap-1 border-b border-gray-200/80 dark:border-gray-800 px-4 pt-3">
       <button @click="activeTab = 'maintenance'"
         :class="activeTab === 'maintenance' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
@@ -105,84 +105,79 @@
   <!-- ============================================================ -->
   <!-- TAB 1: MAINTENANCE DATA PRODUCT -->
   <!-- ============================================================ -->
-  <div x-show="activeTab === 'maintenance'" class="space-y-4">
+  <div x-show="activeTab === 'maintenance'" class="space-y-6">
 
   <!-- ============================================================ -->
   <!-- FILTER & DATA TABLE -->
   <!-- ============================================================ -->
   <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
     <!-- Filter Bar as table header -->
-    <div class="p-3 border-b border-gray-100 dark:border-gray-800">
-      <form method="GET" action="<?= base_url('master/product') ?>" class="flex flex-wrap items-center gap-2">
+    <div class="p-3.5 border-b border-gray-100 dark:border-gray-800">
+      <form method="GET" action="<?= base_url('master/product') ?>" class="flex flex-wrap items-center gap-2.5">
         <!-- Search Input -->
         <div class="relative flex-1 min-w-[180px]">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400"></i>
           <input type="text" name="search" value="<?= esc($filters['search'] ?? '') ?>" placeholder="Cari nama produk, MID, atau key..." 
-            class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 pl-9 pr-3 text-xs focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-colors" />
+            class="w-full rounded-xl border border-gray-200 bg-gray-50/50 py-2 pl-9 pr-3 text-xs text-gray-800 placeholder-gray-400 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-colors" />
         </div>
         
         <!-- Filter Channel -->
-        <select name="channel" class="rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 px-2.5 text-xs min-w-[140px] focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-colors">
+        <select name="channel" class="rounded-xl border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs text-gray-800 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-colors min-w-[130px]">
           <option value="">Semua Channel</option>
-          <?php foreach (($channels ?? []) as $ch): ?>
-            <option value="<?= esc($ch) ?>" <?= ($filters['channel'] ?? '') === $ch ? 'selected' : '' ?>>
-              <?= esc($ch) ?>
-            </option>
-          <?php endforeach; ?>
+          <option value="GT" <?= ($filters['channel'] ?? '') === 'GT' ? 'selected' : '' ?>>GT (General Trade)</option>
+          <option value="MT" <?= ($filters['channel'] ?? '') === 'MT' ? 'selected' : '' ?>>MT (Modern Trade)</option>
+          <option value="OEM" <?= ($filters['channel'] ?? '') === 'OEM' ? 'selected' : '' ?>>OEM</option>
+          <option value="EXPORT" <?= ($filters['channel'] ?? '') === 'EXPORT' ? 'selected' : '' ?>>EXPORT</option>
+          <option value="ECOM" <?= ($filters['channel'] ?? '') === 'ECOM' ? 'selected' : '' ?>>ECOM</option>
         </select>
         
-        <!-- Filter Tahun -->
-        <select name="year" class="rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 px-2.5 text-xs min-w-[120px] focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-colors">
-          <option value="">Semua Tahun</option>
-          <?php foreach (($years ?? []) as $y): ?>
-            <option value="<?= esc($y) ?>" <?= (string)($filters['year'] ?? '') === (string)$y ? 'selected' : '' ?>>
-              <?= esc($y) ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-
         <!-- Filter Status -->
-        <select name="status" class="rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 px-2.5 text-xs min-w-[120px] focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-colors">
+        <select name="status" class="rounded-xl border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs text-gray-800 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-colors min-w-[130px]">
           <option value="">Semua Status</option>
           <option value="A" <?= ($filters['status'] ?? '') === 'A' ? 'selected' : '' ?>>Aktif (A)</option>
           <option value="D" <?= ($filters['status'] ?? '') === 'D' ? 'selected' : '' ?>>Non-Aktif (D)</option>
         </select>
         
-        <button type="submit" class="rounded-lg bg-gray-900 dark:bg-brand-500 py-1.5 px-3 text-xs font-semibold text-white hover:bg-black dark:hover:bg-brand-600 transition-colors shadow-xs" title="Terapkan Filter">
-          <i class="fa-solid fa-filter text-[10px]"></i>
+        <!-- Submit & Reset Buttons -->
+        <button type="submit" class="h-8 px-3 rounded-xl bg-gray-900 dark:bg-brand-500 text-xs font-semibold text-white hover:bg-black dark:hover:bg-brand-600 transition-colors inline-flex items-center gap-1.5 shadow-xs" title="Terapkan Filter">
+          <i class="fa-solid fa-filter text-[11px]"></i>
+          <span>Filter</span>
         </button>
         <?php if (! empty($has_filter)): ?>
-        <a href="<?= base_url('master/product') ?>" class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-1.5 px-2.5 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Reset Filter">
-          <i class="fa-solid fa-rotate-left text-[10px]"></i>
+        <a href="<?= base_url('master/product') ?>" class="h-8 px-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors inline-flex items-center gap-1.5" title="Reset Filter">
+          <i class="fa-solid fa-rotate-left text-[11px]"></i>
+          <span>Reset</span>
         </a>
         <?php endif; ?>
       </form>
     </div>
+    
+    <!-- Table Responsive -->
     <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="border-b border-gray-200/80 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-800/50 text-[11px] font-bold capitalize tracking-normal text-gray-500 dark:text-gray-400">
-            <th class="py-3 px-4 w-12 text-center">No</th>
-            <th class="py-3 px-4 font-mono">ID Inventory</th>
-            <th class="py-3 px-4 text-center">Channel</th>
-            <th class="py-3 px-4">Key Product</th>
-            <th class="py-3 px-4">Product Name</th>
-            <th class="py-3 px-4 text-right">DB</th>
-            <th class="py-3 px-4 text-right">PCS</th>
-            <th class="py-3 px-4 text-right">GR</th>
-            <th class="py-3 px-4 text-right w-28">Action</th>
+      <table class="w-full text-left border-collapse text-xs text-gray-600 dark:text-gray-300">
+        <thead class="bg-brand-500 text-white text-xs font-semibold border-b border-brand-600">
+          <tr>
+            <th class="py-3 px-4 w-12 text-center text-white">No</th>
+            <th class="py-3 px-4 w-28 text-white">ID Inventory</th>
+            <th class="py-3 px-4 w-24 text-center text-white">Channel</th>
+            <th class="py-3 px-4 w-32 text-white">Key Product</th>
+            <th class="py-3 px-4 min-w-[200px] text-white">Product Name</th>
+            <th class="py-3 px-4 text-right w-20 text-white">DB</th>
+            <th class="py-3 px-4 text-right w-20 text-white">PCS</th>
+            <th class="py-3 px-4 text-right w-24 text-white">GR</th>
+            <th class="py-3 px-4 text-right w-28 text-white">Action</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
           <?php if (empty($rows)): ?>
             <tr>
-              <td colspan="9" class="py-12 text-center text-gray-400 dark:text-gray-500">
-                <div class="flex flex-col items-center justify-center gap-2">
+              <td colspan="9" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+                <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
                   <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400">
                     <i class="fa-solid fa-box-open text-xl"></i>
                   </div>
-                  <p class="font-semibold text-gray-600 dark:text-gray-300">Tidak ada data produk ditemukan</p>
-                  <p class="text-xs text-gray-400">Coba sesuaikan filter pencarian di atas.</p>
+                  <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Tidak ada data produk ditemukan</p>
+                  <p class="text-xs text-gray-400">Coba ubah kata kunci pencarian atau reset filter di atas.</p>
                 </div>
               </td>
             </tr>
@@ -251,20 +246,20 @@
                     <button
                       type="button"
                       @click='openEditModal(<?= json_encode($r, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)'
-                      class="h-7 w-7 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-brand-50 hover:text-brand-500 hover:border-brand-200 dark:hover:bg-brand-500/10 dark:hover:text-brand-400 transition-colors flex items-center justify-center shadow-2xs"
+                      class="h-8 w-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-brand-50 hover:text-brand-500 hover:border-brand-200 dark:hover:bg-brand-500/10 dark:hover:text-brand-400 transition-colors flex items-center justify-center shadow-2xs"
                       title="Edit Produk"
                     >
-                      <i class="fa-solid fa-pen-to-square text-[11px]"></i>
+                      <i class="fa-solid fa-pen-to-square text-xs"></i>
                     </button>
 
                     <!-- Delete Button -->
                     <button
                       type="button"
                       @click="toggleStatus(<?= (int)$r['id_product'] ?>, 'hapus')"
-                      class="h-7 w-7 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-red-600 hover:bg-red-50 hover:border-red-200 dark:hover:bg-red-500/10 transition-colors flex items-center justify-center shadow-2xs"
+                      class="h-8 w-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-red-600 hover:bg-red-50 hover:border-red-200 dark:hover:bg-red-900/20 dark:text-red-400 transition-colors flex items-center justify-center shadow-2xs"
                       title="Hapus Produk"
                     >
-                      <i class="fa-solid fa-trash text-[11px]"></i>
+                      <i class="fa-solid fa-trash text-xs"></i>
                     </button>
                   </div>
                 </td>
@@ -285,7 +280,7 @@
     ?>
     <?php if (($total ?? 0) > 0): ?>
     <div class="border-t border-gray-100 dark:border-gray-800 p-3.5 sm:p-4 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
-      <span>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200"><?= $from ?></span> - <span class="font-bold text-gray-800 dark:text-gray-200"><?= $to ?></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= number_format($total) ?></span> produk SKU</span>
+      <span>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200"><?= $from ?></span> - <span class="font-bold text-gray-800 dark:text-gray-200"><?= $to ?></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= number_format($total) ?></span> produk</span>
       <div class="flex items-center gap-1">
         <a href="?page=<?= max(1, $page - 1) ?>" class="h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 <?= $page <= 1 ? 'opacity-40 pointer-events-none' : '' ?> transition-colors text-xs font-semibold flex items-center gap-1"><i class="fa-solid fa-chevron-left text-[10px]"></i><span class="hidden sm:inline">Sebelumnya</span></a>
         <?php for ($p = $winStart; $p <= $winEnd; $p++): ?>

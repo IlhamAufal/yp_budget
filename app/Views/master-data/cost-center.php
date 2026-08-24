@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
 
-<div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-4" x-data="costCenterPage()">
+<div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6" x-data="costCenterPage()">
 
   <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div>
@@ -62,8 +62,8 @@
   </div>
 
   <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs overflow-hidden dark:border-gray-800 dark:bg-gray-900">
-    <div class="p-3 border-b border-gray-100 dark:border-gray-800">
-      <div class="flex flex-wrap items-center gap-2">
+    <div class="p-3.5 border-b border-gray-100 dark:border-gray-800">
+      <div class="flex flex-wrap items-center gap-2.5">
         <div class="relative flex-1 min-w-[180px]">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400"></i>
           <input
@@ -71,13 +71,13 @@
             x-model="searchQuery"
             @input="currentPage = 1"
             placeholder="Cari kode atau nama cost center..."
-            class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 pl-9 pr-3 text-xs text-gray-900 placeholder:text-gray-400 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-all"
+            class="w-full rounded-xl border border-gray-200 bg-gray-50/50 py-2 pl-9 pr-3 text-xs text-gray-900 placeholder:text-gray-400 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-all"
           />
         </div>
         <select
           x-model="selectedDepartment"
           @change="currentPage = 1"
-          class="rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 px-2.5 text-xs text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white min-w-[120px] transition-all"
+          class="rounded-xl border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white min-w-[140px] transition-all"
         >
           <option value="">Semua Departemen</option>
           <?php foreach ($departments ?? [] as $dept): ?>
@@ -89,7 +89,7 @@
         <select
           x-model="selectedStatus"
           @change="currentPage = 1"
-          class="rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 px-2.5 text-xs text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white min-w-[120px] transition-all"
+          class="rounded-xl border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white min-w-[130px] transition-all"
         >
           <option value="">Semua Status</option>
           <option value="A">Aktif</option>
@@ -99,17 +99,18 @@
           x-show="searchQuery !== '' || selectedDepartment !== '' || selectedStatus !== ''"
           x-cloak
           @click="resetFilters()"
-          class="rounded-lg border border-gray-200 py-1.5 px-2.5 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 transition-all"
+          class="h-8 px-3 rounded-xl border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 transition-all inline-flex items-center gap-1.5"
           title="Reset Filter"
         >
-          <i class="fa-solid fa-rotate-left text-[10px]"></i>
+          <i class="fa-solid fa-rotate-left text-[11px]"></i>
+          <span>Reset</span>
         </button>
       </div>
     </div>
     
     <div class="overflow-x-auto">
       <table class="w-full text-left text-xs text-gray-600 dark:text-gray-300">
-        <thead class="bg-gray-50/80 text-[11px] font-bold capitalize tracking-normal text-gray-500 dark:bg-gray-800/60 dark:text-gray-400 border-b border-gray-200/80 dark:border-gray-800">
+        <thead class="bg-brand-500 text-white text-xs font-semibold border-b border-brand-600">
           <tr>
             <th scope="col" class="px-5 py-3.5 w-12 text-center">No</th>
             <th scope="col" class="px-5 py-3.5 w-36">Code</th>
@@ -131,7 +132,7 @@
                   <button
                     @click="openEditModal(row)"
                     title="Edit Cost Center"
-                    class="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-brand-50 hover:text-brand-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-brand-900/30 dark:hover:text-brand-400 transition-colors"
+                    class="h-8 w-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200 dark:hover:bg-brand-900/30 dark:hover:text-brand-400 transition-colors flex items-center justify-center shadow-2xs"
                   >
                     <i class="fa-solid fa-pen-to-square text-xs"></i>
                   </button>
@@ -139,7 +140,7 @@
                   <button
                     @click="toggleStatus(row.id, 'hapus')"
                     title="Hapus Cost Center"
-                    class="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 transition-colors"
+                    class="h-8 w-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-red-600 hover:bg-red-50 hover:border-red-200 dark:hover:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 transition-colors flex items-center justify-center shadow-2xs"
                   >
                     <i class="fa-solid fa-trash text-xs"></i>
                   </button>
@@ -149,13 +150,13 @@
           </template>
 
           <tr x-show="filteredCostCenters.length === 0">
-            <td colspan="4" class="px-5 py-12 text-center">
-              <div class="flex flex-col items-center justify-center gap-2">
-                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 text-gray-400 dark:bg-gray-800">
-                  <i class="fa-solid fa-folder-open text-xl"></i>
+            <td colspan="4" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+              <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                  <i class="fa-solid fa-sitemap text-xl"></i>
                 </div>
-                <p class="text-sm font-semibold text-gray-900 dark:text-white">Tidak Ada Data Cost Center</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 max-w-sm">
+                <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Tidak Ada Data Cost Center</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
                   Tidak ditemukan data yang sesuai dengan kriteria pencarian atau filter Anda.
                 </p>
               </div>

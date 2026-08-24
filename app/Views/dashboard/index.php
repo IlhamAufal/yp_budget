@@ -2,10 +2,10 @@
 
 <?= $this->section('content') ?>
 
-<div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6" x-data="{ period: '<?= (int) ($workingYear ?? date('Y')) ?>' }">
+<div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
     <?php if (! empty($rolelessUsers)): ?>
-    <div class="flex items-start gap-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-2xl p-4" x-data="{ show: true }" x-show="show" x-transition>
+    <div id="roleless-banner" data-dismissible class="flex items-start gap-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-2xl p-4">
         <div class="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86l-8.07 14.03A2 2 0 003.93 21h16.14a2 2 0 001.73-3.11L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
         </div>
@@ -18,7 +18,7 @@
         </div>
         <div class="flex items-center gap-3 shrink-0 mt-0.5">
             <a href="<?= base_url('sys-admin/user') ?>" class="text-xs font-medium text-amber-700 dark:text-amber-300 hover:underline">Kelola User &rarr;</a>
-            <button @click="show = false" class="text-amber-500 hover:text-amber-700 dark:hover:text-amber-300" aria-label="Tutup">
+            <button data-action="dismiss" data-dismiss-target="#roleless-banner" class="text-amber-500 hover:text-amber-700 dark:hover:text-amber-300" aria-label="Tutup">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
@@ -268,15 +268,15 @@
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-50/60 dark:bg-gray-700/30 text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-700/60">
-                        <th class="px-5 py-3">Cost Center</th>
-                        <th class="px-5 py-3">Department</th>
-                        <th class="px-5 py-3 text-right">OPEX GA</th>
-                        <th class="px-5 py-3 text-right">CAPEX</th>
-                        <th class="px-5 py-3 text-center">MPP</th>
-                        <th class="px-5 py-3">Status</th>
-                        <th class="px-5 py-3 text-right">Aksi</th>
+                <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+                    <tr class="bg-brand-500 text-white font-semibold">
+                        <th class="px-5 py-3 text-white">Cost Center</th>
+                        <th class="px-5 py-3 text-white">Department</th>
+                        <th class="px-5 py-3 text-right text-white">OPEX GA</th>
+                        <th class="px-5 py-3 text-right text-white">CAPEX</th>
+                        <th class="px-5 py-3 text-center text-white">MPP</th>
+                        <th class="px-5 py-3 text-white">Status</th>
+                        <th class="px-5 py-3 text-right text-white">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60 text-xs">

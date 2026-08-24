@@ -12,13 +12,13 @@
 
     <div class="overflow-x-auto max-h-96 rounded-lg border border-gray-200 dark:border-gray-700">
       <table class="w-full text-left text-xs">
-        <thead class="bg-gray-50 uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-          <tr>
-            <th class="px-3 py-2 border-b min-w-[180px]">DETAIL ITEM</th>
+        <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+          <tr class="bg-brand-500 text-white font-semibold">
+            <th class="px-3 py-2 border-r border-white/20 min-w-[180px] text-white">Detail Item</th>
             <template x-for="m in months" :key="m">
-              <th class="px-2 py-2 border-b text-center min-w-[75px]" x-text="m"></th>
+              <th class="px-2 py-2 border-r border-white/20 text-center min-w-[75px] text-white" x-text="m"></th>
             </template>
-            <th class="px-2 py-2 border-b text-center w-10">AKSI</th>
+            <th class="px-2 py-2 text-center w-10 text-white">Aksi</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">

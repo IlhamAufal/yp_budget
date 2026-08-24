@@ -44,70 +44,78 @@
                 this.isLoadingModal = false;
             });
     }
-}" class="p-4 md:p-6 lg:p-8 space-y-8 pb-12">
+}" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h2 class="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+                <span class="text-brand-500 font-bold">Monitoring</span>
+            </div>
+            <h1 class="text-xl md:text-2xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 shadow-xs">
+                    <i class="fa-solid fa-chart-line text-base"></i>
+                </span>
                 Summary Profit & Loss Monitoring
-            </h2>
-            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+            </h1>
+            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                 Monitoring alokasi anggaran OPEX, FOH, MPP, dan CAPEX per Cost Center.
             </p>
         </div>
     </div>
 
-    <div class="rounded-2xl border border-gray-200 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900">
+    <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
         
-        <div class="border-b border-gray-200 dark:border-gray-800 px-4 pt-3 overflow-x-auto">
-            <nav class="flex space-x-2 sm:space-x-4 min-w-max" aria-label="Tabs">
+        <div class="border-b border-gray-100 dark:border-gray-800 px-6 pt-3 overflow-x-auto">
+            <nav class="flex items-center gap-4 min-w-max" aria-label="Tabs">
                 <button 
                     @click="activeTab = 'opex_ga'"
                     :class="activeTab === 'opex_ga' 
-                        ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-semibold bg-brand-50/50 dark:bg-brand-950/20' 
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
-                    class="flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-medium border-b-2 rounded-t-lg transition-colors">
-                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' 
+                        : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'"
+                    class="flex items-center gap-1.5 border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
+                    <i class="fa-solid fa-calculator mr-1"></i>
                     <span>Budget - OPEX GA</span>
                 </button>
 
                 <button 
                     @click="activeTab = 'foh'"
                     :class="activeTab === 'foh' 
-                        ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-semibold bg-brand-50/50 dark:bg-brand-950/20' 
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
-                    class="flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-medium border-b-2 rounded-t-lg transition-colors">
-                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' 
+                        : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'"
+                    class="flex items-center gap-1.5 border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
+                    <i class="fa-solid fa-industry mr-1"></i>
                     <span>Budget - FOH</span>
                 </button>
 
                 <button 
                     @click="activeTab = 'mpp_opex'"
                     :class="activeTab === 'mpp_opex' 
-                        ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-semibold bg-brand-50/50 dark:bg-brand-950/20' 
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
-                    class="flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-medium border-b-2 rounded-t-lg transition-colors">
-                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' 
+                        : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'"
+                    class="flex items-center gap-1.5 border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
+                    <i class="fa-solid fa-users mr-1"></i>
                     <span>Budget - MPP OPEX</span>
                 </button>
 
                 <button 
                     @click="activeTab = 'mpp_foh'"
                     :class="activeTab === 'mpp_foh' 
-                        ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-semibold bg-brand-50/50 dark:bg-brand-950/20' 
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
-                    class="flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-medium border-b-2 rounded-t-lg transition-colors">
-                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' 
+                        : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'"
+                    class="flex items-center gap-1.5 border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
+                    <i class="fa-solid fa-user-gear mr-1"></i>
                     <span>Budget - MPP FOH</span>
                 </button>
 
                 <button 
                     @click="activeTab = 'capex'"
                     :class="activeTab === 'capex' 
-                        ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-semibold bg-brand-50/50 dark:bg-brand-950/20' 
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
-                    class="flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-medium border-b-2 rounded-t-lg transition-colors">
-                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' 
+                        : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'"
+                    class="flex items-center gap-1.5 border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
+                    <i class="fa-solid fa-cubes-stacked mr-1"></i>
                     <span>Budget - CAPEX (OPEX & FOH)</span>
                 </button>
             </nav>
@@ -118,26 +126,26 @@
             <div x-show="activeTab === 'opex_ga'" x-cloak class="space-y-4">
                 <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
                     <table class="w-full text-left text-xs sm:text-sm">
-                        <thead class="bg-gray-50 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 uppercase tracking-wider font-semibold">
-                            <tr>
-                                <th rowspan="2" class="px-4 py-3 border-b border-r border-gray-200 dark:border-gray-800 min-w-[200px]">Cost Center</th>
-                                <th colspan="14" class="px-4 py-2 border-b border-gray-200 dark:border-gray-800 text-center">Budget Expense (Rp)</th>
+                        <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+                            <tr class="bg-brand-500 text-white font-semibold">
+                                <th rowspan="2" class="px-4 py-3 border-r border-white/20 min-w-[200px] text-white">Cost Center</th>
+                                <th colspan="14" class="px-4 py-2 border-r border-white/20 text-center text-white font-semibold">Budget Expense (Rp)</th>
                             </tr>
-                            <tr class="bg-gray-100/70 dark:bg-gray-800/80">
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800">Entry By</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jan</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Feb</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Mar</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Apr</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">May</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jun</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jul</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Aug</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Sep</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Oct</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Nov</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Dec</th>
-                                <th class="px-3 py-2 border-b border-gray-200 dark:border-gray-800 text-right font-bold text-gray-900 dark:text-white">Total</th>
+                            <tr class="bg-brand-600 text-white text-[11px] font-semibold">
+                                <th class="px-3 py-2 border-r border-white/20 text-white">Entry By</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jan</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Feb</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Mar</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Apr</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">May</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jun</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jul</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Aug</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Sep</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Oct</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Nov</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Dec</th>
+                                <th class="px-3 py-2 text-right font-bold text-white bg-brand-600">Total</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-gray-600 dark:text-gray-300">
@@ -168,7 +176,15 @@
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="15" class="px-4 py-8 text-center text-gray-400">Tidak ada data budget OPEX GA tersedia.</td>
+                                    <td colspan="15" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+                                        <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                                                <i class="fa-solid fa-calculator text-xl"></i>
+                                            </div>
+                                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Tidak Ada Data Budget OPEX GA</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">Belum ada data anggaran OPEX GA untuk periode ini.</p>
+                                        </div>
+                                    </td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -197,26 +213,26 @@
             <div x-show="activeTab === 'foh'" x-cloak class="space-y-4">
                 <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
                     <table class="w-full text-left text-xs sm:text-sm">
-                        <thead class="bg-gray-50 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 uppercase tracking-wider font-semibold">
-                            <tr>
-                                <th rowspan="2" class="px-4 py-3 border-b border-r border-gray-200 dark:border-gray-800 min-w-[200px]">Cost Center</th>
-                                <th colspan="14" class="px-4 py-2 border-b border-gray-200 dark:border-gray-800 text-center">Budget Expense (Rp)</th>
+                        <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+                            <tr class="bg-brand-500 text-white font-semibold">
+                                <th rowspan="2" class="px-4 py-3 border-r border-white/20 min-w-[200px] text-white">Cost Center</th>
+                                <th colspan="14" class="px-4 py-2 border-r border-white/20 text-center text-white font-semibold">Budget Expense (Rp)</th>
                             </tr>
-                            <tr class="bg-gray-100/70 dark:bg-gray-800/80">
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800">Entry By</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jan</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Feb</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Mar</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Apr</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">May</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jun</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jul</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Aug</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Sep</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Oct</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Nov</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Dec</th>
-                                <th class="px-3 py-2 border-b border-gray-200 dark:border-gray-800 text-right font-bold text-gray-900 dark:text-white">Total</th>
+                            <tr class="bg-brand-600 text-white text-[11px] font-semibold">
+                                <th class="px-3 py-2 border-r border-white/20 text-white">Entry By</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jan</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Feb</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Mar</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Apr</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">May</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jun</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jul</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Aug</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Sep</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Oct</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Nov</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Dec</th>
+                                <th class="px-3 py-2 text-right font-bold text-white bg-brand-600">Total</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-gray-600 dark:text-gray-300">
@@ -247,7 +263,15 @@
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="15" class="px-4 py-8 text-center text-gray-400">Tidak ada data budget FOH tersedia.</td>
+                                    <td colspan="15" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+                                        <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                                                <i class="fa-solid fa-industry text-xl"></i>
+                                            </div>
+                                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Tidak Ada Data Budget FOH</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">Belum ada data anggaran FOH untuk periode ini.</p>
+                                        </div>
+                                    </td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -276,43 +300,43 @@
             <div x-show="activeTab === 'mpp_opex'" x-cloak class="space-y-4">
                 <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
                     <table class="w-full text-left text-xs sm:text-sm">
-                        <thead class="bg-gray-50 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 uppercase tracking-wider font-semibold">
-                            <tr>
-                                <th rowspan="2" class="px-4 py-3 border-b border-r border-gray-200 dark:border-gray-800 min-w-[180px]">Cost Center</th>
-                                <th rowspan="2" class="px-3 py-3 border-b border-r border-gray-200 dark:border-gray-800">Tipe</th>
-                                <th rowspan="2" class="px-3 py-3 border-b border-r border-gray-200 dark:border-gray-800 min-w-[140px]">Jabatan</th>
-                                <th colspan="13" class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-center">New Headcount</th>
-                                <th rowspan="2" class="px-3 py-3 border-b border-r border-gray-200 dark:border-gray-800 min-w-[150px]">Notes</th>
-                                <th rowspan="2" class="px-3 py-3 border-b border-r border-gray-200 dark:border-gray-800">Salary</th>
-                                <th colspan="13" class="px-3 py-2 border-b border-gray-200 dark:border-gray-800 text-center">Amount Headcount (Rp)</th>
+                        <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+                            <tr class="bg-brand-500 text-white font-semibold">
+                                <th rowspan="2" class="px-4 py-3 border-r border-white/20 min-w-[180px] text-white">Cost Center</th>
+                                <th rowspan="2" class="px-3 py-3 border-r border-white/20 text-white">Tipe</th>
+                                <th rowspan="2" class="px-3 py-3 border-r border-white/20 min-w-[140px] text-white">Jabatan</th>
+                                <th colspan="13" class="px-3 py-2 border-r border-white/20 text-center text-white bg-emerald-700/60 font-semibold">New Headcount</th>
+                                <th rowspan="2" class="px-3 py-3 border-r border-white/20 min-w-[150px] text-white">Notes</th>
+                                <th rowspan="2" class="px-3 py-3 border-r border-white/20 text-white">Salary</th>
+                                <th colspan="13" class="px-3 py-2 text-center text-white bg-sky-700/60 font-semibold">Amount Headcount (Rp)</th>
                             </tr>
-                            <tr class="bg-gray-100/70 dark:bg-gray-800/80">
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jan</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Feb</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Mar</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Apr</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">May</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jun</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jul</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Aug</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Sep</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Oct</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Nov</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Dec</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right font-bold">Tot</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jan</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Feb</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Mar</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Apr</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">May</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jun</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jul</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Aug</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Sep</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Oct</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Nov</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Dec</th>
-                                <th class="px-3 py-2 border-b border-gray-200 dark:border-gray-800 text-right font-bold text-gray-900 dark:text-white">Total</th>
+                            <tr class="bg-brand-600 text-white text-[11px] font-semibold">
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Jan</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Feb</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Mar</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Apr</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">May</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Jun</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Jul</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Aug</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Sep</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Oct</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Nov</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Dec</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right font-bold text-white bg-emerald-700/60">Tot</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jan</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Feb</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Mar</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Apr</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">May</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jun</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jul</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Aug</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Sep</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Oct</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Nov</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Dec</th>
+                                <th class="px-3 py-2 text-right font-bold text-white bg-brand-700">Total</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-gray-600 dark:text-gray-300">
@@ -359,7 +383,15 @@
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="31" class="px-4 py-8 text-center text-gray-400">Tidak ada data MPP OPEX tersedia.</td>
+                                    <td colspan="31" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+                                        <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                                                <i class="fa-solid fa-users text-xl"></i>
+                                            </div>
+                                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Tidak Ada Data MPP OPEX</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">Belum ada data perencanaan tenaga kerja OPEX untuk periode ini.</p>
+                                        </div>
+                                    </td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -388,43 +420,43 @@
             <div x-show="activeTab === 'mpp_foh'" x-cloak class="space-y-4">
                 <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
                     <table class="w-full text-left text-xs sm:text-sm">
-                        <thead class="bg-gray-50 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 uppercase tracking-wider font-semibold">
-                            <tr>
-                                <th rowspan="2" class="px-4 py-3 border-b border-r border-gray-200 dark:border-gray-800 min-w-[180px]">Cost Center</th>
-                                <th rowspan="2" class="px-3 py-3 border-b border-r border-gray-200 dark:border-gray-800">Tipe</th>
-                                <th rowspan="2" class="px-3 py-3 border-b border-r border-gray-200 dark:border-gray-800 min-w-[140px]">Jabatan</th>
-                                <th colspan="13" class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-center">New Headcount</th>
-                                <th rowspan="2" class="px-3 py-3 border-b border-r border-gray-200 dark:border-gray-800 min-w-[150px]">Notes</th>
-                                <th rowspan="2" class="px-3 py-3 border-b border-r border-gray-200 dark:border-gray-800">Salary</th>
-                                <th colspan="13" class="px-3 py-2 border-b border-gray-200 dark:border-gray-800 text-center">Amount Headcount (Rp)</th>
+                        <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+                            <tr class="bg-brand-500 text-white font-semibold">
+                                <th rowspan="2" class="px-4 py-3 border-r border-white/20 min-w-[180px] text-white">Cost Center</th>
+                                <th rowspan="2" class="px-3 py-3 border-r border-white/20 text-white">Tipe</th>
+                                <th rowspan="2" class="px-3 py-3 border-r border-white/20 min-w-[140px] text-white">Jabatan</th>
+                                <th colspan="13" class="px-3 py-2 border-r border-white/20 text-center text-white bg-emerald-700/60 font-semibold">New Headcount</th>
+                                <th rowspan="2" class="px-3 py-3 border-r border-white/20 min-w-[150px] text-white">Notes</th>
+                                <th rowspan="2" class="px-3 py-3 border-r border-white/20 text-white">Salary</th>
+                                <th colspan="13" class="px-3 py-2 text-center text-white bg-sky-700/60 font-semibold">Amount Headcount (Rp)</th>
                             </tr>
-                            <tr class="bg-gray-100/70 dark:bg-gray-800/80">
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jan</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Feb</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Mar</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Apr</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">May</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jun</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jul</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Aug</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Sep</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Oct</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Nov</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Dec</th>
-                                <th class="px-2 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right font-bold">Tot</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jan</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Feb</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Mar</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Apr</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">May</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jun</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jul</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Aug</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Sep</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Oct</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Nov</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Dec</th>
-                                <th class="px-3 py-2 border-b border-gray-200 dark:border-gray-800 text-right font-bold text-gray-900 dark:text-white">Total</th>
+                            <tr class="bg-brand-600 text-white text-[11px] font-semibold">
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Jan</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Feb</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Mar</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Apr</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">May</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Jun</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Jul</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Aug</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Sep</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Oct</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Nov</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right text-white">Dec</th>
+                                <th class="px-2 py-2 border-r border-white/20 text-right font-bold text-white bg-emerald-700/60">Tot</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jan</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Feb</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Mar</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Apr</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">May</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jun</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jul</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Aug</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Sep</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Oct</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Nov</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Dec</th>
+                                <th class="px-3 py-2 text-right font-bold text-white bg-brand-700">Total</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-gray-600 dark:text-gray-300">
@@ -471,7 +503,15 @@
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="31" class="px-4 py-8 text-center text-gray-400">Tidak ada data MPP FOH tersedia.</td>
+                                    <td colspan="31" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+                                        <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                                                <i class="fa-solid fa-user-gear text-xl"></i>
+                                            </div>
+                                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Tidak Ada Data MPP FOH</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">Belum ada data perencanaan tenaga kerja FOH untuk periode ini.</p>
+                                        </div>
+                                    </td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -500,31 +540,31 @@
             <div x-show="activeTab === 'capex'" x-cloak class="space-y-4">
                 <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
                     <table class="w-full text-left text-xs sm:text-sm">
-                        <thead class="bg-gray-50 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 uppercase tracking-wider font-semibold">
-                            <tr>
-                                <th rowspan="2" class="px-4 py-3 border-b border-r border-gray-200 dark:border-gray-800 min-w-[180px]">Cost Center</th>
-                                <th rowspan="2" class="px-3 py-3 border-b border-r border-gray-200 dark:border-gray-800 min-w-[200px]">Item Description</th>
-                                <th rowspan="2" class="px-3 py-3 border-b border-r border-gray-200 dark:border-gray-800">Account</th>
-                                <th rowspan="2" class="px-3 py-3 border-b border-r border-gray-200 dark:border-gray-800">CC Code</th>
-                                <th rowspan="2" class="px-3 py-3 border-b border-r border-gray-200 dark:border-gray-800 text-right">Unit</th>
-                                <th rowspan="2" class="px-3 py-3 border-b border-r border-gray-200 dark:border-gray-800 text-right min-w-[120px]">Unit Price</th>
-                                <th rowspan="2" class="px-3 py-3 border-b border-r border-gray-200 dark:border-gray-800 min-w-[150px]">Remarks</th>
-                                <th colspan="12" class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-center">Acquisition Period</th>
-                                <th rowspan="2" class="px-3 py-3 border-b border-gray-200 dark:border-gray-800 text-right font-bold text-gray-900 dark:text-white min-w-[130px]">Total</th>
+                        <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+                            <tr class="bg-brand-500 text-white font-semibold">
+                                <th rowspan="2" class="px-4 py-3 border-r border-white/20 min-w-[180px] text-white">Cost Center</th>
+                                <th rowspan="2" class="px-3 py-3 border-r border-white/20 min-w-[200px] text-white">Item Description</th>
+                                <th rowspan="2" class="px-3 py-3 border-r border-white/20 text-white">Account</th>
+                                <th rowspan="2" class="px-3 py-3 border-r border-white/20 text-white">CC Code</th>
+                                <th rowspan="2" class="px-3 py-3 border-r border-white/20 text-right text-white">Unit</th>
+                                <th rowspan="2" class="px-3 py-3 border-r border-white/20 text-right min-w-[120px] text-white">Unit Price</th>
+                                <th rowspan="2" class="px-3 py-3 border-r border-white/20 min-w-[150px] text-white">Remarks</th>
+                                <th colspan="12" class="px-3 py-2 border-r border-white/20 text-center text-white bg-sky-700/60 font-semibold">Acquisition Period</th>
+                                <th rowspan="2" class="px-3 py-3 text-right font-bold text-white bg-brand-700 min-w-[130px]">Total</th>
                             </tr>
-                            <tr class="bg-gray-100/70 dark:bg-gray-800/80">
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jan</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Feb</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Mar</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Apr</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">May</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jun</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jul</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Aug</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Sep</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Oct</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Nov</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Dec</th>
+                            <tr class="bg-brand-600 text-white text-[11px] font-semibold">
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jan</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Feb</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Mar</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Apr</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">May</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jun</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jul</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Aug</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Sep</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Oct</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Nov</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Dec</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-gray-600 dark:text-gray-300">
@@ -555,7 +595,15 @@
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="20" class="px-4 py-8 text-center text-gray-400">Tidak ada data budget CAPEX tersedia.</td>
+                                    <td colspan="20" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+                                        <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                                                <i class="fa-solid fa-cubes-stacked text-xl"></i>
+                                            </div>
+                                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Tidak Ada Data Budget CAPEX</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">Belum ada data belanja modal CAPEX untuk periode ini.</p>
+                                        </div>
+                                    </td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>

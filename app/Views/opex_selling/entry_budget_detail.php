@@ -1,97 +1,109 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div x-data="opexSellingDetailApp()" x-init="init()" class="space-y-6">
+<div x-data="opexSellingDetailApp()" x-init="init()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <div class="flex items-center gap-2">
-                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <i class="fas fa-shopping-cart text-lg text-primary"></i>
-                </div>
-                <h2 class="text-title-md2 font-bold text-black dark:text-white">Entry Detail Budget Item</h2>
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors">
+                    <i class="fa-solid fa-gauge-high"></i> Dashboard
+                </a>
+                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+                <a href="<?= base_url('opex-selling/entry-budget') ?>" class="hover:text-brand-500 transition-colors">Entry Budget</a>
+                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+                <span class="text-brand-500 font-bold" x-text="headerName"></span>
             </div>
-            <nav class="mt-1">
-                <ol class="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400">
-                    <li><a class="hover:text-primary" href="<?= base_url('dashboard') ?>"><i class="fas fa-home mr-1"></i>Home</a></li>
-                    <li><i class="fas fa-chevron-right text-[10px]"></i></li>
-                    <li><a class="hover:text-primary" href="<?= base_url('opex-selling/entry-budget') ?>">Entry Budget</a></li>
-                    <li><i class="fas fa-chevron-right text-[10px]"></i></li>
-                    <li class="text-primary font-semibold" x-text="headerName"></li>
-                </ol>
-            </nav>
+            <h1 class="text-xl md:text-2xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 shadow-xs">
+                    <i class="fa-solid fa-cart-shopping text-base"></i>
+                </span>
+                Entry Detail Budget Item
+            </h1>
         </div>
-        <a href="<?= base_url('opex-selling/entry-budget') ?>" class="inline-flex items-center gap-2 rounded bg-gray-500 px-4 py-2 text-xs font-semibold text-white hover:bg-gray-600 transition">
-            <i class="fas fa-arrow-left"></i> Kembali
+        <a href="<?= base_url('opex-selling/entry-budget') ?>" class="inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-xs transition-all">
+            <i class="fa-solid fa-arrow-left text-[11px]"></i> Kembali
         </a>
     </div>
 
-    <div class="rounded-sm border border-stroke bg-white p-5 shadow-default dark:border-strokedark dark:bg-boxdark flex flex-wrap items-center justify-between gap-4">
+    <div class="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs dark:border-gray-800 dark:bg-gray-900 flex flex-wrap items-center justify-between gap-4">
         <div>
-            <span class="text-xs font-medium text-gray-500">Main Account / Description:</span>
-            <h3 class="text-lg font-bold text-black dark:text-white" x-text="headerName"></h3>
+            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Main Account / Description:</span>
+            <h3 class="text-base md:text-lg font-bold text-gray-900 dark:text-white mt-0.5" x-text="headerName"></h3>
         </div>
         <div>
-            <span class="text-xs font-medium text-gray-500">Cost Center:</span>
-            <p class="text-sm font-bold text-primary" x-text="costCenterCode"></p>
+            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Cost Center:</span>
+            <p class="text-sm font-bold text-brand-600 dark:text-brand-400 mt-0.5" x-text="costCenterCode"></p>
         </div>
     </div>
 
-    <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark p-6">
+    <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
         <div class="max-w-full overflow-x-auto">
-            <table class="w-full table-auto text-left text-xs">
-                <thead>
-                    <tr class="bg-gray-100 text-gray-700 dark:bg-meta-4 dark:text-gray-300">
-                        <th rowspan="2" class="border-b border-r px-4 py-2.5 font-bold uppercase text-center w-16">ENTRY</th>
-                        <th rowspan="2" class="border-b border-r px-4 py-2.5 font-bold uppercase min-w-[240px]">SELLING EXPENSE</th>
-                        <th colspan="8" class="border-b border-r px-4 py-2.5 font-bold uppercase text-center">ACTUAL</th>
-                        <th rowspan="2" class="border-b px-4 py-2.5 font-bold uppercase text-right w-32">TOTAL</th>
+            <table class="w-full text-left text-xs text-gray-600 dark:text-gray-300 border-collapse">
+                <thead class="bg-brand-500 text-white text-xs font-semibold">
+                    <tr class="border-b border-brand-600 bg-brand-500 text-white font-semibold">
+                        <th rowspan="2" class="border-r border-white/20 px-4 py-3 font-semibold text-white text-center w-20">Entry</th>
+                        <th rowspan="2" class="border-r border-white/20 px-4 py-3 font-semibold text-white min-w-[240px]">Selling Expense</th>
+                        <th colspan="8" class="border-r border-white/20 px-2 py-2 font-semibold text-white text-center bg-emerald-700/60">Actual</th>
+                        <th rowspan="2" class="px-4 py-3 font-semibold text-white text-right w-32">Total</th>
                     </tr>
-                    <tr class="bg-gray-100 text-gray-700 dark:bg-meta-4 dark:text-gray-300">
+                    <tr class="border-b border-brand-600 bg-brand-600 text-white text-[11px] font-semibold">
                         <template x-for="m in actualMonths" :key="m">
-                            <th class="border-b border-r px-2 py-2 text-center font-bold uppercase" x-text="m"></th>
+                            <th class="border-r border-white/20 px-2 py-2 text-center text-white font-semibold" x-text="m"></th>
                         </template>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
                     <template x-if="matrixRows.length === 0 && !loading">
                         <tr>
-                            <td colspan="11" class="border-b py-8 text-center text-gray-500 dark:text-gray-400">
-                                <i class="fas fa-inbox mr-1"></i>No data available in table
+                            <td colspan="11" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+                                <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                                        <i class="fa-solid fa-cart-shopping text-xl"></i>
+                                    </div>
+                                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Tidak Ada Rincian Akun</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Tidak ditemukan sub-akun dalam kelompok header ini.</p>
+                                </div>
                             </td>
                         </tr>
                     </template>
                     <template x-if="loading">
                         <tr>
-                            <td colspan="11" class="border-b py-8 text-center text-gray-500 dark:text-gray-400">
-                                <i class="fas fa-spinner fa-spin mr-1"></i>Memuat data...
+                            <td colspan="11" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+                                <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-brand-500">
+                                        <i class="fa-solid fa-spinner fa-spin text-xl"></i>
+                                    </div>
+                                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Memuat Data...</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Mohon tunggu sebentar, sedang mengambil data rincian.</p>
+                                </div>
                             </td>
                         </tr>
                     </template>
                     <template x-for="(row, idx) in paginatedRows" :key="idx">
-                        <tr class="hover:bg-gray-50 dark:hover:bg-meta-4">
-                            <td class="border-b border-r px-4 py-2.5 text-center">
+                        <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+                            <td class="border-r border-gray-100 dark:border-gray-800 px-4 py-2.5 text-center">
                                 <button @click="openModalDetail(row, idx)" title="Entry Detail Item"
-                                    class="inline-flex items-center justify-center rounded bg-blue-600 p-1.5 text-white shadow hover:bg-blue-700 active:scale-[0.98] transition-all">
-                                    <i class="fas fa-edit text-[11px]"></i>
+                                    class="h-8 w-8 rounded-lg inline-flex items-center justify-center bg-brand-500 text-white shadow-2xs hover:bg-brand-600 active:scale-[0.98] transition-all">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
                                 </button>
                             </td>
-                            <td class="border-b border-r px-4 py-2.5 font-medium" x-text="row.coa_name"></td>
+                            <td class="border-r border-gray-100 dark:border-gray-800 px-4 py-2.5 font-medium text-gray-800 dark:text-gray-200" x-text="row.coa_name"></td>
                             <template x-for="m in 8" :key="m">
-                                <td class="border-b border-r px-2 py-2 text-right font-mono" x-text="formatNumber(getActualValue(row, m))"></td>
+                                <td class="border-r border-gray-100 dark:border-gray-800 px-2 py-2 text-right font-mono" x-text="formatNumber(getActualValue(row, m))"></td>
                             </template>
-                            <td class="border-b px-4 py-2.5 text-right font-bold" x-text="formatNumber(getActualTotal(row))"></td>
+                            <td class="px-4 py-2.5 text-right font-bold text-gray-900 dark:text-white font-mono" x-text="formatNumber(getActualTotal(row))"></td>
                         </tr>
                     </template>
                 </tbody>
                 <tfoot>
                     <template x-if="matrixRows.length > 0">
-                        <tr class="bg-gray-100 dark:bg-meta-4 font-bold text-gray-900 dark:text-white">
-                            <td colspan="2" class="border-t border-r px-4 py-3 uppercase">TOTAL</td>
+                        <tr class="bg-gray-50 dark:bg-gray-800/60 font-bold text-gray-900 dark:text-white border-t border-gray-200 dark:border-gray-700 text-xs">
+                            <td colspan="2" class="border-r border-gray-200 dark:border-gray-700 px-4 py-3 uppercase">TOTAL</td>
                             <template x-for="m in 8" :key="'ft_' + m">
-                                <td class="border-t border-r px-2 py-3 text-right font-bold" x-text="formatNumber(columnActualTotal(m))"></td>
+                                <td class="border-r border-gray-200 dark:border-gray-700 px-2 py-3 text-right font-mono" x-text="formatNumber(columnActualTotal(m))"></td>
                             </template>
-                            <td class="border-t px-4 py-3 text-right font-bold" x-text="formatNumber(allActualTotal())"></td>
+                            <td class="px-4 py-3 text-right font-mono" x-text="formatNumber(allActualTotal())"></td>
                         </tr>
                     </template>
                 </tfoot>
@@ -99,26 +111,26 @@
         </div>
 
         <template x-if="matrixRows.length > 0">
-            <div class="flex flex-wrap items-center justify-between gap-3 border-t border-stroke dark:border-strokedark pt-4 mt-4 text-xs">
-                <span class="text-gray-600 dark:text-gray-400">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 dark:border-gray-800 p-3.5 sm:p-4 bg-gray-50/50 dark:bg-gray-800/30 text-xs text-gray-500 dark:text-gray-400">
+                <span>
                     Showing <span class="font-bold text-gray-800 dark:text-gray-200" x-text="((currentPage - 1) * perPage) + 1"></span> to
                     <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(currentPage * perPage, totalRows)"></span> of
                     <span class="font-bold text-gray-800 dark:text-gray-200" x-text="totalRows"></span> entries
                 </span>
                 <div class="flex items-center gap-1" x-show="totalPages > 1">
                     <button type="button" @click="goPage(currentPage - 1)" :disabled="currentPage === 1"
-                        class="h-7 px-2.5 rounded-lg border border-stroke dark:border-strokedark bg-white dark:bg-boxdark text-gray-600 dark:text-gray-300 font-semibold disabled:opacity-40 hover:bg-gray-50 transition">
-                        <i class="fas fa-chevron-left text-[10px]"></i>
+                        class="h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                        <i class="fa-solid fa-chevron-left text-[10px]"></i>
                     </button>
                     <template x-for="(p, pi) in pageNumbers()" :key="'pg_' + pi">
                         <span x-show="p === '...'" class="px-1.5 text-gray-400">&hellip;</span>
                         <button x-show="p !== '...'" type="button" @click="goPage(p)"
-                            :class="currentPage === p ? 'bg-primary text-white font-bold' : 'border border-stroke dark:border-strokedark bg-white dark:bg-boxdark text-gray-600 dark:text-gray-300 hover:bg-gray-50 transition'"
-                            class="h-7 min-w-[28px] px-1.5 rounded-lg font-semibold" x-text="p"></button>
+                            :class="currentPage === p ? 'bg-brand-500 text-white font-bold shadow-xs' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
+                            class="h-8 min-w-[32px] px-2 rounded-lg text-xs font-semibold transition" x-text="p"></button>
                     </template>
                     <button type="button" @click="goPage(currentPage + 1)" :disabled="currentPage === totalPages"
-                        class="h-7 px-2.5 rounded-lg border border-stroke dark:border-strokedark bg-white dark:bg-boxdark text-gray-600 dark:text-gray-300 font-semibold disabled:opacity-40 hover:bg-gray-50 transition">
-                        <i class="fas fa-chevron-right text-[10px]"></i>
+                        class="h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
                     </button>
                 </div>
             </div>
@@ -147,13 +159,13 @@
 
             <div class="overflow-x-auto max-h-96 rounded-lg border border-gray-200 dark:border-gray-700">
                 <table class="w-full text-left text-xs">
-                    <thead class="bg-gray-50 uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                        <tr>
-                            <th class="px-3 py-2 border-b min-w-[180px]">DETAIL ITEM</th>
+                    <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+                        <tr class="bg-brand-500 text-white font-semibold">
+                            <th class="px-3 py-2 border-r border-white/20 min-w-[180px] text-white">Detail Item</th>
                             <template x-for="m in months" :key="m">
-                                <th class="px-2 py-2 border-b text-center min-w-[75px]" x-text="m"></th>
+                                <th class="px-2 py-2 border-r border-white/20 text-center min-w-[75px] text-white" x-text="m"></th>
                             </template>
-                            <th class="px-2 py-2 border-b text-center w-10">AKSI</th>
+                            <th class="px-2 py-2 text-center w-10 text-white">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">

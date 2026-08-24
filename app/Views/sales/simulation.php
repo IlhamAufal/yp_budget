@@ -6,7 +6,7 @@
   $kursEur = (float) ($kurs['EUR'] ?? 0);
   $hasKurs = $kursUsd > 0 || $kursEur > 0;
 ?>
-<div x-data="salesSimulation()" class="p-4 md:p-6 lg:p-8 space-y-8 pb-12">
+<div x-data="salesSimulation()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
   <!-- ============================================================ -->
   <!-- HEADER -->
@@ -16,17 +16,17 @@
       <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
         <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
         <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-        <span>Sales</span>
+        <a href="<?= base_url('sales') ?>" class="hover:text-brand-500 transition-colors">Sales</a>
         <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
         <span class="text-brand-500 font-bold">Simulation</span>
       </div>
-      <h2 class="text-xl md:text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
-        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400">
+      <h1 class="text-xl md:text-2xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
+        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 shadow-xs">
           <i class="fa-solid fa-chart-line text-base"></i>
         </span>
         Sales Simulation
-      </h2>
-      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+      </h1>
+      <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
         Simulasi revenue & volume berbasis asumsi Master Assumption (KURS, Volume, ASP).
       </p>
     </div>
@@ -79,12 +79,12 @@
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b border-gray-200/80 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-800/50 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              <th class="py-3 px-4">Channel</th>
-              <th class="py-3 px-4 text-right">Volume</th>
-              <th class="py-3 px-4 text-right">ASP (Rp)</th>
-              <th class="py-3 px-4 text-right">Revenue (Rp)</th>
+          <thead class="bg-brand-500 text-white text-xs font-semibold border-b border-brand-600">
+            <tr class="bg-brand-500 text-white font-semibold">
+              <th class="py-3 px-4 text-white">Channel</th>
+              <th class="py-3 px-4 text-right text-white">Volume</th>
+              <th class="py-3 px-4 text-right text-white">ASP (Rp)</th>
+              <th class="py-3 px-4 text-right text-white">Revenue (Rp)</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
@@ -116,19 +116,19 @@
       <div class="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
         <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400"><i class="fa-solid fa-ship text-sm"></i></span>
         <div>
-          <h3 class="text-sm font-bold text-gray-800 dark:text-white">Revenue Export</h3>
+          <h3 class="text-sm font-bold text-gray-800 dark:text-white">Revenue Export (International)</h3>
           <p class="text-xs text-gray-500 dark:text-gray-400">Volume × ASP (USD) × KURS USD = Revenue (IDR) per produk.</p>
         </div>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b border-gray-200/80 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-800/50 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              <th class="py-3 px-4">Produk</th>
-              <th class="py-3 px-4 text-right">Volume</th>
-              <th class="py-3 px-4 text-right">ASP (USD)</th>
-              <th class="py-3 px-4 text-right">Revenue (USD)</th>
-              <th class="py-3 px-4 text-right">Revenue (IDR)</th>
+          <thead class="bg-brand-500 text-white text-xs font-semibold border-b border-brand-600">
+            <tr class="bg-brand-500 text-white font-semibold">
+              <th class="py-3 px-4 text-white">Produk</th>
+              <th class="py-3 px-4 text-right text-white">Volume</th>
+              <th class="py-3 px-4 text-right text-white">ASP (USD)</th>
+              <th class="py-3 px-4 text-right text-white">Revenue (USD)</th>
+              <th class="py-3 px-4 text-right text-white">Revenue (IDR)</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
@@ -193,10 +193,10 @@
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b border-gray-200/80 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-800/50 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              <th class="py-3 px-4">Channel</th>
-              <th class="py-3 px-4 text-right">Volume</th>
+          <thead class="bg-brand-500 text-white text-xs font-semibold border-b border-brand-600">
+            <tr class="bg-brand-500 text-white font-semibold">
+              <th class="py-3 px-4 text-white">Channel</th>
+              <th class="py-3 px-4 text-right text-white">Volume</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
@@ -224,10 +224,10 @@
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b border-gray-200/80 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-800/50 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              <th class="py-3 px-4">Produk</th>
-              <th class="py-3 px-4 text-right">Volume</th>
+          <thead class="bg-brand-500 text-white text-xs font-semibold border-b border-brand-600">
+            <tr class="bg-brand-500 text-white font-semibold">
+              <th class="py-3 px-4 text-white">Produk</th>
+              <th class="py-3 px-4 text-right text-white">Volume</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">

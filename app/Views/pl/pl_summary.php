@@ -118,27 +118,35 @@
     fmt(v) {
         return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(Number(v || 0));
     }
-}" class="p-4 md:p-6 lg:p-8 space-y-8 pb-12">
+}" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h2 class="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+                <span class="text-brand-500 font-bold">Profit & Loss (P&L)</span>
+            </div>
+            <h1 class="text-xl md:text-2xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 shadow-xs">
+                    <i class="fa-solid fa-scale-balanced text-base"></i>
+                </span>
                 Profit & Loss (P&L) Report
-            </h2>
-            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Rincian dan ringkasan Laporan Laba Rugi Operasional.
+            </h1>
+            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                Rincian dan ringkasan Laporan Laba Rugi Operasional Perusahaan.
             </p>
         </div>
 
-        <div class="flex items-center gap-2">
-            <a href="<?= base_url('pl/export_excel') ?>" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800 dark:hover:bg-emerald-900/40 transition-colors">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <div class="flex items-center gap-3">
+            <a href="<?= base_url('pl/export_excel') ?>" class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-xs font-bold transition shadow-xs">
+                <i class="fa-solid fa-file-excel"></i>
                 <span>Export Excel</span>
             </a>
         </div>
     </div>
 
-    <div class="rounded-2xl border border-gray-200 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900">
+    <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
 
         <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
             <div class="flex flex-wrap items-center gap-3">
@@ -184,22 +192,22 @@
             <div x-show="activeTab === 'summary'" x-cloak class="space-y-4">
                 <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
                     <table class="w-full text-left text-xs sm:text-sm">
-                        <thead class="bg-gray-50 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 uppercase tracking-wider font-semibold">
-                            <tr>
-                                <th class="px-4 py-3 border-b border-r border-gray-200 dark:border-gray-800 min-w-[240px]">Kategori / Uraian Account</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jan</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Feb</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Mar</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Apr</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">May</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jun</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jul</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Aug</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Sep</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Oct</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Nov</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Dec</th>
-                                <th class="px-3 py-2 border-b border-gray-200 dark:border-gray-800 text-right font-bold text-gray-900 dark:text-white">Total</th>
+                        <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+                            <tr class="bg-brand-500 text-white font-semibold">
+                                <th class="px-4 py-3 border-r border-white/20 min-w-[240px] text-white">Kategori / Uraian Account</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jan</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Feb</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Mar</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Apr</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">May</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jun</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jul</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Aug</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Sep</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Oct</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Nov</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Dec</th>
+                                <th class="px-3 py-2 text-right font-bold text-white bg-brand-600">Total</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-gray-600 dark:text-gray-300">
@@ -226,7 +234,15 @@
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="14" class="px-4 py-8 text-center text-gray-400">Tidak ada data P&L Summary.</td>
+                                    <td colspan="14" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+                                        <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                                                <i class="fa-solid fa-scale-balanced text-xl"></i>
+                                            </div>
+                                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Tidak Ada Data P&L Summary</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">Belum ada ringkasan laporan laba rugi untuk periode ini.</p>
+                                        </div>
+                                    </td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -261,26 +277,26 @@
                 </div>
                 <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
                     <table class="w-full text-left text-xs">
-                        <thead class="bg-gray-50 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 uppercase tracking-wider font-semibold">
-                            <tr>
-                                <th class="px-4 py-3 border-b border-r border-gray-200 dark:border-gray-800 min-w-[220px]">Bagian P/L</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jan</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Feb</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Mar</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Apr</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">May</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jun</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jul</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Aug</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Sep</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Oct</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Nov</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Dec</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Total</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right min-w-[130px]">Adjustment</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Total Adj.</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 min-w-[200px]">Catatan</th>
-                                <th class="px-3 py-2 border-b border-gray-200 dark:border-gray-800 text-center">Aksi</th>
+                        <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+                            <tr class="bg-brand-500 text-white font-semibold">
+                                <th class="px-4 py-3 border-r border-white/20 min-w-[220px] text-white">Bagian P/L</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jan</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Feb</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Mar</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Apr</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">May</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jun</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Jul</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Aug</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Sep</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Oct</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Nov</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Dec</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white bg-brand-600">Total</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right min-w-[130px] text-white">Adjustment</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white bg-brand-600">Total Adj.</th>
+                                <th class="px-3 py-2 border-r border-white/20 min-w-[200px] text-white">Catatan</th>
+                                <th class="px-3 py-2 text-center text-white">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-gray-600 dark:text-gray-300">
@@ -322,7 +338,15 @@
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="18" class="px-4 py-8 text-center text-gray-400">Tidak ada data P&L per bagian.</td>
+                                    <td colspan="18" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+                                        <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                                                <i class="fa-solid fa-layer-group text-xl"></i>
+                                            </div>
+                                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Tidak Ada Data Bagian P&L</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">Belum ada ringkasan per bagian untuk periode ini.</p>
+                                        </div>
+                                    </td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -351,13 +375,13 @@
             <div x-show="activeTab === 'detail'" x-cloak class="space-y-4">
                 <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
                     <table class="w-full text-left text-xs sm:text-sm">
-                        <thead class="bg-gray-50 dark:bg-gray-800/60 text-gray-700 dark:text-gray-300 uppercase tracking-wider font-semibold">
-                            <tr>
-                                <th class="px-4 py-3 border-b border-r border-gray-200 dark:border-gray-800">Kode Akun</th>
-                                <th class="px-4 py-3 border-b border-r border-gray-200 dark:border-gray-800 min-w-[200px]">Deskripsi Akun</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800">Tipe</th>
-                                <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Total Annual Budget</th>
-                                <th class="px-3 py-2 border-b border-gray-200 dark:border-gray-800 text-center">Aksi</th>
+                        <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+                            <tr class="bg-brand-500 text-white font-semibold">
+                                <th class="px-4 py-3 border-r border-white/20 text-white">Kode Akun</th>
+                                <th class="px-4 py-3 border-r border-white/20 min-w-[200px] text-white">Deskripsi Akun</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-white">Tipe</th>
+                                <th class="px-3 py-2 border-r border-white/20 text-right text-white">Total Annual Budget</th>
+                                <th class="px-3 py-2 text-center text-white">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-gray-600 dark:text-gray-300">
@@ -385,7 +409,15 @@
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="5" class="px-4 py-8 text-center text-gray-400">Tidak ada data rincian akun.</td>
+                                    <td colspan="5" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+                                        <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                                                <i class="fa-solid fa-list-check text-xl"></i>
+                                            </div>
+                                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Tidak Ada Rincian Akun</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">Tidak ditemukan data akun untuk kriteria filter yang dipilih.</p>
+                                        </div>
+                                    </td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -448,11 +480,11 @@
                 <template x-if="!isLoadingModal">
                     <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
                         <table class="w-full text-left text-xs">
-                            <thead class="bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 uppercase font-semibold">
-                                <tr>
-                                    <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800">Cost Center</th>
-                                    <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800">Uraian / Remarks</th>
-                                    <th class="px-3 py-2 border-b border-gray-200 dark:border-gray-800 text-right">Nominal (Rp)</th>
+                            <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+                                <tr class="bg-brand-500 text-white font-semibold">
+                                    <th class="px-3 py-2 border-r border-white/20 text-white">Cost Center</th>
+                                    <th class="px-3 py-2 border-r border-white/20 text-white">Uraian / Remarks</th>
+                                    <th class="px-3 py-2 text-right text-white">Nominal (Rp)</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
@@ -511,11 +543,11 @@
                 <template x-if="!isLoadingSection">
                     <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
                         <table class="w-full text-left text-xs">
-                            <thead class="bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 uppercase font-semibold">
-                                <tr>
-                                    <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800">Account</th>
-                                    <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 min-w-[160px]">Uraian</th>
-                                    <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800">Cost Center</th>
+                            <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+                                <tr class="bg-brand-500 text-white font-semibold">
+                                    <th class="px-3 py-2 border-r border-white/20 text-white">Account</th>
+                                    <th class="px-3 py-2 border-r border-white/20 min-w-[160px] text-white">Uraian</th>
+                                    <th class="px-3 py-2 border-r border-white/20 text-white">Cost Center</th>
                                     <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Jan</th>
                                     <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Feb</th>
                                     <th class="px-3 py-2 border-b border-r border-gray-200 dark:border-gray-800 text-right">Mar</th>

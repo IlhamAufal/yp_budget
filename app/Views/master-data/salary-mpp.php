@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
 
-<div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-4" x-data="salaryMppPage()" x-init="fetchTableData()">
+<div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6" x-data="salaryMppPage()" x-init="fetchTableData()">
 
   <!-- ============================================================ -->
   <!-- BREADCRUMB & HEADER -->
@@ -73,14 +73,14 @@
         <i class="fa-solid fa-calendar text-[10px]"></i>
       </span>
       <span class="text-gray-500 dark:text-gray-400">Tahun Anggaran:</span>
-      <span class="font-bold text-gray-900 dark:text-white"><?= esc($selectedYear) ?></span>
+      <span class="font-bold text-brand-500 dark:text-brand-400"><?= esc($selectedYear) ?></span>
     </div>
   </div>
 
   <!-- ============================================================ -->
   <!-- FORM: MASTER SALARY (Collapsible) -->
   <!-- ============================================================ -->
-  <div class="rounded-2xl mb-5 mt-5 border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+  <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
     <button @click="formOpen = !formOpen" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
       <h3 class="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
         <i class="fa-solid fa-caret-right transition-transform" :class="formOpen ? 'rotate-90' : ''"></i>
@@ -101,22 +101,11 @@
                 </span>
               </template>
             </div>
-            <div class="relative" x-data="{ open: false }">
-              <input type="text" x-model="staffSearchQuery"
-                @focus="open = true"
-                @input="open = true"
-                @keydown.escape="open = false"
-                placeholder="Ketik nama staff..."
-                class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors" />
-              <div x-show="open && filteredStaffOptions.length > 0"
-                @click.outside="open = false"
-                x-cloak
-                class="absolute z-50 left-0 top-full mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
-                <template x-for="opt in filteredStaffOptions" :key="opt">
-                  <button type="button"
-                    @mousedown.prevent="addStaffName(opt); open = staffSearchQuery.length > 0"
-                    class="w-full text-left px-3 py-2 text-xs hover:bg-blue-50 dark:hover:bg-blue-500/10 text-gray-800 dark:text-gray-200 border-b border-gray-100 dark:border-gray-700 last:border-0"
-                    x-text="opt"></button>
+            <div class="relative" @click.away="staffDropdownOpen = false">
+              <input type="text" x-model="staffSearch" @focus="staffDropdownOpen = true" placeholder="Pilih atau cari nama jabatan/posisi..." class="w-full rounded-xl border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors" />
+              <div x-show="staffDropdownOpen" class="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                <template x-for="item in filteredStaffList" :key="item.id">
+                  <div @click="addStaffName(item.desc)" class="cursor-pointer px-3 py-1.5 text-xs hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200" x-text="item.desc"></div>
                 </template>
               </div>
             </div>
@@ -125,7 +114,7 @@
           <!-- Tipe Staff -->
           <div>
             <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Tipe Staff</label>
-            <select x-model="formData.type" class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors">
+            <select x-model="formData.type" class="w-full rounded-xl border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors">
               <?php foreach (($mppTypes ?? []) as $t): ?>
                 <option value="<?= esc($t['id_mpp']) ?>"><?= esc($t['desc_mpp']) ?></option>
               <?php endforeach; ?>
@@ -135,7 +124,7 @@
           <!-- Department (cost_center_sap) -->
           <div>
             <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Department</label>
-            <select x-model="formData.dept_id" class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors">
+            <select x-model="formData.dept_id" class="w-full rounded-xl border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors">
               <option value="">-- Pilih --</option>
               <?php foreach (($costCenters ?? []) as $idx => $cc): ?>
                 <option value="<?= esc($cc['cost_center']) ?>"><?= ($idx + 1) . '. [' . esc($cc['cost_center_sap']) . ']' . esc($cc['cost_desc']) ?></option>
@@ -146,18 +135,18 @@
           <!-- Rate Gaji -->
           <div>
             <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Rate Gaji (In IDR Mio)</label>
-            <input type="number" step="any" x-model="formData.salary" placeholder="0" class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs font-mono focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors" />
+            <input type="number" step="any" x-model="formData.salary" placeholder="0" class="w-full rounded-xl border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs font-mono focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors" />
           </div>
         </div>
 
         <!-- Actions -->
-        <div class="flex items-center gap-3">
-          <button type="button" @click="saveFromForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50">
+        <div class="flex items-center gap-2.5 pt-2">
+          <button type="button" @click="saveFromForm()" :disabled="saving" class="inline-flex items-center gap-2 rounded-xl bg-brand-500 hover:bg-brand-600 px-4 py-2 text-xs font-bold text-white transition-colors shadow-xs disabled:opacity-50">
             <i class="fa-solid fa-floppy-disk"></i>
             <span x-text="saving ? 'Menyimpan...' : 'Save'"></span>
           </button>
-          <a href="<?= base_url('master/salary-mpp/export?' . http_build_query($filters ?? [])) ?>" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-            <i class="fa-solid fa-file-excel text-emerald-600"></i>
+          <a href="<?= base_url('master/salary-mpp/export?' . http_build_query($filters ?? [])) ?>" class="inline-flex items-center gap-2 rounded-xl border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/40 px-3.5 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-all shadow-xs">
+            <i class="fa-solid fa-file-excel text-emerald-600 dark:text-emerald-400"></i>
             Export Data
           </a>
         </div>
@@ -170,19 +159,19 @@
   <!-- ============================================================ -->
   <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
     <!-- Filter Bar -->
-    <div class="p-3 border-b border-gray-100 dark:border-gray-800">
-      <div class="flex flex-wrap items-center gap-2">
+    <div class="p-3.5 border-b border-gray-100 dark:border-gray-800">
+      <div class="flex flex-wrap items-center gap-2.5">
         <div class="relative flex-1 min-w-[180px]">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400"></i>
-          <input type="text" x-model="filter.search" @input.debounce.400ms="fetchTableData()" placeholder="Cari nama jabatan, posisi..." class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 pl-9 pr-3 text-xs text-gray-800 placeholder-gray-400 focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors" />
+          <input type="text" x-model="filter.search" @input.debounce.400ms="fetchTableData()" placeholder="Cari nama jabatan, posisi..." class="w-full rounded-xl border border-gray-200 bg-gray-50/50 py-2 pl-9 pr-3 text-xs text-gray-800 placeholder-gray-400 focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors" />
         </div>
-        <select x-model="filter.dept_id" @change="fetchTableData()" class="rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 px-2.5 text-xs min-w-[160px] text-gray-800 focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors">
+        <select x-model="filter.dept_id" @change="fetchTableData()" class="rounded-xl border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs min-w-[160px] text-gray-800 focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors">
           <option value="">Semua Cost Center</option>
           <?php foreach (($costCenters ?? []) as $idx => $cc): ?>
             <option value="<?= esc($cc['cost_center']) ?>">[<?= esc($cc['cost_center_sap']) ?>] <?= esc($cc['cost_desc']) ?></option>
           <?php endforeach; ?>
         </select>
-        <select x-model="filter.type" @change="fetchTableData()" class="rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 px-2.5 text-xs min-w-[120px] text-gray-800 focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors">
+        <select x-model="filter.type" @change="fetchTableData()" class="rounded-xl border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs min-w-[130px] text-gray-800 focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors">
           <option value="">Semua Tipe</option>
           <?php foreach (($mppTypes ?? []) as $t): ?>
             <option value="<?= esc($t['id_mpp']) ?>"><?= esc($t['desc_mpp']) ?></option>
@@ -193,25 +182,36 @@
 
     <!-- Table -->
     <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="border-b border-gray-200/80 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-800/50 text-[11px] font-bold capitalize tracking-normal text-gray-500 dark:text-gray-400">
-            <th class="py-3 px-4">Nama Staff</th>
-            <th class="py-3 px-4 text-center">Tipe Staff</th>
-            <th class="py-3 px-4">Cost Center</th>
-            <th class="py-3 px-4 text-right">Rate Gaji (In IDR Mio)</th>
-            <th class="py-3 px-4 text-right w-20">Action</th>
+      <table class="w-full text-left border-collapse text-xs text-gray-600 dark:text-gray-300">
+        <thead class="bg-brand-500 text-white text-xs font-semibold border-b border-brand-600">
+          <tr>
+            <th class="py-3 px-4 text-white">Nama Staff</th>
+            <th class="py-3 px-4 text-center text-white">Tipe Staff</th>
+            <th class="py-3 px-4 text-white">Cost Center</th>
+            <th class="py-3 px-4 text-right text-white">Rate Gaji (In IDR Mio)</th>
+            <th class="py-3 px-4 text-right w-20 text-white">Action</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
           <tr x-show="tableLoading">
-            <td colspan="5" class="py-10 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Memuat data...</td>
+            <td colspan="5" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+              <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-brand-500">
+                  <i class="fa-solid fa-spinner fa-spin text-xl"></i>
+                </div>
+                <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Memuat Data...</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Mohon tunggu sebentar, sistem sedang memproses data.</p>
+              </div>
+            </td>
           </tr>
           <tr x-show="!tableLoading && tableRows.length === 0">
-            <td colspan="5" class="py-12 text-center text-gray-400">
-              <div class="flex flex-col items-center gap-2">
-                <i class="fa-solid fa-inbox text-2xl text-gray-300"></i>
-                <p class="font-semibold text-gray-500">Tidak ada data</p>
+            <td colspan="5" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+              <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                  <i class="fa-solid fa-users-gear text-xl"></i>
+                </div>
+                <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Tidak Ada Data Posisi / Rate Gaji</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Coba ubah kata kunci pencarian atau filter di atas.</p>
               </div>
             </td>
           </tr>
@@ -226,8 +226,8 @@
               </td>
               <td class="py-3 px-4 text-right font-mono font-bold text-gray-900 dark:text-white" x-text="fmtRupiah(row.salary)"></td>
               <td class="py-3 px-4 text-right">
-                <button type="button" @click="toggleStatus(row.id, 'hapus')" class="h-7 w-7 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-red-600 hover:bg-red-50 hover:border-red-200 dark:hover:bg-red-500/10 transition-colors flex items-center justify-center" title="Hapus">
-                  <i class="fa-solid fa-trash text-[11px]"></i>
+                <button type="button" @click="toggleStatus(row.id, 'hapus')" class="h-8 w-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-red-600 hover:bg-red-50 hover:border-red-200 dark:hover:bg-red-900/20 dark:text-red-400 transition-colors inline-flex items-center justify-center shadow-2xs" title="Hapus">
+                  <i class="fa-solid fa-trash text-xs"></i>
                 </button>
               </td>
             </tr>
@@ -237,7 +237,7 @@
     </div>
 
     <!-- Footer -->
-    <div x-show="tableRows.length > 0" class="border-t border-gray-100 dark:border-gray-800 p-3 bg-gray-50/50 dark:bg-gray-800/30 text-xs text-gray-500 dark:text-gray-400">
+    <div x-show="tableRows.length > 0" class="border-t border-gray-100 dark:border-gray-800 p-3.5 sm:p-4 bg-gray-50/50 dark:bg-gray-800/30 text-xs text-gray-500 dark:text-gray-400">
       <span>Showing <span class="font-bold text-gray-800 dark:text-gray-200" x-text="tableRows.length"></span> entries</span>
     </div>
   </div>

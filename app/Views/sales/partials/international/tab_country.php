@@ -21,9 +21,9 @@
         <h3 class="text-xs font-bold uppercase tracking-wider mb-4"><i class="fa-solid fa-flag text-indigo-500 mr-1"></i> Detail International per Negara</h3>
         <div class="overflow-x-auto">
             <table class="w-full text-xs border-collapse">
-                <thead class="bg-gray-100 dark:bg-gray-800 font-bold border-b border-gray-300 dark:border-gray-700">
-                    <tr>
-                        <th class="p-2">No.</th><th class="p-2">Region</th><th class="p-2">Country</th><th class="p-2">Product</th><th class="p-2">Key Product</th><th class="p-2 text-right">Tot QTY</th><th class="p-2 text-right">Tot REV ($)</th>
+                <thead class="bg-brand-500 text-white font-semibold border-b border-brand-600 text-xs">
+                    <tr class="bg-brand-500 text-white font-semibold">
+                        <th class="p-2 text-white font-semibold">No.</th><th class="p-2 text-white font-semibold">Region</th><th class="p-2 text-white font-semibold">Country</th><th class="p-2 text-white font-semibold">Product</th><th class="p-2 text-white font-semibold">Key Product</th><th class="p-2 text-right text-white font-semibold">Tot Qty</th><th class="p-2 text-right text-white font-semibold">Tot Rev ($)</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-800">

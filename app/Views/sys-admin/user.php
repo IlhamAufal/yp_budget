@@ -2,14 +2,14 @@
 
 <?= $this->section('content') ?>
 
-<div class="p-4 md:p-8 mx-auto max-w-(--breakpoint-2xl) space-y-6 md:space-y-8" x-data="userPage()" @modal-saved.window="if($event.detail.entity === 'user') setTimeout(() => location.reload(), 600)">
+<div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6" x-data="userPage()" @modal-saved.window="if($event.detail.entity === 'user') setTimeout(() => location.reload(), 600)">
 
   <!-- ============================================================ -->
   <!-- BREADCRUMB & HEADER -->
   <!-- ============================================================ -->
-  <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-3">
+      <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
         <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors">
           <i class="fa-solid fa-gauge-high"></i> Dashboard
         </a>
@@ -18,13 +18,13 @@
         <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
         <span class="text-brand-500 font-bold">User Management</span>
       </div>
-      <h1 class="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-4">
-        <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-400">
-          <i class="fa-solid fa-users-gear text-xl"></i>
+      <h1 class="text-xl md:text-2xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
+        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 shadow-xs">
+          <i class="fa-solid fa-users-gear text-base"></i>
         </span>
         User Management
       </h1>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+      <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
         Kelola akun pengguna, penugasan role, dan hak akses sistem.
       </p>
     </div>
@@ -34,7 +34,7 @@
       <button
         type="button"
         @click="Modal.show({ url: '<?= base_url('sys-admin/user/form') ?>', title: 'Tambah User Baru', size: 'lg' })"
-        class="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-5 py-3 text-sm font-bold text-white shadow-md hover:bg-brand-600 transition-all"
+        class="inline-flex items-center gap-2 rounded-xl bg-brand-500 hover:bg-brand-600 px-4 py-2 text-xs font-bold text-white shadow-xs transition-all active:scale-[0.98]"
       >
         <i class="fa-solid fa-plus"></i>
         <span>Tambah User</span>
@@ -104,14 +104,14 @@
 
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="border-b border-gray-200/80 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-800/50 text-xs font-bold capitalize tracking-normal text-gray-500 dark:text-gray-400">
-            <th class="py-4 px-5 w-12 text-center">No.</th>
-            <th class="py-4 px-5">User</th>
-            <th class="py-4 px-5">Role</th>
-            <th class="py-4 px-5">Object</th>
-            <th class="py-4 px-5 text-center">Status</th>
-            <th class="py-4 px-5 text-right w-44">Action</th>
+        <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+          <tr class="bg-brand-500 text-white font-semibold">
+            <th class="py-3 px-5 w-12 text-center text-white">No.</th>
+            <th class="py-3 px-5 text-white">User</th>
+            <th class="py-3 px-5 text-white">Role</th>
+            <th class="py-3 px-5 text-white">Object</th>
+            <th class="py-3 px-5 text-center text-white">Status</th>
+            <th class="py-3 px-5 text-right w-44 text-white">Action</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-sm">
@@ -230,34 +230,34 @@
                     <button
                       type="button"
                       @click="openResetModal(<?= (int)$r['user_id'] ?>, <?= htmlspecialchars(json_encode($r['user_name']), ENT_QUOTES, 'UTF-8') ?>)"
-                      class="h-9 w-9 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors flex items-center justify-center shadow-2xs"
+                      class="h-8 w-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors flex items-center justify-center shadow-2xs"
                       title="Reset Password"
                     >
-                      <i class="fa-solid fa-key text-sm"></i>
+                      <i class="fa-solid fa-key text-xs"></i>
                     </button>
                     <button
                       type="button"
                       @click="Modal.show({ url: '<?= base_url('sys-admin/user/form') ?>?id=<?= (int)$r['user_id'] ?>', title: 'Edit User', size: 'lg' })"
-                      class="h-9 w-9 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-brand-500 hover:bg-brand-50 hover:border-brand-200 dark:hover:bg-brand-500/10 transition-colors flex items-center justify-center shadow-2xs"
+                      class="h-8 w-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-brand-500 hover:bg-brand-50 hover:border-brand-200 dark:hover:bg-brand-500/10 transition-colors flex items-center justify-center shadow-2xs"
                       title="Edit User"
                     >
-                      <i class="fa-solid fa-pen text-sm"></i>
+                      <i class="fa-solid fa-pen text-xs"></i>
                     </button>
                     <button
                       type="button"
                       @click="toggleStatus(<?= (int)$r['user_id'] ?>, '<?= ($r['user_active'] ?? 'Y') === 'Y' ? 'nonaktifkan' : 'aktifkan' ?>')"
-                      class="h-9 w-9 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 <?= ($r['user_active'] ?? 'Y') === 'Y' ? 'text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10' : 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10' ?> transition-colors flex items-center justify-center shadow-2xs"
+                      class="h-8 w-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 <?= ($r['user_active'] ?? 'Y') === 'Y' ? 'text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10' : 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10' ?> transition-colors flex items-center justify-center shadow-2xs"
                       title="Aktif / Nonaktifkan"
                     >
-                      <i class="fa-solid fa-power-off text-sm"></i>
+                      <i class="fa-solid fa-power-off text-xs"></i>
                     </button>
                     <button
                       type="button"
                       @click="deleteUser(<?= (int)$r['user_id'] ?>)"
-                      class="h-9 w-9 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-red-600 hover:bg-red-50 hover:border-red-200 dark:hover:bg-red-500/10 transition-colors flex items-center justify-center shadow-2xs"
+                      class="h-8 w-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-red-600 hover:bg-red-50 hover:border-red-200 dark:hover:bg-red-500/10 transition-colors flex items-center justify-center shadow-2xs"
                       title="Hapus User"
                     >
-                      <i class="fa-solid fa-trash text-sm"></i>
+                      <i class="fa-solid fa-trash text-xs"></i>
                     </button>
                   </div>
                 </td>

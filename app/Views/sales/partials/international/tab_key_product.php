@@ -6,13 +6,13 @@
         <p class="text-xs text-gray-500 dark:text-gray-400 mb-6">Rekapitulasi performa per Kategori Key Product International dalam USD ($).</p>
         <div class="overflow-x-auto scrollbar-thin">
             <table class="w-full text-left text-xs border-collapse">
-                <thead class="bg-gray-100 dark:bg-gray-800 font-bold border-b border-gray-300 dark:border-gray-700">
-                    <tr>
-                        <th class="p-3">No.</th>
-                        <th class="p-3">KEY PRODUCT</th>
-                        <th class="p-3 text-right">Total QTY</th>
-                        <th class="p-3 text-right text-amber-700">Total REV ($)</th>
-                        <th class="p-3 text-right text-emerald-700">AVG ASP ($)</th>
+                <thead class="bg-brand-500 text-white font-semibold border-b border-brand-600 text-xs">
+                    <tr class="bg-brand-500 text-white font-semibold">
+                        <th class="p-3 text-white font-semibold">No.</th>
+                        <th class="p-3 text-white font-semibold">Key Product</th>
+                        <th class="p-3 text-right text-white font-semibold">Total Qty</th>
+                        <th class="p-3 text-right text-white font-semibold">Total Rev ($)</th>
+                        <th class="p-3 text-right text-white font-semibold">Avg ASP ($)</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-800">

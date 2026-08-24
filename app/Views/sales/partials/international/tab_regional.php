@@ -17,8 +17,8 @@
         <h3 class="text-xs font-bold uppercase tracking-wider mb-4"><i class="fa-solid fa-list-check text-indigo-500 mr-1"></i> Summary Regional Area</h3>
         <div class="overflow-x-auto">
             <table class="w-full text-xs border-collapse">
-                <thead class="bg-gray-100 dark:bg-gray-800 font-bold border-b border-gray-300 dark:border-gray-700">
-                    <tr><th class="p-3">Regional</th><th class="p-3 text-right">Total QTY</th><th class="p-3 text-right">Total REV ($)</th><th class="p-3 text-right">AVG ASP ($)</th></tr>
+                <thead class="bg-brand-500 text-white font-semibold border-b border-brand-600 text-xs">
+                    <tr class="bg-brand-500 text-white font-semibold"><th class="p-3 text-white font-semibold">Regional</th><th class="p-3 text-right text-white font-semibold">Total Qty</th><th class="p-3 text-right text-white font-semibold">Total Rev ($)</th><th class="p-3 text-right text-white font-semibold">Avg ASP ($)</th></tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
                     <template x-if="regionalSummaries.length === 0">

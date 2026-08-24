@@ -27,31 +27,31 @@
 
             <div class="overflow-x-auto border border-gray-200 dark:border-gray-800 rounded-lg">
                 <table class="w-full text-left text-xs border-collapse">
-                    <thead>
-                        <tr class="bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300 font-semibold border-b border-gray-200 dark:border-gray-800">
-                            <th rowspan="2" class="p-2 w-10 text-center">#</th>
-                            <th rowspan="2" class="p-2 min-w-[150px]">DESCRIPTION</th>
-                            <th rowspan="2" class="p-2 min-w-[150px]">COST CENTER</th>
-                            <th rowspan="2" class="p-2 min-w-[100px]">NEW LINES</th>
-                            <th rowspan="2" class="p-2 w-16 text-right">QTY</th>
-                            <th rowspan="2" class="p-2 min-w-[120px] text-right">UNIT PRICE (IN IDR MIO)</th>
-                            <th rowspan="2" class="p-2 min-w-[120px]">REMARKS</th>
-                            <th colspan="12" class="p-2 text-center border-x border-gray-200 dark:border-gray-800 bg-blue-50/60 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300">ACQUISITION PERIOD</th>
-                            <th rowspan="2" class="p-2 w-20 text-right">TOTAL</th>
+                    <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+                        <tr class="bg-brand-500 text-white font-semibold">
+                            <th rowspan="2" class="p-2 w-10 text-center border-r border-white/20 text-white">#</th>
+                            <th rowspan="2" class="p-2 min-w-[150px] border-r border-white/20 text-white">Description</th>
+                            <th rowspan="2" class="p-2 min-w-[150px] border-r border-white/20 text-white">Cost Center</th>
+                            <th rowspan="2" class="p-2 min-w-[100px] border-r border-white/20 text-white">New Lines</th>
+                            <th rowspan="2" class="p-2 w-16 text-right border-r border-white/20 text-white">Qty</th>
+                            <th rowspan="2" class="p-2 min-w-[120px] text-right border-r border-white/20 text-white">Unit Price (Mio IDR)</th>
+                            <th rowspan="2" class="p-2 min-w-[120px] border-r border-white/20 text-white">Remarks</th>
+                            <th colspan="12" class="p-2 text-center border-r border-white/20 bg-sky-700/60 text-white font-semibold">Acquisition Period</th>
+                            <th rowspan="2" class="p-2 w-20 text-right text-white bg-brand-700 font-bold">Total</th>
                         </tr>
-                        <tr class="bg-gray-50 dark:bg-gray-900/80 text-gray-600 dark:text-gray-400 font-semibold border-b border-gray-200 dark:border-gray-800 text-[10px]">
-                            <th class="p-2 w-16 text-right">JAN</th>
-                            <th class="p-2 w-16 text-right">FEB</th>
-                            <th class="p-2 w-16 text-right">MAR</th>
-                            <th class="p-2 w-16 text-right">APR</th>
-                            <th class="p-2 w-16 text-right">MAY</th>
-                            <th class="p-2 w-16 text-right">JUN</th>
-                            <th class="p-2 w-16 text-right">JUL</th>
-                            <th class="p-2 w-16 text-right">AUG</th>
-                            <th class="p-2 w-16 text-right">SEP</th>
-                            <th class="p-2 w-16 text-right">OCT</th>
-                            <th class="p-2 w-16 text-right">NOV</th>
-                            <th class="p-2 w-16 text-right">DEC</th>
+                        <tr class="bg-brand-600 text-white font-semibold text-[10px]">
+                            <th class="p-2 w-16 text-right border-r border-white/20 text-white">Jan</th>
+                            <th class="p-2 w-16 text-right border-r border-white/20 text-white">Feb</th>
+                            <th class="p-2 w-16 text-right border-r border-white/20 text-white">Mar</th>
+                            <th class="p-2 w-16 text-right border-r border-white/20 text-white">Apr</th>
+                            <th class="p-2 w-16 text-right border-r border-white/20 text-white">May</th>
+                            <th class="p-2 w-16 text-right border-r border-white/20 text-white">Jun</th>
+                            <th class="p-2 w-16 text-right border-r border-white/20 text-white">Jul</th>
+                            <th class="p-2 w-16 text-right border-r border-white/20 text-white">Aug</th>
+                            <th class="p-2 w-16 text-right border-r border-white/20 text-white">Sep</th>
+                            <th class="p-2 w-16 text-right border-r border-white/20 text-white">Oct</th>
+                            <th class="p-2 w-16 text-right border-r border-white/20 text-white">Nov</th>
+                            <th class="p-2 w-16 text-right border-r border-white/20 text-white">Dec</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-800">

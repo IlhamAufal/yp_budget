@@ -9,8 +9,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   
   <link href="<?= base_url('assets/css/style.css') ?>" rel="stylesheet">
-  
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
   <div class="flex min-h-screen items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -65,7 +63,7 @@
             </div>
           </div>
 
-          <div x-data="{ showPassword: false }">
+          <div>
             <label
               for="password"
               class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -81,7 +79,7 @@
               </span>
 
               <input
-                :type="showPassword ? 'text' : 'password'"
+                type="password"
                 id="password"
                 name="password"
                 placeholder="Masukkan password"
@@ -91,15 +89,11 @@
 
               <button
                 type="button"
-                @click="showPassword = !showPassword"
+                id="toggle-password"
                 class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                 tabindex="-1"
               >
-                <i
-                  :class="showPassword
-                    ? 'fa-solid fa-eye-slash'
-                    : 'fa-solid fa-eye'"
-                ></i>
+                <i id="toggle-password-icon" class="fa-solid fa-eye"></i>
               </button>
             </div>
           </div>
@@ -145,5 +139,20 @@
 
     </div>
   </div>
+
+  <script>
+    (function () {
+      var btn = document.getElementById('toggle-password');
+      var input = document.getElementById('password');
+      var icon = document.getElementById('toggle-password-icon');
+      if (!btn || !input || !icon) return;
+
+      btn.addEventListener('click', function () {
+        var show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        icon.className = show ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+      });
+    })();
+  </script>
 </body>
 </html>
