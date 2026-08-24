@@ -161,6 +161,7 @@
   <!-- ============================================================ -->
   <?= $this->include('partials/modal_select_year') ?>
   <?= $this->include('partials/global_modal') ?>
+  <?= $this->include('partials/confirm_modal') ?>
 
   <?= $this->include('partials/master_scripts') ?>
   <?= $this->include('partials/footer_scripts') ?>

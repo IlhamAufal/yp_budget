@@ -1,5 +1,5 @@
-<div x-show="uploadModalOpen" x-cloak class="fixed inset-0 z-[999999] flex items-center justify-center p-4" style="background-color: rgba(0,0,0,0.65); backdrop-filter: blur(6px);">
-    <div @click.outside="uploadModalOpen = false" class="w-full max-w-2xl overflow-hidden rounded-lg border border-stroke bg-white shadow-2xl dark:border-strokedark dark:bg-boxdark">
+<div x-show="uploadModalOpen" x-cloak class="fixed inset-0 z-[9999999] flex items-center justify-center p-4" style="background-color: rgba(0,0,0,0.65); backdrop-filter: blur(6px);" @click.self="uploadModalOpen = false">
+    <div class="w-full max-w-2xl overflow-hidden rounded-lg border border-stroke bg-white shadow-2xl dark:border-strokedark dark:bg-boxdark">
         <div class="flex items-center justify-between border-b border-stroke px-6 py-4 dark:border-strokedark">
             <h3 class="text-base font-bold text-black dark:text-white" x-text="uploadTitle"></h3>
             <button type="button" @click="uploadModalOpen = false" class="text-gray-400 hover:text-black dark:hover:text-white" aria-label="Close">&times;</button>

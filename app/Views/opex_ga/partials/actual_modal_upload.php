@@ -1,4 +1,4 @@
-<div x-show="uploadModalOpen" class="fixed inset-0 z-[999999] flex items-center justify-center p-4" x-cloak>
+<div x-show="uploadModalOpen" class="fixed inset-0 z-[9999999] flex items-center justify-center p-4" x-cloak>
     <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="uploadModalOpen = false"></div>
 
     <div class="relative w-full max-w-xl rounded-lg bg-white p-6 shadow-2xl dark:bg-boxdark">

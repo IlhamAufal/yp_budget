@@ -424,8 +424,6 @@
     </script>
   <?php endif; ?>
 
-  <!-- Confirm Modal Reusable -->
-  <?= $this->include('partials/confirm_modal') ?>
 
 </div>
 

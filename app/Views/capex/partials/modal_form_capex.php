@@ -1,5 +1,5 @@
 <div x-show="formCapexOpen" 
-     class="fixed inset-0 z-[9999] flex items-center justify-center p-4" 
+     class="fixed inset-0 z-[9999999] flex items-center justify-center p-4" 
      style="background-color: rgba(0,0,0,0.65); backdrop-filter: blur(4px);"
      x-cloak>
     <div class="w-full max-w-7xl max-h-[90vh] bg-white dark:bg-boxdark rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200 dark:border-gray-800"
