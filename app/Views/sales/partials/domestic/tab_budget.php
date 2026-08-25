@@ -150,12 +150,20 @@
                             </template>
                             <template x-if="row.kind === 'subtotal'">
                                 <td class="px-3 py-2.5 text-right border-r border-amber-300 font-extrabold text-xs bg-amber-100 dark:bg-amber-900/50" x-text="formatNumber(row.group.subtotal.total_qty)"></td>
+                            </template>
+                            <template x-if="row.kind === 'subtotal'">
                                 <td class="px-3 py-2.5 text-right border-r border-amber-300 font-extrabold text-xs text-emerald-700 dark:text-emerald-400 bg-amber-100 dark:bg-amber-900/50" x-text="formatNumber(row.group.subtotal.total_revenue)"></td>
+                            </template>
+                            <template x-if="row.kind === 'subtotal'">
                                 <td class="px-3 py-2.5 text-right font-extrabold text-xs bg-amber-100 dark:bg-amber-900/50" x-text="formatNumber(calculateASP(row.group.subtotal.total_revenue, row.group.subtotal.total_qty, row.group.channel))"></td>
                             </template>
                             <template x-if="row.kind === 'item'">
                                 <td class="px-3 py-2.5 border-l-2 border-[#2F3185]/30 border-r border-gray-200 dark:border-gray-800 bg-[#2F3185]/5 dark:bg-gray-800 text-right font-bold text-xs text-gray-900 dark:text-white" x-text="formatNumber(row.item.total_qty)"></td>
+                            </template>
+                            <template x-if="row.kind === 'item'">
                                 <td class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-800 bg-[#2F3185]/5 dark:bg-gray-800 text-right font-bold text-xs text-emerald-600 dark:text-emerald-400" x-text="formatNumber(row.item.total_revenue)"></td>
+                            </template>
+                            <template x-if="row.kind === 'item'">
                                 <td class="px-3 py-2.5 bg-[#2F3185]/5 dark:bg-gray-800 text-right font-bold text-xs text-amber-600 dark:text-amber-400" x-text="formatNumber(calculateASP(row.item.total_revenue, row.item.total_qty, row.item.id_channel))"></td>
                             </template>
                         </tr>

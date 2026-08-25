@@ -3,56 +3,50 @@
 <?= $this->section('content') ?>
 <div x-data="salesMainContainer()" x-init="initData()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
         <div>
-            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
-                <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-                <span class="text-brand-500 font-bold">Sales Overview</span>
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">Dashboard</a>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+                <span class="text-[#2F3185] font-bold">Sales Overview</span>
             </div>
-            <h1 class="text-xl md:text-2xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
-                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 shadow-xs">
-                    <i class="fa-solid fa-chart-line text-base"></i>
-                </span>
+            <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Sales Budget Overview
             </h1>
-            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 Pusat simulasi, alokasi target volume & revenue, serta penyesuaian diskon sales.
             </p>
         </div>
-        <div class="flex items-center gap-2.5 rounded-xl border border-gray-200/80 bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-xs dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
-            <i class="fa-solid fa-calendar-days text-brand-500"></i>
-            <span>Budget Plan Year :</span>
-            <span class="text-brand-600 dark:text-brand-400 font-bold"><?= esc($workingYear ?? date('Y')) ?></span>
-        </div>
     </div>
 
-    <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
-        <div class="border-b border-gray-100 dark:border-gray-800 px-6 pt-3">
-            <div class="flex flex-wrap items-center gap-4">
-                <button @click="activeTab = 'summary'" :class="activeTab === 'summary' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'" class="flex items-center gap-1.5 border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
-                    <i class="fa-solid fa-chart-pie mr-1"></i>Summary
-                </button>
-                <button @click="activeTab = 'domestic'" :class="activeTab === 'domestic' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'" class="flex items-center gap-1.5 border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
-                    <i class="fa-solid fa-boxes-packing mr-1"></i>Domestic
-                </button>
-                <button @click="activeTab = 'intl_valas'" :class="activeTab === 'intl_valas' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'" class="flex items-center gap-1.5 border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
-                    <i class="fa-solid fa-globe mr-1"></i>INTL (VALAS)
-                </button>
-                <button @click="activeTab = 'intl_idr'" :class="activeTab === 'intl_idr' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'" class="flex items-center gap-1.5 border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
-                    <i class="fa-solid fa-money-bill-transfer mr-1"></i>INTL (IDR)
-                </button>
-                <button @click="activeTab = 'delivery_claim'" :class="activeTab === 'delivery_claim' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'" class="flex items-center gap-1.5 border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
-                    <i class="fa-solid fa-truck mr-1"></i>Delivery & Claim
-                </button>
-                <button @click="activeTab = 'key_product'" :class="activeTab === 'key_product' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'" class="flex items-center gap-1.5 border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
-                    <i class="fa-solid fa-award mr-1"></i>Key Product
-                </button>
-                <button @click="activeTab = 'reclass'" :class="activeTab === 'reclass' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'" class="flex items-center gap-1.5 border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
-                    <i class="fa-solid fa-right-left mr-1"></i>Reclass A&P
-                </button>
-            </div>
-        </div>
+    <!-- Sub Tabs Navigation -->
+    <div class="nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+        <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="Sales Overview Tabs">
+            <button type="button" @click="activeTab = 'summary'" :class="activeTab === 'summary' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Summary</span>
+            </button>
+            <button type="button" @click="activeTab = 'domestic'" :class="activeTab === 'domestic' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Domestic</span>
+            </button>
+            <button type="button" @click="activeTab = 'intl_valas'" :class="activeTab === 'intl_valas' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>INTL (Valas)</span>
+            </button>
+            <button type="button" @click="activeTab = 'intl_idr'" :class="activeTab === 'intl_idr' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>INTL (IDR)</span>
+            </button>
+            <button type="button" @click="activeTab = 'delivery_claim'" :class="activeTab === 'delivery_claim' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Delivery & Claim</span>
+            </button>
+            <button type="button" @click="activeTab = 'key_product'" :class="activeTab === 'key_product' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Key Product</span>
+            </button>
+            <button type="button" @click="activeTab = 'reclass'" :class="activeTab === 'reclass' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Reclass A&P</span>
+            </button>
+        </nav>
+    </div>
+
+    <div>
 
         <div class="p-5 md:p-6 space-y-6">
 

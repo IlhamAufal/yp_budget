@@ -1,69 +1,72 @@
 <div x-data="salesSummaryTab()" x-init="initData()" class="space-y-6">
 
-    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
         <div>
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Sales Grand Summary & Revenue Target</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Konsolidasi total Domestic Sales, International Sales (Valas/IDR), dan penyesuaian diskon.</p>
+            <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Sales Grand Summary & Revenue Target</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Konsolidasi total Domestic Sales, International Sales (Valas/IDR), dan penyesuaian diskon.</p>
         </div>
 
-        <div class="flex items-center gap-2">
-            <button type="button" @click="exportExcel()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        <div class="shrink-0">
+            <button type="button" @click="exportExcel()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-all inline-flex items-center gap-2 active:scale-[0.98]">
+                <i class="fa-solid fa-file-excel"></i>
                 <span>Export Summary</span>
             </button>
         </div>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Grand Total Volume</p>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mt-1" x-text="formatNumber(summary.total_volume) + ' Box'">0 Box</h3>
-            <p class="text-[11px] text-blue-600 dark:text-blue-400 mt-1">Domestic + Export Combined</p>
+        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
+            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Grand Total Volume</p>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mt-1.5" x-text="formatNumber(summary.total_volume) + ' Box'">0 Box</h3>
+            <p class="text-[11px] text-[#2F3185] dark:text-indigo-400 mt-1 font-medium">Domestic + Export Combined</p>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Gross Revenue Target (IDR)</p>
-            <h3 class="text-xl font-bold text-primary mt-1" x-text="'Rp ' + formatNumber(summary.gross_revenue)">Rp 0</h3>
+        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
+            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Gross Revenue Target (IDR)</p>
+            <h3 class="text-xl font-bold text-[#2F3185] dark:text-indigo-400 mt-1.5" x-text="'Rp ' + formatNumber(summary.gross_revenue)">Rp 0</h3>
             <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Before Discount & Reclass</p>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total Discount & Reclass</p>
-            <h3 class="text-xl font-bold text-rose-600 dark:text-rose-400 mt-1" x-text="'Rp ' + formatNumber(summary.total_discount)">Rp 0</h3>
+        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
+            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Total Discount & Reclass</p>
+            <h3 class="text-xl font-bold text-rose-600 dark:text-rose-400 mt-1.5" x-text="'Rp ' + formatNumber(summary.total_discount)">Rp 0</h3>
             <p class="text-[11px] text-rose-500 dark:text-rose-400 mt-1">Commercial Deductions</p>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Net Sales Target (IDR)</p>
-            <h3 class="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1" x-text="'Rp ' + formatNumber(summary.net_sales)">Rp 0</h3>
+        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
+            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Net Sales Target (IDR)</p>
+            <h3 class="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1.5" x-text="'Rp ' + formatNumber(summary.net_sales)">Rp 0</h3>
             <p class="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1">Final P/L Revenue Baseline</p>
         </div>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Rincian Ringkasan Sales per Segmen (12 Bulan)</h2>
-        </div>
+    <!-- Table Section Label (Separated from table container) -->
+    <div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Rincian Ringkasan Sales per Segmen (12 Bulan)</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Rincian target bulanan per segmen kanal penjualan.</p>
+    </div>
 
+    <!-- Table Container (Round corner starts directly from thead) -->
+    <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs overflow-hidden bg-white dark:bg-gray-900">
         <div class="overflow-x-auto scrollbar-thin">
-            <table class="w-full text-left text-xs border-collapse min-w-[1200px]">
-                <thead class="bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold border-b border-gray-200 dark:border-gray-700">
-                    <tr>
-                        <th class="p-3 sticky left-0 z-10 bg-gray-50 dark:bg-gray-700 min-w-[220px]">Segmen Penjualan</th>
+            <table class="w-full text-left text-xs border-collapse min-w-[1200px] whitespace-nowrap">
+                <thead class="bg-[#2F3185] text-white font-semibold border-b border-white/20 text-xs">
+                    <tr class="bg-[#2F3185] text-white font-semibold">
+                        <th class="px-4 py-3.5 sticky left-0 z-10 bg-[#2F3185] text-white font-semibold min-w-[240px] border-r border-white/20">Segmen Penjualan</th>
                         <template x-for="(month, idx) in monthNames" :key="idx">
-                            <th class="p-2 text-center w-24" x-text="month"></th>
+                            <th class="px-3 py-3.5 text-center text-white font-semibold w-24 border-r border-white/20" x-text="month"></th>
                         </template>
-                        <th class="p-3 text-right w-32 bg-gray-100 dark:bg-gray-700/80 sticky right-0">Total Year</th>
+                        <th class="px-4 py-3.5 text-right w-36 bg-[#2F3185] text-white font-bold sticky right-0">Total Year</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-800 font-mono text-xs">
                     <template x-for="row in rows" :key="row.id">
-                        <tr :class="row.is_total ? 'bg-primary/5 font-bold dark:bg-primary/10' : ''">
-                            <td class="p-3 sticky left-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 font-medium" :class="row.is_total ? 'text-primary font-bold' : 'text-gray-900 dark:text-white'" x-text="row.segment_name"></td>
+                        <tr :class="row.is_total ? 'bg-[#2F3185]/10 dark:bg-[#2F3185]/20 font-bold border-t-2 border-[#2F3185]/30 text-gray-900 dark:text-white' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'">
+                            <td class="px-4 py-3 sticky left-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 font-sans font-semibold" :class="row.is_total ? 'text-[#2F3185] dark:text-indigo-400 font-bold' : 'text-gray-900 dark:text-white'" x-text="row.segment_name"></td>
                             <template x-for="m in 12" :key="m">
-                                <td class="p-2 text-right font-mono" x-text="formatNumber(row.monthly[m])"></td>
+                                <td class="px-3 py-3 text-right border-r border-gray-200 dark:border-gray-800" x-text="formatNumber(row.monthly[m])"></td>
                             </template>
-                            <td class="p-3 text-right font-bold font-mono bg-gray-50 dark:bg-gray-700/50 sticky right-0" :class="row.is_total ? 'text-primary' : 'text-gray-900 dark:text-white'" x-text="formatNumber(row.total_year)"></td>
+                            <td class="px-4 py-3 text-right font-bold bg-gray-50 dark:bg-gray-800 sticky right-0" :class="row.is_total ? 'text-[#2F3185] dark:text-indigo-400' : 'text-gray-900 dark:text-white'" x-text="formatNumber(row.total_year)"></td>
                         </tr>
                     </template>
                 </tbody>

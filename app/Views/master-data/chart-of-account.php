@@ -7,44 +7,39 @@
   <!-- ============================================================ -->
   <!-- BREADCRUMB & HEADER -->
   <!-- ============================================================ -->
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
     <div>
-      <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
-        <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors">
-          <i class="fa-solid fa-gauge-high"></i> Dashboard
-        </a>
-        <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-        <span>Master Data</span>
-        <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-        <span class="text-brand-500 font-bold">Chart of Account (COA)</span>
+      <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+        <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">Dashboard</a>
+        <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+        <span class="hover:text-[#2F3185]">Master Data</span>
+        <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+        <span class="text-[#2F3185] font-bold">Chart of Account (COA)</span>
       </div>
-      <h1 class="text-xl md:text-2xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
-        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-400">
-          <i class="fa-solid fa-book-bookmark text-base"></i>
-        </span>
+      <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
         Chart of Account (COA)
       </h1>
-      <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
         Pengelolaan akun anggaran untuk modul FOH, OPEX GA, OPEX Selling, dan CAPEX.
       </p>
     </div>
 
     <!-- Quick Action Buttons -->
-    <div class="flex flex-wrap items-center gap-2.5">
+    <div class="flex flex-wrap items-center gap-3">
       <button
         type="button"
         @click="openCopyModal()"
-        class="inline-flex items-center gap-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 transition-all shadow-xs"
+        class="inline-flex items-center gap-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-5 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-xs cursor-pointer active:scale-[0.98]"
       >
-        <i class="fa-solid fa-copy text-brand-500"></i>
+        <i class="fa-solid fa-copy text-[#2F3185] dark:text-indigo-400"></i>
         <span>Salin Antar Tahun</span>
       </button>
 
       <a
         href="<?= base_url('master/coa/export?' . http_build_query($filters ?? [])) ?>"
-        class="inline-flex items-center gap-2 rounded-xl border border-emerald-300 dark:border-emerald-700/60 bg-emerald-50 dark:bg-emerald-950/40 px-3.5 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-all shadow-xs"
+        class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-5 py-2.5 text-xs font-semibold text-white shadow-xs transition-all active:scale-[0.98]"
       >
-        <i class="fa-solid fa-file-excel text-emerald-600 dark:text-emerald-400"></i>
+        <i class="fa-solid fa-file-excel"></i>
         <span>Export CSV</span>
       </a>
     </div>
@@ -59,9 +54,9 @@
     $inactiveCount = $totalRows - $activeCount;
     $selectedYear = $filters['year'] ?? session()->get('year_code') ?? date('Y');
   ?>
-  <div class="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-gray-200/80 bg-white px-4 py-2.5 text-xs dark:border-gray-800 dark:bg-gray-900">
+  <div class="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-2xl border border-gray-200/80 bg-white p-4 text-xs dark:border-gray-800 dark:bg-gray-900 shadow-xs">
     <div class="flex items-center gap-2">
-      <span class="flex h-6 w-6 items-center justify-center rounded-md bg-blue-50 text-blue-500 dark:bg-blue-500/10 dark:text-blue-400">
+      <span class="flex h-6 w-6 items-center justify-center rounded-md bg-[#2F3185]/10 text-[#2F3185] dark:bg-[#2F3185]/20 dark:text-indigo-400">
         <i class="fa-solid fa-book-bookmark text-[10px]"></i>
       </span>
       <span class="text-gray-500 dark:text-gray-400">Total Akun:</span>
@@ -89,34 +84,29 @@
         <i class="fa-solid fa-calendar text-[10px]"></i>
       </span>
       <span class="text-gray-500 dark:text-gray-400">Tahun:</span>
-      <span class="font-bold text-brand-500 dark:text-brand-400"><?= esc($selectedYear) ?></span>
+      <span class="font-bold text-[#2F3185] dark:text-indigo-400"><?= esc($selectedYear) ?></span>
     </div>
   </div>
 
-  <!-- ============================================================ -->
-  <!-- DATA TABLE & FILTER -->
-  <!-- ============================================================ -->
-  <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
-    <!-- Filter Bar -->
-    <div class="p-3.5 border-b border-gray-100 dark:border-gray-800">
-      <form method="GET" action="<?= base_url('master/coa') ?>" class="flex flex-wrap items-center gap-2.5">
-        <div class="relative flex-1 min-w-[220px]">
-            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                <i class="fa-solid fa-magnifying-glass text-xs text-gray-400 dark:text-gray-500"></i>
-            </div>
+  <!-- Filter Card -->
+  <div class="rounded-2xl border border-gray-200/80 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 shadow-xs">
+    <form method="GET" action="<?= base_url('master/coa') ?>" class="flex flex-wrap items-center gap-3">
+      <div class="flex-1 min-w-[220px]">
+        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Pencarian Akun</label>
+        <input
+            type="text"
+            name="search"
+            value="<?= esc($filters['search'] ?? '') ?>"
+            placeholder="Cari nomor akun, header, atau uraian..."
+            class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5 text-xs text-gray-800 placeholder:text-gray-400 focus:border-[#2F3185] focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-all shadow-xs"
+        />
+      </div>
 
-            <input
-                type="text"
-                name="search"
-                value="<?= esc($filters['search'] ?? '') ?>"
-                placeholder="Cari akun, header, atau uraian..."
-                class="w-full rounded-xl border border-gray-200/80 bg-gray-50/60 py-2 pl-10 pr-3.5 text-xs text-gray-800 placeholder:text-gray-400 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700/80 dark:bg-gray-800/80 dark:text-white dark:focus:border-brand-400 transition-all shadow-xs"
-            />
-        </div>
-
+      <div class="min-w-[140px]">
+        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Tipe Modul</label>
         <select
           name="type"
-          class="rounded-xl border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs min-w-[130px] focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+          class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-2.5 px-3 text-xs focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-colors"
         >
           <option value="">Semua Tipe</option>
           <option value="OPEX GA" <?= ($filters['type'] ?? '') === 'OPEX GA' ? 'selected' : '' ?>>OPEX GA</option>
@@ -124,10 +114,13 @@
           <option value="FOH" <?= ($filters['type'] ?? '') === 'FOH' ? 'selected' : '' ?>>FOH</option>
           <option value="CAPEX" <?= ($filters['type'] ?? '') === 'CAPEX' ? 'selected' : '' ?>>CAPEX</option>
         </select>
+      </div>
 
+      <div class="min-w-[130px]">
+        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Tahun</label>
         <select
           name="year"
-          class="rounded-xl border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs min-w-[130px] focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+          class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-2.5 px-3 text-xs focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-colors"
         >
           <option value="">Semua Tahun</option>
           <?php foreach (($years ?? []) as $y): ?>
@@ -136,20 +129,24 @@
             </option>
           <?php endforeach; ?>
         </select>
+      </div>
 
+      <div class="min-w-[130px]">
+        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
         <select
           name="status"
-          class="rounded-xl border border-gray-200 bg-gray-50/50 py-2 px-3 text-xs min-w-[130px] focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+          class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-2.5 px-3 text-xs focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-colors"
         >
           <option value="">Semua Status</option>
           <option value="A" <?= ($filters['status'] ?? '') === 'A' ? 'selected' : '' ?>>Aktif (A)</option>
           <option value="D" <?= ($filters['status'] ?? '') === 'D' ? 'selected' : '' ?>>Non-Aktif (D)</option>
         </select>
+      </div>
 
+      <div class="flex items-center gap-2 pt-5">
         <button
           type="submit"
-          class="h-8 px-3 rounded-xl bg-gray-900 dark:bg-brand-500 text-xs font-semibold text-white hover:bg-black dark:hover:bg-brand-600 transition-colors inline-flex items-center gap-1.5 shadow-xs"
-          title="Terapkan Filter"
+          class="px-5 py-2.5 rounded-xl bg-[#2F3185] hover:bg-[#25276d] text-xs font-semibold text-white transition-colors inline-flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-[0.98]"
         >
           <i class="fa-solid fa-filter text-[11px]"></i>
           <span>Filter</span>
@@ -157,115 +154,126 @@
         <?php if (! empty($has_filter)): ?>
         <a
           href="<?= base_url('master/coa') ?>"
-          class="h-8 px-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors inline-flex items-center gap-1.5"
-          title="Reset Filter"
+          class="px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors inline-flex items-center gap-1.5 shadow-xs"
         >
           <i class="fa-solid fa-rotate-left text-[11px]"></i>
           <span>Reset</span>
         </a>
         <?php endif; ?>
-      </form>
+      </div>
+    </form>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- DATA TABLE & FILTER -->
+  <!-- ============================================================ -->
+  <div class="space-y-4">
+    <div>
+      <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Daftar Chart of Account (COA)</h3>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Daftar seluruh akun anggaran yang terdaftar pada sistem.</p>
     </div>
 
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse text-xs text-gray-600 dark:text-gray-300">
-        <thead class="bg-brand-500 text-white text-xs font-semibold border-b border-brand-600">
-          <tr>
-            <th class="py-3 px-4 w-12 text-center text-white">No.</th>
-            <th class="py-3 px-4 w-36 text-white">Main Account</th>
-            <th class="py-3 px-4 text-white">Header</th>
-            <th class="py-3 px-4 text-white">Name</th>
-            <th class="py-3 px-4 text-white">Category</th>
-            <th class="py-3 px-4 text-right w-20 text-white">Action</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
-          <?php if (empty($rows)): ?>
-            <tr>
-              <td colspan="6" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
-                <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
-                  <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
-                    <i class="fa-solid fa-book-bookmark text-xl"></i>
-                  </div>
-                  <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Tidak Ada Data Akun COA</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">Coba ubah kata kunci pencarian atau reset filter di atas.</p>
-                </div>
-              </td>
+    <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs text-gray-600 dark:text-gray-300">
+          <thead class="bg-[#2F3185] text-white text-xs font-semibold border-b border-white/20">
+            <tr class="bg-[#2F3185] text-white font-semibold text-xs">
+              <th class="py-3 px-4 w-12 text-center text-white font-semibold">No.</th>
+              <th class="py-3 px-4 w-36 text-white font-semibold">Main Account</th>
+              <th class="py-3 px-4 text-white font-semibold">Header</th>
+              <th class="py-3 px-4 text-white font-semibold">Name</th>
+              <th class="py-3 px-4 text-white font-semibold">Category</th>
+              <th class="py-3 px-4 text-right w-20 text-white font-semibold">Aksi</th>
             </tr>
-          <?php else: ?>
-            <?php foreach ($rows as $index => $r): ?>
-              <tr x-show="isRowVisible(<?= $index ?>)" class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
-                <!-- No. -->
-                <td class="py-3 px-4 text-center text-gray-400 font-medium"><?= $index + 1 ?></td>
-
-                <!-- Main Account -->
-                <td class="py-3 px-4 font-mono font-bold text-brand-600 dark:text-brand-400">
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
-                    <i class="fa-solid fa-hashtag text-[10px] text-gray-400"></i>
-                    <?= esc($r['main_account']) ?>
-                  </span>
-                </td>
-
-                <!-- Header -->
-                <td class="py-3 px-4 text-gray-600 dark:text-gray-400">
-                  <?= esc($r['cost_center_header'] ?: '-') ?>
-                </td>
-
-                <!-- Name -->
-                <td class="py-3 px-4 font-semibold text-gray-800 dark:text-gray-100">
-                  <div><?= esc($r['cost_center_desc'] ?: '-') ?></div>
-                </td>
-
-                <!-- Category -->
-                <td class="py-3 px-4 text-gray-600 dark:text-gray-300">
-                  <?= esc($r['category'] ?: ($r['type'] ?: '-')) ?>
-                </td>
-
-                <!-- Action (delete only) -->
-                <td class="py-3 px-4 text-right">
-                  <div class="flex items-center justify-end">
-                    <button
-                      type="button"
-                      @click="toggleStatus(<?= (int)$r['id_cost_center'] ?>, 'hapus')"
-                      class="h-8 w-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-red-600 hover:bg-red-50 hover:border-red-200 dark:hover:bg-red-900/20 dark:text-red-400 transition-colors flex items-center justify-center shadow-2xs"
-                      title="Hapus Akun"
-                    >
-                      <i class="fa-solid fa-trash text-xs"></i>
-                    </button>
+          </thead>
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-xs">
+            <?php if (empty($rows)): ?>
+              <tr>
+                <td colspan="6" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+                  <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-[#2F3185]">
+                      <i class="fa-solid fa-book-bookmark text-xl"></i>
+                    </div>
+                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Tidak Ada Data Akun COA</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Coba ubah kata kunci pencarian atau reset filter di atas.</p>
                   </div>
                 </td>
               </tr>
-            <?php endforeach; ?>
-          <?php endif; ?>
-        </tbody>
-      </table>
-    </div>
+            <?php else: ?>
+              <?php foreach ($rows as $index => $r): ?>
+                <tr x-show="isRowVisible(<?= $index ?>)" class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+                  <!-- No. -->
+                  <td class="py-3 px-4 text-center text-gray-400 font-medium"><?= $index + 1 ?></td>
 
-    <!-- Table Footer / Pagination -->
-    <?php
-      $pages   = max(1, (int) ceil(($total ?? 0) / max(1, $perPage ?? 10)));
-      $from    = ($total ?? 0) > 0 ? (($page - 1) * $perPage + 1) : 0;
-      $to      = min($page * $perPage, $total ?? 0);
-      $winStart = max(1, min($page - 2, max(1, $pages - 4)));
-      $winEnd   = min($pages, $winStart + 4);
-    ?>
-    <?php if (($total ?? 0) > 0): ?>
-    <div class="border-t border-gray-100 dark:border-gray-800 p-3.5 sm:p-4 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
-      <span>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200"><?= $from ?></span> - <span class="font-bold text-gray-800 dark:text-gray-200"><?= $to ?></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= number_format($total) ?></span> akun COA</span>
-      <div class="flex items-center gap-1">
-        <a href="?page=<?= max(1, $page - 1) ?>" class="h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 <?= $page <= 1 ? 'opacity-40 pointer-events-none' : '' ?> transition-colors text-xs font-semibold flex items-center gap-1"><i class="fa-solid fa-chevron-left text-[10px]"></i><span class="hidden sm:inline">Sebelumnya</span></a>
-        <?php for ($p = $winStart; $p <= $winEnd; $p++): ?>
-          <a href="?page=<?= $p ?>" class="h-8 min-w-[32px] px-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center <?= $p === $page ? 'bg-brand-500 text-white font-bold shadow-xs' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' ?>"><?= $p ?></a>
-        <?php endfor; ?>
-        <a href="?page=<?= min($pages, $page + 1) ?>" class="h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 <?= $page >= $pages ? 'opacity-40 pointer-events-none' : '' ?> transition-colors text-xs font-semibold flex items-center gap-1"><span class="hidden sm:inline">Berikutnya</span><i class="fa-solid fa-chevron-right text-[10px]"></i></a>
+                  <!-- Main Account -->
+                  <td class="py-3 px-4 font-mono font-bold text-[#2F3185] dark:text-indigo-400">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 font-mono text-xs">
+                      <?= esc($r['main_account']) ?>
+                    </span>
+                  </td>
+
+                  <!-- Header -->
+                  <td class="py-3 px-4 text-gray-600 dark:text-gray-400">
+                    <?= esc($r['cost_center_header'] ?: '-') ?>
+                  </td>
+
+                  <!-- Name -->
+                  <td class="py-3 px-4 font-medium text-gray-800 dark:text-gray-100">
+                    <div><?= esc($r['cost_center_desc'] ?: '-') ?></div>
+                  </td>
+
+                  <!-- Category -->
+                  <td class="py-3 px-4 text-gray-600 dark:text-gray-300">
+                    <?= esc($r['category'] ?: ($r['type'] ?: '-')) ?>
+                  </td>
+
+                  <!-- Action (delete only) -->
+                  <td class="py-3 px-4 text-right">
+                    <div class="flex items-center justify-end">
+                      <button
+                        type="button"
+                        @click="toggleStatus(<?= (int)$r['id_cost_center'] ?>, 'hapus')"
+                        class="h-7 w-7 rounded-lg inline-flex items-center justify-center bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 transition-colors shadow-xs"
+                        title="Hapus Akun"
+                      >
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </tbody>
+        </table>
       </div>
+
+      <!-- Table Footer / Pagination -->
+      <?php
+        $pages   = max(1, (int) ceil(($total ?? 0) / max(1, $perPage ?? 10)));
+        $from    = ($total ?? 0) > 0 ? (($page - 1) * $perPage + 1) : 0;
+        $to      = min($page * $perPage, $total ?? 0);
+        $winStart = max(1, min($page - 2, max(1, $pages - 4)));
+        $winEnd   = min($pages, $winStart + 4);
+      ?>
+      <?php if (($total ?? 0) > 0): ?>
+      <div class="border-t border-gray-200 dark:border-gray-800 p-3.5 sm:p-4 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
+        <span>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200"><?= $from ?></span> - <span class="font-bold text-gray-800 dark:text-gray-200"><?= $to ?></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= number_format($total) ?></span> akun COA</span>
+        <div class="flex items-center gap-1">
+          <a href="?page=<?= max(1, $page - 1) ?>" class="h-8 px-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 <?= $page <= 1 ? 'opacity-40 pointer-events-none' : '' ?> transition-colors text-xs font-semibold flex items-center gap-1"><i class="fa-solid fa-chevron-left text-[10px]"></i><span class="hidden sm:inline">Sebelumnya</span></a>
+          <?php for ($p = $winStart; $p <= $winEnd; $p++): ?>
+            <a href="?page=<?= $p ?>" class="h-8 min-w-[32px] px-2.5 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center <?= $p === $page ? 'bg-[#2F3185] text-white font-bold shadow-xs' : 'border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' ?>"><?= $p ?></a>
+          <?php endfor; ?>
+          <a href="?page=<?= min($pages, $page + 1) ?>" class="h-8 px-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 <?= $page >= $pages ? 'opacity-40 pointer-events-none' : '' ?> transition-colors text-xs font-semibold flex items-center gap-1"><span class="hidden sm:inline">Berikutnya</span><i class="fa-solid fa-chevron-right text-[10px]"></i></a>
+        </div>
+      </div>
+      <?php endif; ?>
     </div>
-    <?php endif; ?>
   </div>
 
   <!-- ============================================================ -->
   <!-- MODAL: TAMBAH / EDIT AKUN COA -->
   <!-- ============================================================ -->
+  <template x-teleport="body">
   <div
     x-show="modalOpen"
     x-transition:enter="transition ease-out duration-250"
@@ -274,8 +282,8 @@
     x-transition:leave="transition ease-in duration-200"
     x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0"
-    class="fixed inset-0 flex items-center justify-center p-4"
-    style="z-index: 9999999; background-color: rgba(0,0,0,0.65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);"
+    class="fixed inset-0 flex items-center justify-center p-4 z-[9999999]"
+    style="background-color: rgba(0,0,0,0.65); backdrop-filter: blur(4px);"
     @click.self="modalOpen = false"
     x-cloak
   >
@@ -290,33 +298,28 @@
       class="relative w-full max-w-xl rounded-2xl bg-white shadow-2xl dark:bg-gray-900 border border-gray-100 dark:border-gray-800 overflow-hidden"
     >
       <!-- Modal Header -->
-      <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-        <div class="flex items-center gap-4">
-          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-400">
-            <i class="fa-solid fa-book-bookmark text-lg"></i>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white" x-text="form.id ? 'Edit Akun COA' : 'Tambah Akun COA Baru'"></h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400" x-text="form.id ? 'Perbarui detail data chart of account' : 'Isi formulir untuk mendaftarkan akun COA baru'"></p>
-          </div>
+      <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
+        <div>
+          <h3 class="text-base font-bold text-gray-900 dark:text-white" x-text="form.id ? 'Edit Akun COA' : 'Tambah Akun COA Baru'"></h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5" x-text="form.id ? 'Perbarui detail data chart of account' : 'Isi formulir untuk mendaftarkan akun COA baru'"></p>
         </div>
         <button
           type="button"
           @click="modalOpen = false"
-          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          class="h-8 w-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         >
-          <i class="fa-solid fa-xmark text-lg"></i>
+          <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
 
       <!-- Modal Form -->
-      <form @submit.prevent="saveCoa()" class="p-6 space-y-6">
+      <form @submit.prevent="saveCoa()" class="p-6 space-y-4">
         <input type="hidden" x-model="form.id" />
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Main Account Number -->
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Nomor Akun Utama <span class="text-red-500">*</span>
             </label>
             <input
@@ -324,27 +327,27 @@
               x-model="form.main_account"
               required
               placeholder="Contoh: 510101"
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-mono font-bold text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-3.5 py-2.5 text-xs font-mono font-bold text-gray-900 focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
             />
           </div>
 
           <!-- SAP Code (External) -->
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Kode SAP / External
             </label>
             <input
               type="text"
               x-model="form.id_acct_ext"
               placeholder="Contoh: SAP-5101"
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-mono text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-3.5 py-2.5 text-xs font-mono text-gray-900 focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
             />
           </div>
         </div>
 
         <!-- Description / Name -->
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
+          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
             Nama / Deskripsi Akun <span class="text-red-500">*</span>
           </label>
           <input
@@ -352,61 +355,61 @@
             x-model="form.cost_center_desc"
             required
             placeholder="Contoh: Gaji & Tunjangan Pabrik"
-            class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+            class="w-full rounded-xl border border-gray-300 bg-gray-50 px-3.5 py-2.5 text-xs font-medium text-gray-900 focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
           />
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Header / Group -->
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Header / Kelompok Akun
             </label>
             <input
               type="text"
               x-model="form.cost_center_header"
               placeholder="Contoh: DIRECT LABOR"
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-3.5 py-2.5 text-xs text-gray-900 focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
             />
           </div>
 
           <!-- Sub Account -->
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Sub Akun
             </label>
             <input
               type="text"
               x-model="form.cost_center_sub"
               placeholder="Contoh: PRODUCTION STAFF"
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-3.5 py-2.5 text-xs text-gray-900 focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
             />
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <!-- Tahun -->
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Tahun <span class="text-red-500">*</span>
             </label>
             <input
               type="number"
               x-model="form.year"
               required
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-3.5 py-2.5 text-xs font-semibold text-gray-900 focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
             />
           </div>
 
           <!-- Modul / Type -->
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Tipe / Modul <span class="text-red-500">*</span>
             </label>
             <select
               x-model="form.type"
               required
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-3.5 py-2.5 text-xs font-semibold text-gray-900 focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
             >
               <option value="FOH">FOH</option>
               <option value="GA">OPEX GA</option>
@@ -418,13 +421,13 @@
 
           <!-- Status -->
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Status <span class="text-red-500">*</span>
             </label>
             <select
               x-model="form.status"
               required
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-3.5 py-2.5 text-xs font-semibold text-gray-900 focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
             >
               <option value="A">Aktif (A)</option>
               <option value="D">Non-Aktif (D)</option>
@@ -433,18 +436,18 @@
         </div>
 
         <!-- Form Actions -->
-        <div class="pt-6 flex items-center justify-end gap-3 border-t border-gray-100 dark:border-gray-800">
+        <div class="pt-4 flex items-center justify-end gap-2 border-t border-gray-100 dark:border-gray-800">
           <button
             type="button"
             @click="modalOpen = false"
-            class="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-5 py-3 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            class="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-5 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
             Batal
           </button>
           <button
             type="submit"
             :disabled="saving"
-            class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-500 px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/40 disabled:opacity-50 transition-colors"
+            class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#2F3185] hover:bg-[#25276d] px-5 py-2.5 text-xs font-semibold text-white shadow-xs focus:outline-none disabled:opacity-50 transition-all active:scale-[0.98]"
           >
             <i class="fa-solid fa-spinner fa-spin" x-show="saving"></i>
             <span x-text="saving ? 'Menyimpan...' : (form.id ? 'Perbarui Akun' : 'Simpan Akun')"></span>
@@ -453,10 +456,12 @@
       </form>
     </div>
   </div>
+  </template>
 
   <!-- ============================================================ -->
   <!-- MODAL: SALIN AKUN ANTAR TAHUN -->
   <!-- ============================================================ -->
+  <template x-teleport="body">
   <div
     x-show="copyModalOpen"
     x-transition:enter="transition ease-out duration-250"
@@ -465,8 +470,8 @@
     x-transition:leave="transition ease-in duration-200"
     x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0"
-    class="fixed inset-0 flex items-center justify-center p-4"
-    style="z-index: 9999999; background-color: rgba(0,0,0,0.65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);"
+    class="fixed inset-0 flex items-center justify-center p-4 z-[9999999]"
+    style="background-color: rgba(0,0,0,0.65); backdrop-filter: blur(4px);"
     @click.self="copyModalOpen = false"
     x-cloak
   >
@@ -481,36 +486,31 @@
       class="relative w-full max-w-md rounded-2xl bg-white shadow-2xl dark:bg-gray-900 border border-gray-100 dark:border-gray-800 overflow-hidden"
     >
       <!-- Modal Header -->
-      <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-        <div class="flex items-center gap-4">
-          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400">
-            <i class="fa-solid fa-copy text-lg"></i>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Salin Akun Antar Tahun</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Duplikasi master akun COA untuk tahun anggaran baru</p>
-          </div>
+      <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
+        <div>
+          <h3 class="text-base font-bold text-gray-900 dark:text-white">Salin Akun Antar Tahun</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Duplikasi master akun COA untuk tahun anggaran baru</p>
         </div>
         <button
           type="button"
           @click="copyModalOpen = false"
-          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          class="h-8 w-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         >
-          <i class="fa-solid fa-xmark text-lg"></i>
+          <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
 
       <!-- Copy Form -->
-      <form @submit.prevent="executeCopy()" class="p-6 space-y-6">
-        <div class="grid grid-cols-2 gap-6">
+      <form @submit.prevent="executeCopy()" class="p-6 space-y-4">
+        <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Tahun Sumber <span class="text-red-500">*</span>
             </label>
             <select
               x-model="copyForm.from_year"
               required
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-3.5 py-2.5 text-xs font-semibold text-gray-900 focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
             >
               <?php foreach (($years ?? []) as $y): ?>
                 <option value="<?= esc($y) ?>"><?= esc($y) ?></option>
@@ -519,7 +519,7 @@
           </div>
 
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">
+            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Tahun Target <span class="text-red-500">*</span>
             </label>
             <input
@@ -527,29 +527,29 @@
               x-model="copyForm.to_year"
               required
               placeholder="Contoh: <?= date('Y') + 1 ?>"
-              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
+              class="w-full rounded-xl border border-gray-300 bg-gray-50 px-3.5 py-2.5 text-xs font-semibold text-gray-900 focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white transition-colors"
             />
           </div>
         </div>
 
-        <div class="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 p-4 text-sm text-amber-800 dark:text-amber-300 flex items-start gap-3">
-          <i class="fa-solid fa-circle-info text-amber-500 mt-0.5 shrink-0"></i>
+        <div class="rounded-xl bg-[#2F3185]/5 dark:bg-[#2F3185]/10 border border-[#2F3185]/20 p-4 text-xs text-gray-700 dark:text-gray-300 flex items-start gap-3">
+          <i class="fa-solid fa-circle-info text-[#2F3185] dark:text-indigo-400 mt-0.5 shrink-0"></i>
           <span>Akun yang sudah ada di tahun target akan <strong>dilewati otomatis</strong> sehingga tidak terjadi duplikasi.</span>
         </div>
 
         <!-- Form Actions -->
-        <div class="pt-4 flex items-center justify-end gap-3">
+        <div class="pt-4 flex items-center justify-end gap-2 border-t border-gray-100 dark:border-gray-800">
           <button
             type="button"
             @click="copyModalOpen = false"
-            class="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-5 py-3 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            class="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-5 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
             Batal
           </button>
           <button
             type="submit"
             :disabled="copying"
-            class="inline-flex items-center justify-center gap-2 rounded-xl bg-purple-600 px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500/40 disabled:opacity-50 transition-colors"
+            class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#2F3185] hover:bg-[#25276d] px-5 py-2.5 text-xs font-semibold text-white shadow-xs focus:outline-none disabled:opacity-50 transition-all active:scale-[0.98]"
           >
             <i class="fa-solid fa-spinner fa-spin" x-show="copying"></i>
             <span x-text="copying ? 'Memproses...' : 'Mulai Salin Data'"></span>
@@ -558,6 +558,7 @@
       </form>
     </div>
   </div>
+  </template>
 
 </div>
 

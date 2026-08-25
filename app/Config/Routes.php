@@ -188,6 +188,10 @@ $routes->group('opex-ga', ['filter' => 'auth'], function ($routes) {
     $routes->get('entry-budget', 'OpexGaController::entryBudget');
     $routes->get('entry-budget-detail', 'OpexGaController::entryBudgetDetail');
 
+    // Actual Data page (menu_link: opex-ga/actual-budget) — sama dengan alias underscore opex_ga/actual_budget
+    $routes->get('actual-budget', 'OpexGaController::actualBudget');
+    $routes->get('actual', 'OpexGaController::actual');
+
     // AJAX Entry Data
     $routes->get('getEntryData', 'OpexGaController::getEntryData');
     $routes->get('getHeaderAccounts', 'OpexGaController::getHeaderAccounts');

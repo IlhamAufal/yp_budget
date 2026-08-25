@@ -2,51 +2,42 @@
 
 <?= $this->section('content') ?>
 <div x-data="capexEntryApp()" x-init="loadEntryData()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
         <div>
-            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
-                <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-                <span>CAPEX</span>
-                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-                <span class="text-brand-500 font-bold">Entry Form</span>
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">Dashboard</a>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+                <span class="hover:text-[#2F3185]">CAPEX</span>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+                <span class="text-[#2F3185] font-bold">Entry Form</span>
             </div>
-            <h1 class="text-xl md:text-2xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
-                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 shadow-xs">
-                    <i class="fa-solid fa-cubes-stacked text-base"></i>
-                </span>
+            <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Entry Form CAPEX
             </h1>
-            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 Pengisian dan peninjauan pengajuan belanja modal (Capital Expenditure).
             </p>
         </div>
-        <div class="flex items-center gap-2.5 rounded-xl border border-gray-200/80 bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-xs dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300">
-            <i class="fa-solid fa-calendar-days text-brand-500"></i>
-            <span>Budget Plan Year :</span>
-            <span class="text-brand-600 dark:text-brand-400 font-bold"><?= esc($workingYear ?? '2027') ?></span>
-        </div>
     </div>
 
-    <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
-        <div class="border-b border-gray-100 dark:border-gray-800 px-6 pt-3">
-            <div class="flex items-center gap-4">
-                <button @click="activeSubTab = 'entry'"
-                    :class="activeSubTab === 'entry' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'"
-                    class="flex items-center gap-1.5 border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
-                    <i class="fa-solid fa-pen-to-square mr-1"></i>
-                    6.1 Entry Capex
-                </button>
-                <button @click="activeSubTab = 'view_cost_center'"
-                    :class="activeSubTab === 'view_cost_center' ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white'"
-                    class="flex items-center gap-1.5 border-b-2 px-3 pb-3 text-xs font-semibold transition-all duration-200">
-                    <i class="fa-solid fa-chart-column mr-1"></i>
-                    6.2 View By Cost Center
-                </button>
-            </div>
-        </div>
+    <!-- Sub Tabs Navigation -->
+    <div class="nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+        <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="CAPEX Entry Tabs">
+            <button type="button" @click="activeSubTab = 'entry'"
+                :class="activeSubTab === 'entry' ? 'active' : ''"
+                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>6.1 Entry CAPEX</span>
+            </button>
+            <button type="button" @click="activeSubTab = 'view_cost_center'"
+                :class="activeSubTab === 'view_cost_center' ? 'active' : ''"
+                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>6.2 View By Cost Center</span>
+            </button>
+        </nav>
+    </div>
 
-        <div class="p-5 md:p-6 space-y-6">
+    <div>
+        <div class="space-y-6">
             <div x-show="activeSubTab === 'entry'" x-transition:enter.opacity.duration.300ms>
                 <?= $this->include('capex/partials/tab_entry_capex') ?>
             </div>

@@ -1,30 +1,38 @@
 <div class="space-y-6">
+    <!-- Table Section Label (Separated from table container) -->
+    <div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Sales Domestic Budget (12 Bulan)</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Konsolidasi total kuantiti, revenue, dan ASP per produk (IDR).</p>
+    </div>
 
-    <!-- Data Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h3 class="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <i class="fa-solid fa-table text-primary"></i> Sales Domestic Budget (12 Bulan)
-            </h3>
-            <span class="text-[11px] text-gray-500 dark:text-gray-400 italic">ASP Formula: Revenue / Qty (Rp/Kg)</span>
-        </div>
+    <!-- Data Table Container (Round corner starts directly from thead) -->
+    <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs overflow-hidden bg-white dark:bg-gray-900">
         <div class="overflow-x-auto scrollbar-thin max-h-[600px]">
-            <table class="w-full text-left text-[11px] border-collapse min-w-[1400px]">
-                <thead class="bg-gray-100/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-300 font-bold uppercase border-b border-gray-300 dark:border-gray-700 sticky top-0 z-10">
-                    <tr>
-                        <th class="p-2.5 border-r border-gray-300 dark:border-gray-700 w-10 text-center">No.</th>
-                        <th class="p-2.5 border-r border-gray-300 dark:border-gray-700 w-20 text-center">CHANNEL</th>
-                        <th class="p-2.5 border-r border-gray-300 dark:border-gray-700 min-w-[100px]">KEY PRODUCT</th>
-                        <th class="p-2.5 border-r border-gray-300 dark:border-gray-700 min-w-[80px]">CODE INV</th>
-                        <th class="p-2.5 border-r border-gray-300 dark:border-gray-700 min-w-[200px]">PRODUCT NAME</th>
-                        <th class="p-2.5 border-r border-gray-300 dark:border-gray-700 w-24 text-right">TOT QTY</th>
-                        <th class="p-2.5 border-r border-gray-300 dark:border-gray-700 w-28 text-right text-emerald-700">TOT REV (Rp)</th>
-                        <th class="p-2.5 w-20 text-right text-blue-700">ASP/kg</th>
+            <table class="w-full text-left text-xs border-collapse min-w-[1400px] whitespace-nowrap">
+                <thead class="bg-[#2F3185] text-white font-semibold border-b border-white/20 sticky top-0 z-10 text-xs">
+                    <tr class="bg-[#2F3185] text-white font-semibold">
+                        <th class="px-3.5 py-3.5 border-r border-white/20 w-12 text-center text-white">No.</th>
+                        <th class="px-3.5 py-3.5 border-r border-white/20 w-24 text-center text-white">Channel</th>
+                        <th class="px-3.5 py-3.5 border-r border-white/20 min-w-[140px] text-white">Key Product</th>
+                        <th class="px-3.5 py-3.5 border-r border-white/20 min-w-[120px] text-white">Code Inv</th>
+                        <th class="px-3.5 py-3.5 border-r border-white/20 min-w-[260px] text-white">Product Name</th>
+                        <th class="px-3.5 py-3.5 border-r border-white/20 w-28 text-right text-white">Tot Qty (Kg)</th>
+                        <th class="px-3.5 py-3.5 border-r border-white/20 w-36 text-right text-white">Tot Rev (Rp)</th>
+                        <th class="px-3.5 py-3.5 w-28 text-right text-white">ASP (Rp/kg)</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-800 text-xs">
                     <?php if (empty($domesticProducts ?? [])): ?>
-                    <tr><td colspan="8" class="p-8 text-center text-gray-400">Tidak ada data produk domestic.</td></tr>
+                    <tr>
+                        <td colspan="8" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500 font-sans">
+                            <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                                    <i class="fa-solid fa-inbox text-xl"></i>
+                                </div>
+                                <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Belum Ada Data Produk Domestic</p>
+                            </div>
+                        </td>
+                    </tr>
                     <?php else: ?>
                     <?php foreach ($domesticProducts as $idx => $p):
                         $totQty = 0; $totRev = 0;
@@ -33,14 +41,14 @@
                         $avgAsp = $totQty > 0 ? ($totRev / $totQty) : 0;
                     ?>
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                        <td class="p-2 text-center border-r border-gray-200 dark:border-gray-800 text-gray-500"><?= $idx + 1 ?></td>
-                        <td class="p-2 text-center border-r border-gray-200 dark:border-gray-800 font-bold text-blue-700 dark:text-blue-400"><?= esc($p['id_channel'] ?? 'GT') ?></td>
-                        <td class="p-2 border-r border-gray-200 dark:border-gray-800"><?= esc($p['key_product'] ?? '-') ?></td>
-                        <td class="p-2 border-r border-gray-200 dark:border-gray-800 font-semibold"><?= esc($p['mid_product'] ?? '-') ?></td>
-                        <td class="p-2 border-r border-gray-200 dark:border-gray-800 font-medium text-gray-900 dark:text-white"><?= esc($p['product_name'] ?? '-') ?></td>
-                        <td class="p-2 border-r border-gray-200 dark:border-gray-800 text-right font-mono font-bold"><?= number_format($totQty, 2) ?></td>
-                        <td class="p-2 border-r border-gray-200 dark:border-gray-800 text-right font-mono font-bold text-emerald-600">Rp <?= number_format($totRev, 0, ',', '.') ?></td>
-                        <td class="p-2 text-right font-mono font-bold text-blue-600"><?= number_format($avgAsp, 2) ?></td>
+                        <td class="px-3.5 py-2.5 text-center border-r border-gray-200 dark:border-gray-800 text-gray-500"><?= $idx + 1 ?></td>
+                        <td class="px-3.5 py-2.5 text-center border-r border-gray-200 dark:border-gray-800 font-sans font-bold text-gray-800 dark:text-gray-200"><?= esc($p['id_channel'] ?? 'GT') ?></td>
+                        <td class="px-3.5 py-2.5 border-r border-gray-200 dark:border-gray-800 font-sans text-gray-600 dark:text-gray-400"><?= esc($p['key_product'] ?? '-') ?></td>
+                        <td class="px-3.5 py-2.5 border-r border-gray-200 dark:border-gray-800 font-semibold text-gray-800 dark:text-gray-200"><?= esc($p['mid_product'] ?? '-') ?></td>
+                        <td class="px-3.5 py-2.5 border-r border-gray-200 dark:border-gray-800 font-sans font-medium text-gray-900 dark:text-white"><?= esc($p['product_name'] ?? '-') ?></td>
+                        <td class="px-3.5 py-2.5 border-r border-gray-200 dark:border-gray-800 text-right font-mono font-bold"><?= number_format($totQty, 2) ?></td>
+                        <td class="px-3.5 py-2.5 border-r border-gray-200 dark:border-gray-800 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">Rp <?= number_format($totRev, 0, ',', '.') ?></td>
+                        <td class="px-3.5 py-2.5 text-right font-mono font-bold text-amber-600 dark:text-amber-400"><?= number_format($avgAsp, 2) ?></td>
                     </tr>
                     <?php endforeach; ?>
                     <?php endif; ?>
@@ -48,5 +56,4 @@
             </table>
         </div>
     </div>
-
 </div>

@@ -18,81 +18,66 @@
         <div>
             <!-- Breadcrumbs -->
             <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
-                <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors flex items-center gap-1">
-                    <i class="fa-solid fa-gauge-high"></i> Dashboard
+                <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors flex items-center gap-1">
+                    Dashboard
                 </a>
                 <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
-                <a href="<?= base_url('sales') ?>" class="hover:text-brand-500 transition-colors">Sales</a>
+                <a href="<?= base_url('sales') ?>" class="hover:text-[#2F3185] transition-colors">Sales</a>
                 <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
-                <span class="text-brand-500 font-bold">Sales International Entry</span>
+                <span class="text-[#2F3185] font-bold">Sales International Entry</span>
             </div>
 
             <!-- Page Title -->
-            <div class="flex items-center gap-3">
-                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 shadow-xs">
-                    <i class="fa-solid fa-plane-departure text-lg"></i>
-                </span>
-                <div>
-                    <h1 class="text-xl md:text-2xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
-                        2.2 Sales International Entry
-                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800">
-                            USD ($) · FY <?= esc($workingYear) ?>
-                        </span>
-                    </h1>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        Pengelolaan target dan laporan Sales International per Negara (Valas USD $).
-                    </p>
-                </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                    Sales International Entry (Valas USD $)
+                </h1>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Pengelolaan target dan laporan Sales International per Negara (Valas USD $).
+                </p>
             </div>
         </div>
-
     </div>
 
     <!-- ============================================================ -->
     <!-- 2. SUB-TABS NAVIGATION BAR (6 SUB-TABS) -->
     <!-- ============================================================ -->
-    <div class="bg-gray-100/80 dark:bg-gray-800/60 p-1.5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs">
+    <div class="nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
         <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="International Sub Tabs">
             <button type="button" @click="subTab = 'budget'" 
-                    :class="subTab === 'budget' ? 'bg-white dark:bg-gray-900 text-brand-600 dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
-                    class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2">
-                <i class="fa-solid fa-table-cells text-sm"></i>
+                    :class="subTab === 'budget' ? 'active' : ''"
+                    class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
                 <span>Sales International - Budget ($)</span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] bg-brand-500/10 text-brand-600 font-bold" x-text="filteredItems.length">0</span>
+                <span class="tab-badge px-2 py-0.5 rounded-full text-[10px] font-bold" x-text="filteredItems.length">0</span>
             </button>
 
             <button type="button" @click="subTab = 'key_product'" 
-                    :class="subTab === 'key_product' ? 'bg-white dark:bg-gray-900 text-brand-600 dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
-                    class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2">
-                <i class="fa-solid fa-award text-sm text-amber-500"></i>
+                    :class="subTab === 'key_product' ? 'active' : ''"
+                    class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
                 <span>Report Key Product ($)</span>
             </button>
 
             <button type="button" @click="subTab = 'country'" 
-                    :class="subTab === 'country' ? 'bg-white dark:bg-gray-900 text-brand-600 dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
-                    class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2">
-                <i class="fa-solid fa-globe text-sm text-blue-500"></i>
+                    :class="subTab === 'country' ? 'active' : ''"
+                    class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
                 <span>Report Country ($)</span>
             </button>
 
             <button type="button" @click="subTab = 'regional'" 
-                    :class="subTab === 'regional' ? 'bg-white dark:bg-gray-900 text-brand-600 dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
-                    class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2">
-                <i class="fa-solid fa-chart-pie text-sm text-indigo-500"></i>
+                    :class="subTab === 'regional' ? 'active' : ''"
+                    class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
                 <span>Summary Regional Area ($)</span>
             </button>
 
             <button type="button" @click="subTab = 'download'" 
-                    :class="subTab === 'download' ? 'bg-white dark:bg-gray-900 text-brand-600 dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
-                    class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2">
-                <i class="fa-solid fa-file-excel text-sm text-emerald-600 dark:text-emerald-400"></i>
+                    :class="subTab === 'download' ? 'active' : ''"
+                    class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
                 <span>Download Template</span>
             </button>
 
             <button type="button" @click="subTab = 'upload'" 
-                    :class="subTab === 'upload' ? 'bg-white dark:bg-gray-900 text-brand-600 dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'"
-                    class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2">
-                <i class="fa-solid fa-cloud-arrow-up text-sm text-sky-600 dark:text-sky-400"></i>
+                    :class="subTab === 'upload' ? 'active' : ''"
+                    class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
                 <span>Upload Data</span>
             </button>
         </nav>
