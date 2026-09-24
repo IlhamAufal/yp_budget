@@ -31,12 +31,12 @@
                     </tr>
                     <tr class="bg-[#2F3185] text-white text-xs font-semibold border-b border-white/20">
                         <?php for ($i = 0; $i < 12; $i++): ?>
-                            <th class="p-2 border-r border-white/20 w-20 text-center text-white font-semibold text-xs bg-[#2F3185]">Qty (Kg)</th>
-                            <th class="p-2 border-r border-white/20 w-28 text-center text-white font-semibold text-xs bg-[#2F3185]">Revenue (Rp)</th>
+                            <th class="p-2 border-r border-white/20 w-20 text-center text-white font-semibold text-xs bg-[#2F3185]">Qty</th>
+                            <th class="p-2 border-r border-white/20 w-28 text-center text-white font-semibold text-xs bg-[#2F3185]">Revenue</th>
                             <th class="p-2 border-r border-white/20 w-20 text-center text-white font-semibold text-xs bg-[#2F3185]">ASP/kg</th>
                         <?php endfor; ?>
-                        <th class="p-2 border-r border-white/20 w-20 text-center bg-[#2F3185] text-white font-semibold text-xs">Qty (Kg)</th>
-                        <th class="p-2 border-r border-white/20 w-28 text-center bg-[#2F3185] text-white font-semibold text-xs">Revenue (Rp)</th>
+                        <th class="p-2 border-r border-white/20 w-20 text-center bg-[#2F3185] text-white font-semibold text-xs">Qty</th>
+                        <th class="p-2 border-r border-white/20 w-28 text-center bg-[#2F3185] text-white font-semibold text-xs">Revenue</th>
                         <th class="p-2 border-r border-white/20 w-20 text-center bg-[#2F3185] text-white font-semibold text-xs">ASP/kg</th>
                     </tr>
                 </thead>

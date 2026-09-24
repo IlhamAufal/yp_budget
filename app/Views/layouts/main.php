@@ -84,6 +84,8 @@
 
     /* Tab navigation utilities: Inactive #2F3185 with white text, Active White with #2F3185 text */
     .nav-tab-container {
+      display: inline-flex;
+      max-width: 100%;
       background-color: #2F3185 !important;
       padding: 0.375rem;
       border-radius: 1rem;

@@ -44,7 +44,7 @@
   <!-- ============================================================ -->
   <!-- TABS -->
   <!-- ============================================================ -->
-  <div class="nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+  <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
     <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="Simulation Tabs">
       <button type="button" @click="tab = 'revenue'" :class="tab === 'revenue' ? 'active' : ''"
               class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
@@ -76,7 +76,7 @@
                 <th class="py-3 px-4 text-white border-r border-white/20">Channel</th>
                 <th class="py-3 px-4 text-right text-white border-r border-white/20">Volume (Kg)</th>
                 <th class="py-3 px-4 text-right text-white border-r border-white/20">ASP (Rp/kg)</th>
-                <th class="py-3 px-4 text-right text-white">Revenue (Rp)</th>
+                <th class="py-3 px-4 text-right text-white">Revenue</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">

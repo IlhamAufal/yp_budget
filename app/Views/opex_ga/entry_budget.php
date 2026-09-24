@@ -17,13 +17,23 @@
                 Entry / Update Budget OPEX GA
             </h1>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                Pengelolaan dan perincian input anggaran OPEX General & Administrative.
+                Pengelolaan dan perincian input anggaran OPEX General &amp; Administrative.
             </p>
+        </div>
+        <div class="shrink-0">
+            <button type="button" data-action="open-modal"
+                    data-modal-url="<?= base_url('manual-book/view') ?>?file=<?= rawurlencode('MANUAL BOOK - BUDGET SYSTEM - INPUT OPEX GA.pdf') ?>&amp;title=<?= rawurlencode('Manual Book - Input OPEX GA') ?>"
+                    data-modal-title="Manual Book - Input OPEX GA"
+                    data-modal-size="xl"
+                    class="inline-flex items-center gap-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Manual Book</span>
+            </button>
         </div>
     </div>
 
     <!-- TAB NAV -->
-    <div class="nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+    <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
         <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="OPEX GA Entry Tabs">
             <button
                 type="button"
@@ -55,19 +65,12 @@
         </div>
     </div>
 
-    <?= $this->include('partials/manual_book_modal', [
-        'mbTitle' => 'Manual Book - Input OPEX GA',
-        'mbPdfUrl' => base_url('assets/docs/manual_book/MANUAL BOOK - BUDGET SYSTEM - INPUT OPEX GA.pdf'),
-        'mbPdfExists' => is_file(FCPATH . 'assets/docs/manual_book/MANUAL BOOK - BUDGET SYSTEM - INPUT OPEX GA.pdf'),
-    ]) ?>
-
 </div>
 
 <script>
 function opexGaEntryApp() {
     return {
         activeTab: 'entry',
-        manualBookModalOpen: false,
         costCenters: <?= json_encode(array_map(fn($cc) => [
             'id'   => $cc['cost_center_sap'] ?? $cc['cost_center'],
             'text' => ($cc['cc_code'] ?? $cc['cost_center']) . ' - ' . $cc['cost_desc'],

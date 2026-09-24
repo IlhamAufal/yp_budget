@@ -7,39 +7,39 @@ $report = $report ?? ['rows' => [], 'grand_total' => ['actual' => ['months' => [
 $fmt = static fn($value): string => number_format((float) $value, 2, ',', '.');
 ?>
 <div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
         <div>
-            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
                 <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">Dashboard</a>
-                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
                 <span>Reports</span>
-                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
                 <span class="text-[#2F3185] font-bold">Grand OPEX</span>
             </div>
             <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Grand OPEX Report
             </h1>
-            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 Gabungan OPEX GA dan OPEX Selling untuk working year <?= esc($workingYear ?? '') ?>.
             </p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="<?= base_url('dashboard') ?>" class="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-xs font-semibold text-gray-700 shadow-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+            <a href="<?= base_url('dashboard') ?>" class="inline-flex items-center gap-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-5 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-xs transition-colors active:scale-[0.98]">
                 <i class="fa-solid fa-arrow-left text-xs"></i>
                 <span>Kembali ke Dashboard</span>
             </a>
         </div>
     </div>
 
-    <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
-        <div class="border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex items-center justify-between">
-            <div>
-                <h2 class="font-bold text-sm text-gray-900 dark:text-white">OPEX GA + OPEX SELLING</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Setiap subtotal modul dan grand total menggunakan kalkulator report yang sama.</p>
-            </div>
+    <div class="space-y-4">
+        <div>
+            <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Konsolidasi OPEX GA + OPEX Selling</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Setiap subtotal modul dan grand total menggunakan kalkulator report yang sama.</p>
         </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-[2200px] w-full border-collapse text-xs">
+
+        <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+            <div class="overflow-x-auto scrollbar-thin">
+                <table class="min-w-[2200px] w-full border-collapse text-xs">
                 <thead class="text-center font-semibold text-xs bg-[#2F3185] text-white border-b border-white/20">
                     <tr class="bg-[#2F3185] text-white font-semibold">
                         <th rowspan="2" class="border-r border-white/20 px-3.5 py-3 text-left text-white font-semibold">Module</th>

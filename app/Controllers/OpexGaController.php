@@ -511,6 +511,20 @@ class OpexGaController extends BaseController
      * Excel (Phase 2.3 — Excel engine terpusat)
      * ------------------------------------------------------------------ */
 
+    /**
+     * GET opexga/upload-modal — konten form upload Excel untuk global modal.
+     * Params: type (whitelist, default 'opex_summary').
+     */
+    public function uploadModalForm(): string
+    {
+        $type = (string) ($this->request->getGet('type') ?? 'opex_summary');
+        if (! in_array($type, ['opex_summary'], true)) {
+            $type = 'opex_summary';
+        }
+
+        return view('opex_ga/upload_modal_content', ['uploadType' => $type]);
+    }
+
     public function processUpload()
     {
         $file = $this->request->getFile('excel_file');

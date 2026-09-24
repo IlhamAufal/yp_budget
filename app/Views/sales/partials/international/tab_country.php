@@ -43,7 +43,7 @@
                         <th class="px-3.5 py-3.5 text-white font-semibold min-w-[140px] border-r border-white/20">Country</th>
                         <th class="px-3.5 py-3.5 text-white font-semibold min-w-[240px] border-r border-white/20">Product Name</th>
                         <th class="px-3.5 py-3.5 text-white font-semibold min-w-[140px] border-r border-white/20">Key Product</th>
-                        <th class="px-3.5 py-3.5 text-right text-white font-semibold min-w-[120px] border-r border-white/20">Tot Qty (Kg)</th>
+                        <th class="px-3.5 py-3.5 text-right text-white font-semibold min-w-[120px] border-r border-white/20">Tot Qty</th>
                         <th class="px-3.5 py-3.5 text-right text-white font-semibold min-w-[140px]">Tot Rev ($)</th>
                     </tr>
                 </thead>

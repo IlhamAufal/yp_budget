@@ -33,7 +33,7 @@
     </div>
 
     <!-- Sub Tabs Navigation -->
-    <div class="nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+    <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
         <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="Domestic Sub Tabs">
             <button type="button" @click="setSubTab('budget')" :class="subTab === 'budget' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
                 <span>Sales Domestic - Budget</span>

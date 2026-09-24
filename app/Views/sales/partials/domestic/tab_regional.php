@@ -52,12 +52,12 @@
                     </tr>
                     <tr class="bg-[#2F3185] text-white text-xs font-semibold border-b border-white/20">
                         <?php for ($i = 0; $i < 12; $i++): ?>
-                            <th class="px-2 py-2 border-r border-white/20 w-[88px] min-w-[88px] text-center text-white font-semibold text-xs bg-[#2F3185]">Qty (Kg)</th>
-                            <th class="px-2 py-2 border-r border-white/20 w-[120px] min-w-[120px] text-center text-white font-semibold text-xs bg-[#2F3185]">Revenue (Rp)</th>
+                            <th class="px-2 py-2 border-r border-white/20 w-[88px] min-w-[88px] text-center text-white font-semibold text-xs bg-[#2F3185]">Qty</th>
+                            <th class="px-2 py-2 border-r border-white/20 w-[120px] min-w-[120px] text-center text-white font-semibold text-xs bg-[#2F3185]">Revenue</th>
                             <th class="px-2 py-2 border-r border-white/20 w-[96px] min-w-[96px] text-center text-white font-semibold text-xs bg-[#2F3185]">ASP/kg</th>
                         <?php endfor; ?>
-                        <th class="px-2 py-2 border-r border-white/20 w-[120px] min-w-[120px] text-center bg-[#2F3185] text-white font-semibold text-xs">Qty (Kg)</th>
-                        <th class="px-2 py-2 border-r border-white/20 w-[120px] min-w-[120px] text-center bg-[#2F3185] text-white font-semibold text-xs">Revenue (Rp)</th>
+                        <th class="px-2 py-2 border-r border-white/20 w-[120px] min-w-[120px] text-center bg-[#2F3185] text-white font-semibold text-xs">Qty</th>
+                        <th class="px-2 py-2 border-r border-white/20 w-[120px] min-w-[120px] text-center bg-[#2F3185] text-white font-semibold text-xs">Revenue</th>
                         <th class="px-2 py-2 border-r border-white/20 w-[120px] min-w-[120px] text-center bg-[#2F3185] text-white font-semibold text-xs">ASP/kg</th>
                     </tr>
                 </thead>

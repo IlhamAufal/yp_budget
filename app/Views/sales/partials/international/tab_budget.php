@@ -53,7 +53,7 @@
                     </tr>
                     <tr class="bg-[#2F3185] text-white text-xs font-semibold border-b border-white/20">
                         <template x-for="col in domesticMetricCols" :key="'dom-budget-subhead-'+col.m+'-'+col.k">
-                            <th class="px-2 py-2 border-r border-white/20 text-center text-white font-semibold text-xs bg-[#2F3185]" :class="col.k === 'qty' ? 'w-[88px] min-w-[88px]' : col.k === 'rev' ? 'w-[120px] min-w-[120px]' : 'w-[96px] min-w-[96px]'" x-text="col.k === 'qty' ? 'Qty (Kg)' : col.k === 'rev' ? 'Revenue ($)' : 'ASP ($/kg)'"></th>
+                            <th class="px-2 py-2 border-r border-white/20 text-center text-white font-semibold text-xs bg-[#2F3185]" :class="col.k === 'qty' ? 'w-[88px] min-w-[88px]' : col.k === 'rev' ? 'w-[120px] min-w-[120px]' : 'w-[96px] min-w-[96px]'" x-text="col.k === 'qty' ? 'Qty' : col.k === 'rev' ? 'Revenue ($)' : 'ASP ($/kg)'"></th>
                         </template>
                         <th class="px-2 py-2 border-r border-white/20 w-[120px] min-w-[120px] text-center bg-[#2F3185] text-white font-semibold text-xs">Tot Qty</th>
                         <th class="px-2 py-2 border-r border-white/20 w-[120px] min-w-[120px] text-center bg-[#2F3185] text-white font-semibold text-xs">Tot Rev</th>

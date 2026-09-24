@@ -120,17 +120,17 @@
     }
 }" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
         <div>
-            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
                 <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">Dashboard</a>
-                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
                 <span class="text-[#2F3185] font-bold">Profit & Loss (P&L)</span>
             </div>
             <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Profit & Loss (P&L) Report
             </h1>
-            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 Rincian dan ringkasan Laporan Laba Rugi Operasional Perusahaan.
             </p>
         </div>
@@ -143,55 +143,58 @@
         </div>
     </div>
 
-    <!-- FILTER & TABS CARD -->
-    <div class="space-y-4">
-        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-end">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Pencarian Akun / Uraian</label>
-                    <input type="text" x-model="searchQuery" placeholder="Ketik untuk mencari akun atau uraian..."
-                           class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:bg-white dark:focus:bg-gray-900 focus:border-[#2F3185] focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white">
-                </div>
+    <!-- FILTER CARD -->
+    <div class="rounded-2xl border border-gray-200/80 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 shadow-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-end">
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Pencarian Akun / Uraian</label>
+                <input type="text" x-model="searchQuery" placeholder="Ketik untuk mencari akun atau uraian..."
+                       class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:bg-white dark:focus:bg-gray-900 focus:border-[#2F3185] focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-all shadow-xs">
+            </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Cost Center</label>
-                    <select x-model="filterDept" class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:bg-white dark:focus:bg-gray-900 focus:border-[#2F3185] focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white">
-                        <option value="">-- Semua Cost Center --</option>
-                        <?php if (!empty($departments)): ?>
-                            <?php foreach ($departments as $dept): ?>
-                                <option value="<?= esc($dept['id_dept']); ?>"><?= esc($dept['cc_sap'] ?? $dept['id_dept']); ?> - <?= esc($dept['cost_desc']); ?></option>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </select>
-                </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Cost Center</label>
+                <select x-model="filterDept" class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:bg-white dark:focus:bg-gray-900 focus:border-[#2F3185] focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-colors">
+                    <option value="">-- Semua Cost Center --</option>
+                    <?php if (!empty($departments)): ?>
+                        <?php foreach ($departments as $dept): ?>
+                            <option value="<?= esc($dept['id_dept']); ?>"><?= esc($dept['cc_sap'] ?? $dept['id_dept']); ?> - <?= esc($dept['cost_desc']); ?></option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
             </div>
         </div>
+    </div>
 
-        <!-- SUB-TABS NAVIGATION -->
-        <div class="nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
-            <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="Tabs P&L">
-                <button type="button" @click="activeTab = 'summary'"
-                        :class="activeTab === 'summary' ? 'active' : ''"
-                        class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
-                    <span>Summary P&L</span>
-                </button>
-                <button type="button" @click="activeTab = 'sections'"
-                        :class="activeTab === 'sections' ? 'active' : ''"
-                        class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
-                    <span>Per Bagian</span>
-                </button>
-                <button type="button" @click="activeTab = 'detail'"
-                        :class="activeTab === 'detail' ? 'active' : ''"
-                        class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
-                    <span>Breakdown per Akun</span>
-                </button>
-            </nav>
-        </div>
+    <!-- SUB-TABS NAVIGATION -->
+    <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+        <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="Tabs P&L">
+            <button type="button" @click="activeTab = 'summary'"
+                    :class="activeTab === 'summary' ? 'active' : ''"
+                    class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Summary P&L</span>
+            </button>
+            <button type="button" @click="activeTab = 'sections'"
+                    :class="activeTab === 'sections' ? 'active' : ''"
+                    class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Per Bagian</span>
+            </button>
+            <button type="button" @click="activeTab = 'detail'"
+                    :class="activeTab === 'detail' ? 'active' : ''"
+                    class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Breakdown per Akun</span>
+            </button>
+        </nav>
+    </div>
 
-        <!-- TAB CONTENT AREA -->
-        <div>
-            <!-- TAB 1: SUMMARY -->
-            <div x-show="activeTab === 'summary'" x-cloak class="space-y-4">
+    <!-- TAB CONTENT AREA -->
+    <div>
+        <!-- TAB 1: SUMMARY -->
+        <div x-show="activeTab === 'summary'" x-cloak class="space-y-4">
+            <div>
+                <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Summary P&L (12 Bulan)</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Ringkasan Laporan Laba Rugi konsolidasi 12 bulan.</p>
+            </div>
                 <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs">
@@ -274,10 +277,11 @@
 
             <!-- TAB 2: PER BAGIAN -->
             <div x-show="activeTab === 'sections'" x-cloak class="space-y-4">
-                <div class="flex items-center justify-between flex-wrap gap-2">
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                <div>
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">P&L Per Bagian / Section (12 Bulan)</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                         Ringkasan P/L per bagian. Klik <span class="font-semibold text-[#2F3185] dark:text-indigo-400">Detail</span> untuk melihat rincian akun, atau edit
-                        <span class="font-semibold text-gray-800 dark:text-gray-200">Adjustment</span> & <span class="font-semibold text-gray-800 dark:text-gray-200">Catatan</span> langsung (tersimpan otomatis saat blur).
+                        <span class="font-semibold text-gray-800 dark:text-gray-200">Adjustment</span> & <span class="font-semibold text-gray-800 dark:text-gray-200">Catatan</span> langsung (tersimpan otomatis).
                     </p>
                 </div>
                 <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
@@ -381,6 +385,10 @@
 
             <!-- TAB 3: BREAKDOWN PER AKUN -->
             <div x-show="activeTab === 'detail'" x-cloak class="space-y-4">
+                <div>
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Breakdown Detail per Akun</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Daftar lengkap seluruh akun buku besar nominal tahunan.</p>
+                </div>
                 <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs">

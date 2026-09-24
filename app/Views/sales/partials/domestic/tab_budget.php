@@ -43,8 +43,8 @@
                 <h3 class="text-xs font-bold text-gray-900 dark:text-white tracking-wider">Trend Revenue Sales Domestic (12 Bulan)</h3>
             </div>
             <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
-                <button type="button" @click="chartMetric = 'revenue'; renderChart()" :class="chartMetric === 'revenue' ? 'bg-[#2F3185] text-white shadow-xs' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all">Revenue (Rp)</button>
-                <button type="button" @click="chartMetric = 'qty'; renderChart()" :class="chartMetric === 'qty' ? 'bg-[#2F3185] text-white shadow-xs' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all">Volume (Kg)</button>
+                <button type="button" @click="chartMetric = 'revenue'; renderChart()" :class="chartMetric === 'revenue' ? 'bg-[#2F3185] text-white shadow-xs' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all">Revenue</button>
+                <button type="button" @click="chartMetric = 'qty'; renderChart()" :class="chartMetric === 'qty' ? 'bg-[#2F3185] text-white shadow-xs' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all">Volume</button>
             </div>
         </div>
         <div id="domesticTrendChart" class="w-full h-72"></div>
@@ -80,8 +80,8 @@
                     </tr>
                     <tr class="bg-[#2F3185] text-white text-xs font-semibold border-b border-white/20">
                         <?php for ($i = 0; $i < 12; $i++): ?>
-                            <th class="px-2 py-2 border-r border-white/20 w-[88px] text-center text-white font-semibold text-xs bg-[#2F3185]">Qty (Kg)</th>
-                            <th class="px-2 py-2 border-r border-white/20 w-[120px] text-center text-white font-semibold text-xs bg-[#2F3185]">Revenue (Rp)</th>
+                            <th class="px-2 py-2 border-r border-white/20 w-[88px] text-center text-white font-semibold text-xs bg-[#2F3185]">Qty</th>
+                            <th class="px-2 py-2 border-r border-white/20 w-[120px] text-center text-white font-semibold text-xs bg-[#2F3185]">Revenue</th>
                             <th class="px-2 py-2 border-r border-white/20 w-[96px] text-center text-white font-semibold text-xs bg-[#2F3185]">ASP/kg</th>
                         <?php endfor; ?>
                         <th class="px-2 py-2 border-r border-white/20 w-[120px] text-center text-white bg-[#2F3185] font-semibold text-xs">Tot Qty</th>

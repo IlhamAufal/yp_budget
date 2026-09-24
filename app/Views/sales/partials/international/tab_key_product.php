@@ -13,7 +13,7 @@
                     <tr class="bg-[#2F3185] text-white font-semibold">
                         <th class="px-4 py-3.5 text-center text-white font-semibold w-12 border-r border-white/20">No.</th>
                         <th class="px-4 py-3.5 text-white font-semibold min-w-[200px] border-r border-white/20">Key Product</th>
-                        <th class="px-4 py-3.5 text-right text-white font-semibold min-w-[140px] border-r border-white/20">Total Qty (Kg)</th>
+                        <th class="px-4 py-3.5 text-right text-white font-semibold min-w-[140px] border-r border-white/20">Total Qty</th>
                         <th class="px-4 py-3.5 text-right text-white font-semibold min-w-[160px] border-r border-white/20">Total Rev (USD $)</th>
                         <th class="px-4 py-3.5 text-right text-white font-semibold min-w-[140px]">Avg ASP ($/kg)</th>
                     </tr>

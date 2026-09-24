@@ -20,7 +20,7 @@
     </div>
 
     <!-- Sub Tabs Navigation -->
-    <div class="nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+    <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
         <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="Sales Overview Tabs">
             <button type="button" @click="activeTab = 'summary'" :class="activeTab === 'summary' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
                 <span>Summary</span>
@@ -46,25 +46,15 @@
         </nav>
     </div>
 
-    <div>
-
-        <div class="p-5 md:p-6 space-y-6">
-
-    <?php /* COMMENTED OUT: Key Product & Channel form — currently GET only
-    <div x-show="activeTab === 'domestic' || activeTab === 'intl_valas'" class="bg-sky-50/70 dark:bg-gray-800 p-5 rounded-xl border border-sky-100 dark:border-gray-700 shadow-sm space-y-4">
-        ... Key Product grid 4x2 + Channel grid 3x2 + Process button ...
-    </div>
-    */ ?>
-
-        <div>
-            <div x-show="activeTab === 'domestic'"><?= $this->include('sales/partials/summary/tab_domestic') ?></div>
-            <div x-show="activeTab === 'intl_valas'"><?= $this->include('sales/partials/summary/tab_intl_valas') ?></div>
-            <div x-show="activeTab === 'intl_idr'"><?= $this->include('sales/partials/summary/tab_intl_idr') ?></div>
-            <div x-show="activeTab === 'delivery_claim'"><?= $this->include('sales/partials/summary/tab_delivery_claim') ?></div>
-            <div x-show="activeTab === 'key_product'"><?= $this->include('sales/partials/summary/tab_key_product') ?></div>
-            <div x-show="activeTab === 'summary'"><?= $this->include('sales/partials/summary/tab_summary') ?></div>
-            <div x-show="activeTab === 'reclass'"><?= $this->include('sales/partials/summary/tab_reclass') ?></div>
-        </div>
+    <!-- Tab Content -->
+    <div class="space-y-6">
+        <div x-show="activeTab === 'summary'" x-cloak><?= $this->include('sales/partials/summary/tab_summary') ?></div>
+        <div x-show="activeTab === 'domestic'" x-cloak><?= $this->include('sales/partials/summary/tab_domestic') ?></div>
+        <div x-show="activeTab === 'intl_valas'" x-cloak><?= $this->include('sales/partials/summary/tab_intl_valas') ?></div>
+        <div x-show="activeTab === 'intl_idr'" x-cloak><?= $this->include('sales/partials/summary/tab_intl_idr') ?></div>
+        <div x-show="activeTab === 'delivery_claim'" x-cloak><?= $this->include('sales/partials/summary/tab_delivery_claim') ?></div>
+        <div x-show="activeTab === 'key_product'" x-cloak><?= $this->include('sales/partials/summary/tab_key_product') ?></div>
+        <div x-show="activeTab === 'reclass'" x-cloak><?= $this->include('sales/partials/summary/tab_reclass') ?></div>
     </div>
 
 </div>

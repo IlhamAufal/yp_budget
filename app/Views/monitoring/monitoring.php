@@ -65,49 +65,61 @@
         </div>
     </div>
 
-    <!-- Sub Tabs Navigation -->
-    <div class="nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
-        <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="Monitoring Tabs">
-            <button 
-                type="button" 
-                @click="activeTab = 'opex_ga'" 
-                :class="activeTab === 'opex_ga' ? 'active' : ''" 
-                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
-                <span>Budget - OPEX GA</span>
-            </button>
+    <!-- Sub Tabs Navigation + Export -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+            <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="Monitoring Tabs">
+                <button 
+                    type="button" 
+                    @click="activeTab = 'opex_ga'" 
+                    :class="activeTab === 'opex_ga' ? 'active' : ''" 
+                    class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                    <span>Budget - OPEX GA</span>
+                </button>
 
-            <button 
-                type="button" 
-                @click="activeTab = 'foh'" 
-                :class="activeTab === 'foh' ? 'active' : ''" 
-                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
-                <span>Budget - FOH</span>
-            </button>
+                <button 
+                    type="button" 
+                    @click="activeTab = 'foh'" 
+                    :class="activeTab === 'foh' ? 'active' : ''" 
+                    class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                    <span>Budget - FOH</span>
+                </button>
 
-            <button 
-                type="button" 
-                @click="activeTab = 'mpp_opex'" 
-                :class="activeTab === 'mpp_opex' ? 'active' : ''" 
-                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
-                <span>Budget - MPP OPEX</span>
-            </button>
+                <button 
+                    type="button" 
+                    @click="activeTab = 'mpp_opex'" 
+                    :class="activeTab === 'mpp_opex' ? 'active' : ''" 
+                    class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                    <span>Budget - MPP OPEX</span>
+                </button>
 
-            <button 
-                type="button" 
-                @click="activeTab = 'mpp_foh'" 
-                :class="activeTab === 'mpp_foh' ? 'active' : ''" 
-                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
-                <span>Budget - MPP FOH</span>
-            </button>
+                <button 
+                    type="button" 
+                    @click="activeTab = 'mpp_foh'" 
+                    :class="activeTab === 'mpp_foh' ? 'active' : ''" 
+                    class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                    <span>Budget - MPP FOH</span>
+                </button>
 
-            <button 
-                type="button" 
-                @click="activeTab = 'capex'" 
-                :class="activeTab === 'capex' ? 'active' : ''" 
-                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
-                <span>Budget - CAPEX</span>
-            </button>
-        </nav>
+                <button 
+                    type="button" 
+                    @click="activeTab = 'capex'" 
+                    :class="activeTab === 'capex' ? 'active' : ''" 
+                    class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                    <span>Budget - CAPEX</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Export Excel sesuai tab aktif -->
+        <button
+            type="button"
+            @click="window.location.href = '<?= base_url('monitoring/export') ?>/' + activeTab"
+            class="shrink-0 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition-all active:scale-[0.98]"
+            title="Download Excel sesuai tab yang aktif">
+            <i class="fa-solid fa-file-excel"></i>
+            <span>Export Excel</span>
+        </button>
     </div>
 
     <div class="space-y-6">
@@ -115,12 +127,12 @@
             <!-- TAB 1: OPEX GA -->
             <div x-show="activeTab === 'opex_ga'" x-cloak class="space-y-4">
                 <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
+                    <div class="overflow-x-auto scrollbar-thin">
+                        <table class="w-full text-left text-xs min-w-[1200px] whitespace-nowrap">
                             <thead class="bg-[#2F3185] text-white font-semibold text-xs border-b border-white/20">
                                 <tr class="bg-[#2F3185] text-white font-semibold">
                                     <th rowspan="2" class="px-4 py-3 border-r border-white/20 min-w-[200px] text-white font-semibold">Cost Center</th>
-                                    <th colspan="14" class="px-4 py-2 border-r border-white/20 text-center text-white font-semibold">Budget Expense (Rp)</th>
+                                    <th colspan="14" class="px-4 py-3 border-r border-white/20 text-center text-white font-semibold">Budget Expense (Rp)</th>
                                 </tr>
                                 <tr class="bg-[#25276d] text-white text-xs font-semibold">
                                     <th class="px-3 py-2 border-r border-white/20 text-white font-semibold">Entry By</th>
@@ -182,21 +194,21 @@
                         </table>
                     </div>
                     <?php $totCount = count($curr ?? []); ?>
-                    <div class="p-3.5 sm:p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
-                        <div>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200" x-text="<?= $totCount ?> === 0 ? 0 : ((page.opex_ga - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(page.opex_ga * perPage, <?= $totCount ?>)"></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= $totCount ?></span> data</div>
-                        <div class="flex items-center gap-1" x-show="totalPages(<?= $totCount ?>) > 1">
-                            <button type="button" @click="page.opex_ga--" :disabled="page.opex_ga === 1" class="h-8 px-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors">Prev</button>
+                    <div class="px-6 py-4 border-t border-gray-200/80 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-800/40 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
+                        <div>Menampilkan <span class="font-bold text-gray-900 dark:text-white" x-text="<?= $totCount ?> === 0 ? 0 : ((page.opex_ga - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-900 dark:text-white" x-text="Math.min(page.opex_ga * perPage, <?= $totCount ?>)"></span> dari <span class="font-bold text-gray-900 dark:text-white"><?= $totCount ?></span> data</div>
+                        <div class="flex items-center gap-1.5" x-show="totalPages(<?= $totCount ?>) > 1">
+                            <button type="button" @click="page.opex_ga--" :disabled="page.opex_ga === 1" class="h-8.5 px-3.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-2xs transition-all active:scale-[0.98] cursor-pointer">Prev</button>
                             <template x-for="(p, i) in pageNumbers('opex_ga', <?= $totCount ?>)" :key="i">
                                 <div>
                                     <template x-if="p === '...'">
                                         <span class="px-2 font-bold text-gray-400">...</span>
                                     </template>
                                     <template x-if="p !== '...'">
-                                        <button type="button" @click="page.opex_ga = p" :class="page.opex_ga === p ? 'bg-[#2F3185] text-white font-bold shadow-xs' : 'border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50'" class="h-8 min-w-[32px] px-2 rounded-lg font-semibold transition-colors" x-text="p"></button>
+                                        <button type="button" @click="page.opex_ga = p" :class="page.opex_ga === p ? 'bg-[#2F3185] text-white font-bold shadow-xs' : 'border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-2xs'" class="h-8.5 min-w-[34px] px-2.5 rounded-xl text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer" x-text="p"></button>
                                     </template>
                                 </div>
                             </template>
-                            <button type="button" @click="page.opex_ga++" :disabled="page.opex_ga === totalPages(<?= $totCount ?>)" class="h-8 px-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors">Next</button>
+                            <button type="button" @click="page.opex_ga++" :disabled="page.opex_ga === totalPages(<?= $totCount ?>)" class="h-8.5 px-3.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-2xs transition-all active:scale-[0.98] cursor-pointer">Next</button>
                         </div>
                     </div>
                 </div>
@@ -205,12 +217,12 @@
             <!-- TAB 2: FOH -->
             <div x-show="activeTab === 'foh'" x-cloak class="space-y-4">
                 <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
+                    <div class="overflow-x-auto scrollbar-thin">
+                        <table class="w-full text-left text-xs min-w-[1200px] whitespace-nowrap">
                             <thead class="bg-[#2F3185] text-white font-semibold text-xs border-b border-white/20">
                                 <tr class="bg-[#2F3185] text-white font-semibold">
                                     <th rowspan="2" class="px-4 py-3 border-r border-white/20 min-w-[200px] text-white font-semibold">Cost Center</th>
-                                    <th colspan="14" class="px-4 py-2 border-r border-white/20 text-center text-white font-semibold">Budget Expense (Rp)</th>
+                                    <th colspan="14" class="px-4 py-3 border-r border-white/20 text-center text-white font-semibold">Budget Expense (Rp)</th>
                                 </tr>
                                 <tr class="bg-[#25276d] text-white text-xs font-semibold">
                                     <th class="px-3 py-2 border-r border-white/20 text-white font-semibold">Entry By</th>
@@ -272,21 +284,21 @@
                         </table>
                     </div>
                     <?php $totCount2 = count($curr2 ?? []); ?>
-                    <div class="p-3.5 sm:p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
-                        <div>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200" x-text="<?= $totCount2 ?> === 0 ? 0 : ((page.foh - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(page.foh * perPage, <?= $totCount2 ?>)"></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= $totCount2 ?></span> data</div>
-                        <div class="flex items-center gap-1" x-show="totalPages(<?= $totCount2 ?>) > 1">
-                            <button type="button" @click="page.foh--" :disabled="page.foh === 1" class="h-8 px-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors">Prev</button>
+                    <div class="px-6 py-4 border-t border-gray-200/80 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-800/40 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
+                        <div>Menampilkan <span class="font-bold text-gray-900 dark:text-white" x-text="<?= $totCount2 ?> === 0 ? 0 : ((page.foh - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-900 dark:text-white" x-text="Math.min(page.foh * perPage, <?= $totCount2 ?>)"></span> dari <span class="font-bold text-gray-900 dark:text-white"><?= $totCount2 ?></span> data</div>
+                        <div class="flex items-center gap-1.5" x-show="totalPages(<?= $totCount2 ?>) > 1">
+                            <button type="button" @click="page.foh--" :disabled="page.foh === 1" class="h-8.5 px-3.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-2xs transition-all active:scale-[0.98] cursor-pointer">Prev</button>
                             <template x-for="(p, i) in pageNumbers('foh', <?= $totCount2 ?>)" :key="i">
                                 <div>
                                     <template x-if="p === '...'">
                                         <span class="px-2 font-bold text-gray-400">...</span>
                                     </template>
                                     <template x-if="p !== '...'">
-                                        <button type="button" @click="page.foh = p" :class="page.foh === p ? 'bg-[#2F3185] text-white font-bold shadow-xs' : 'border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50'" class="h-8 min-w-[32px] px-2 rounded-lg font-semibold transition-colors" x-text="p"></button>
+                                        <button type="button" @click="page.foh = p" :class="page.foh === p ? 'bg-[#2F3185] text-white font-bold shadow-xs' : 'border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-2xs'" class="h-8.5 min-w-[34px] px-2.5 rounded-xl text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer" x-text="p"></button>
                                     </template>
                                 </div>
                             </template>
-                            <button type="button" @click="page.foh++" :disabled="page.foh === totalPages(<?= $totCount2 ?>)" class="h-8 px-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors">Next</button>
+                            <button type="button" @click="page.foh++" :disabled="page.foh === totalPages(<?= $totCount2 ?>)" class="h-8.5 px-3.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-2xs transition-all active:scale-[0.98] cursor-pointer">Next</button>
                         </div>
                     </div>
                 </div>
@@ -295,8 +307,8 @@
             <!-- TAB 3: MPP OPEX -->
             <div x-show="activeTab === 'mpp_opex'" x-cloak class="space-y-4">
                 <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
+                    <div class="overflow-x-auto scrollbar-thin">
+                        <table class="w-full text-left text-xs min-w-[1500px] whitespace-nowrap">
                             <thead class="bg-[#2F3185] text-white font-semibold text-xs border-b border-white/20">
                                 <tr class="bg-[#2F3185] text-white font-semibold">
                                     <th rowspan="2" class="px-4 py-3 border-r border-white/20 min-w-[180px] text-white font-semibold">Cost Center</th>
@@ -395,21 +407,21 @@
                         </table>
                     </div>
                     <?php $totCount3 = count($mpp ?? []); ?>
-                    <div class="p-3.5 sm:p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
-                        <div>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200" x-text="<?= $totCount3 ?> === 0 ? 0 : ((page.mpp_opex - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(page.mpp_opex * perPage, <?= $totCount3 ?>)"></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= $totCount3 ?></span> data</div>
-                        <div class="flex items-center gap-1" x-show="totalPages(<?= $totCount3 ?>) > 1">
-                            <button type="button" @click="page.mpp_opex--" :disabled="page.mpp_opex === 1" class="h-8 px-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors">Prev</button>
+                    <div class="px-6 py-4 border-t border-gray-200/80 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-800/40 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
+                        <div>Menampilkan <span class="font-bold text-gray-900 dark:text-white" x-text="<?= $totCount3 ?> === 0 ? 0 : ((page.mpp_opex - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-900 dark:text-white" x-text="Math.min(page.mpp_opex * perPage, <?= $totCount3 ?>)"></span> dari <span class="font-bold text-gray-900 dark:text-white"><?= $totCount3 ?></span> data</div>
+                        <div class="flex items-center gap-1.5" x-show="totalPages(<?= $totCount3 ?>) > 1">
+                            <button type="button" @click="page.mpp_opex--" :disabled="page.mpp_opex === 1" class="h-8.5 px-3.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-2xs transition-all active:scale-[0.98] cursor-pointer">Prev</button>
                             <template x-for="(p, i) in pageNumbers('mpp_opex', <?= $totCount3 ?>)" :key="i">
                                 <div>
                                     <template x-if="p === '...'">
                                         <span class="px-2 font-bold text-gray-400">...</span>
                                     </template>
                                     <template x-if="p !== '...'">
-                                        <button type="button" @click="page.mpp_opex = p" :class="page.mpp_opex === p ? 'bg-[#2F3185] text-white font-bold shadow-xs' : 'border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50'" class="h-8 min-w-[32px] px-2 rounded-lg font-semibold transition-colors" x-text="p"></button>
+                                        <button type="button" @click="page.mpp_opex = p" :class="page.mpp_opex === p ? 'bg-[#2F3185] text-white font-bold shadow-xs' : 'border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-2xs'" class="h-8.5 min-w-[34px] px-2.5 rounded-xl text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer" x-text="p"></button>
                                     </template>
                                 </div>
                             </template>
-                            <button type="button" @click="page.mpp_opex++" :disabled="page.mpp_opex === totalPages(<?= $totCount3 ?>)" class="h-8 px-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors">Next</button>
+                            <button type="button" @click="page.mpp_opex++" :disabled="page.mpp_opex === totalPages(<?= $totCount3 ?>)" class="h-8.5 px-3.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-2xs transition-all active:scale-[0.98] cursor-pointer">Next</button>
                         </div>
                     </div>
                 </div>
@@ -418,8 +430,8 @@
             <!-- TAB 4: MPP FOH -->
             <div x-show="activeTab === 'mpp_foh'" x-cloak class="space-y-4">
                 <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
+                    <div class="overflow-x-auto scrollbar-thin">
+                        <table class="w-full text-left text-xs min-w-[1500px] whitespace-nowrap">
                             <thead class="bg-[#2F3185] text-white font-semibold text-xs border-b border-white/20">
                                 <tr class="bg-[#2F3185] text-white font-semibold">
                                     <th rowspan="2" class="px-4 py-3 border-r border-white/20 min-w-[180px] text-white font-semibold">Cost Center</th>
@@ -518,21 +530,21 @@
                         </table>
                     </div>
                     <?php $totCount4 = count($mpp_foh ?? []); ?>
-                    <div class="p-3.5 sm:p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
-                        <div>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200" x-text="<?= $totCount4 ?> === 0 ? 0 : ((page.mpp_foh - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(page.mpp_foh * perPage, <?= $totCount4 ?>)"></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= $totCount4 ?></span> data</div>
-                        <div class="flex items-center gap-1" x-show="totalPages(<?= $totCount4 ?>) > 1">
-                            <button type="button" @click="page.mpp_foh--" :disabled="page.mpp_foh === 1" class="h-8 px-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors">Prev</button>
+                    <div class="px-6 py-4 border-t border-gray-200/80 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-800/40 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
+                        <div>Menampilkan <span class="font-bold text-gray-900 dark:text-white" x-text="<?= $totCount4 ?> === 0 ? 0 : ((page.mpp_foh - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-900 dark:text-white" x-text="Math.min(page.mpp_foh * perPage, <?= $totCount4 ?>)"></span> dari <span class="font-bold text-gray-900 dark:text-white"><?= $totCount4 ?></span> data</div>
+                        <div class="flex items-center gap-1.5" x-show="totalPages(<?= $totCount4 ?>) > 1">
+                            <button type="button" @click="page.mpp_foh--" :disabled="page.mpp_foh === 1" class="h-8.5 px-3.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-2xs transition-all active:scale-[0.98] cursor-pointer">Prev</button>
                             <template x-for="(p, i) in pageNumbers('mpp_foh', <?= $totCount4 ?>)" :key="i">
                                 <div>
                                     <template x-if="p === '...'">
                                         <span class="px-2 font-bold text-gray-400">...</span>
                                     </template>
                                     <template x-if="p !== '...'">
-                                        <button type="button" @click="page.mpp_foh = p" :class="page.mpp_foh === p ? 'bg-[#2F3185] text-white font-bold shadow-xs' : 'border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50'" class="h-8 min-w-[32px] px-2 rounded-lg font-semibold transition-colors" x-text="p"></button>
+                                        <button type="button" @click="page.mpp_foh = p" :class="page.mpp_foh === p ? 'bg-[#2F3185] text-white font-bold shadow-xs' : 'border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-2xs'" class="h-8.5 min-w-[34px] px-2.5 rounded-xl text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer" x-text="p"></button>
                                     </template>
                                 </div>
                             </template>
-                            <button type="button" @click="page.mpp_foh++" :disabled="page.mpp_foh === totalPages(<?= $totCount4 ?>)" class="h-8 px-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors">Next</button>
+                            <button type="button" @click="page.mpp_foh++" :disabled="page.mpp_foh === totalPages(<?= $totCount4 ?>)" class="h-8.5 px-3.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-2xs transition-all active:scale-[0.98] cursor-pointer">Next</button>
                         </div>
                     </div>
                 </div>
@@ -541,8 +553,8 @@
             <!-- TAB 5: CAPEX -->
             <div x-show="activeTab === 'capex'" x-cloak class="space-y-4">
                 <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
+                    <div class="overflow-x-auto scrollbar-thin">
+                        <table class="w-full text-left text-xs min-w-[1600px] whitespace-nowrap">
                             <thead class="bg-[#2F3185] text-white font-semibold text-xs border-b border-white/20">
                                 <tr class="bg-[#2F3185] text-white font-semibold">
                                     <th rowspan="2" class="px-4 py-3 border-r border-white/20 min-w-[180px] text-white font-semibold">Cost Center</th>
@@ -613,21 +625,21 @@
                         </table>
                     </div>
                     <?php $totCount5 = count($capex ?? []); ?>
-                    <div class="p-3.5 sm:p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
-                        <div>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200" x-text="<?= $totCount5 ?> === 0 ? 0 : ((page.capex - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(page.capex * perPage, <?= $totCount5 ?>)"></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= $totCount5 ?></span> data</div>
-                        <div class="flex items-center gap-1" x-show="totalPages(<?= $totCount5 ?>) > 1">
-                            <button type="button" @click="page.capex--" :disabled="page.capex === 1" class="h-8 px-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors">Prev</button>
+                    <div class="px-6 py-4 border-t border-gray-200/80 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-800/40 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
+                        <div>Menampilkan <span class="font-bold text-gray-900 dark:text-white" x-text="<?= $totCount5 ?> === 0 ? 0 : ((page.capex - 1) * perPage + 1)"></span> - <span class="font-bold text-gray-900 dark:text-white" x-text="Math.min(page.capex * perPage, <?= $totCount5 ?>)"></span> dari <span class="font-bold text-gray-900 dark:text-white"><?= $totCount5 ?></span> data</div>
+                        <div class="flex items-center gap-1.5" x-show="totalPages(<?= $totCount5 ?>) > 1">
+                            <button type="button" @click="page.capex--" :disabled="page.capex === 1" class="h-8.5 px-3.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-2xs transition-all active:scale-[0.98] cursor-pointer">Prev</button>
                             <template x-for="(p, i) in pageNumbers('capex', <?= $totCount5 ?>)" :key="i">
                                 <div>
                                     <template x-if="p === '...'">
                                         <span class="px-2 font-bold text-gray-400">...</span>
                                     </template>
                                     <template x-if="p !== '...'">
-                                        <button type="button" @click="page.capex = p" :class="page.capex === p ? 'bg-[#2F3185] text-white font-bold shadow-xs' : 'border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50'" class="h-8 min-w-[32px] px-2 rounded-lg font-semibold transition-colors" x-text="p"></button>
+                                        <button type="button" @click="page.capex = p" :class="page.capex === p ? 'bg-[#2F3185] text-white font-bold shadow-xs' : 'border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-2xs'" class="h-8.5 min-w-[34px] px-2.5 rounded-xl text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer" x-text="p"></button>
                                     </template>
                                 </div>
                             </template>
-                            <button type="button" @click="page.capex++" :disabled="page.capex === totalPages(<?= $totCount5 ?>)" class="h-8 px-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors">Next</button>
+                            <button type="button" @click="page.capex++" :disabled="page.capex === totalPages(<?= $totCount5 ?>)" class="h-8.5 px-3.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-2xs transition-all active:scale-[0.98] cursor-pointer">Next</button>
                         </div>
                     </div>
                 </div>

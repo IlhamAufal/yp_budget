@@ -49,55 +49,58 @@
     <!-- Table Section Label (Separated from table container) -->
     <div>
         <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Matriks International Sales dalam IDR (12 Bulan)</h3>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Konversi otomatis dari estimasi nilai valas ke IDR.</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Konversi otomatis dari estimasi nilai valas ke IDR per bulan (QTY, Revenue, ASP).</p>
     </div>
 
     <!-- Table Container (Round corner starts directly from thead) -->
     <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs overflow-hidden bg-white dark:bg-gray-900">
         <div class="overflow-x-auto scrollbar-thin">
-            <table class="w-full text-left text-xs border-collapse min-w-[1500px] whitespace-nowrap">
-                <thead class="bg-[#2F3185] text-white font-semibold border-b border-white/20 text-xs">
+            <table class="w-full text-left text-xs border-collapse min-w-[4600px] whitespace-nowrap">
+                <thead class="bg-[#2F3185] text-white font-semibold border-b border-white/20 text-xs sticky top-0 z-20">
                     <tr class="bg-[#2F3185] text-white font-semibold">
-                        <th class="px-4 py-3.5 sticky left-0 z-10 bg-[#2F3185] text-white font-semibold min-w-[240px] border-r border-white/20">Product SKU</th>
-                        <th class="px-3.5 py-3.5 w-36 text-right text-white font-semibold border-r border-white/20">Price Eq (IDR)</th>
-                        <th class="px-3.5 py-3.5 w-28 text-center text-white font-semibold border-r border-white/20">Type</th>
-                        <template x-for="(month, idx) in monthNames" :key="idx">
-                            <th class="px-3.5 py-3.5 text-center text-white font-semibold w-24 border-r border-white/20" x-text="month"></th>
+                        <th rowspan="2" class="px-4 py-3 sticky left-0 z-30 bg-[#2F3185] text-white font-semibold min-w-[240px] border-r border-white/20">Product SKU</th>
+                        <th rowspan="2" class="px-3 py-3 w-24 text-center text-white font-semibold border-r border-white/20">Currency</th>
+                        <th rowspan="2" class="px-3.5 py-3 w-36 text-right text-white font-semibold border-r border-white/20">Price Eq (IDR)</th>
+                        <template x-for="month in monthNames" :key="month">
+                            <th colspan="3" class="px-3 py-2.5 text-center text-white font-semibold border-r border-white/20" x-text="month"></th>
                         </template>
-                        <th class="px-4 py-3.5 text-right w-36 bg-[#2F3185] text-white font-bold sticky right-0">Total Year</th>
+                        <th colspan="3" class="px-3 py-2.5 text-center text-white font-bold bg-[#25276d] border-l border-white/20">Annual Total</th>
+                    </tr>
+                    <tr class="bg-[#25276d] text-white text-xs font-semibold">
+                        <?php for ($i = 0; $i < 12; $i++): ?>
+                            <th class="px-2 py-2 border-r border-white/20 w-20 text-center text-white font-semibold text-xs bg-[#25276d]">Qty (Box)</th>
+                            <th class="px-2 py-2 border-r border-white/20 w-32 text-center text-white font-semibold text-xs bg-[#25276d]">Revenue</th>
+                            <th class="px-2 py-2 border-r border-white/20 w-24 text-center text-white font-semibold text-xs bg-[#25276d]">ASP/kg</th>
+                        <?php endfor; ?>
+                        <th class="px-2 py-2 border-r border-white/20 w-24 text-center text-white bg-[#25276d] font-semibold text-xs">Tot Qty</th>
+                        <th class="px-2 py-2 border-r border-white/20 w-36 text-center text-white bg-[#25276d] font-semibold text-xs">Tot Rev</th>
+                        <th class="px-2 py-2 text-center text-white bg-[#25276d] font-semibold text-xs">Avg ASP</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-800 font-mono text-xs">
                     <template x-for="item in filteredItems" :key="item.id">
-                        <template x-for="dataType in ['qty', 'val']">
-                            <tr :class="dataType === 'val' ? 'bg-gray-50/50 dark:bg-gray-800/50' : 'hover:bg-gray-50/30 dark:hover:bg-gray-800/30'">
-                                <template x-if="dataType === 'qty'">
-                                    <td class="px-4 py-3 font-sans font-medium text-gray-900 dark:text-white sticky left-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800" rowspan="2">
-                                        <div class="font-semibold text-gray-900 dark:text-white" x-text="item.product_name"></div>
-                                        <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5" x-text="item.product_code + ' | Region: ' + item.region"></div>
-                                    </td>
-                                </template>
+                        <tr class="hover:bg-gray-50/30 dark:hover:bg-gray-800/30">
+                            <td class="px-4 py-3 font-sans font-medium text-gray-900 dark:text-white sticky left-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
+                                <div class="font-semibold text-gray-900 dark:text-white" x-text="item.product_name"></div>
+                                <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5" x-text="item.product_code + ' | Region: ' + item.region"></div>
+                            </td>
 
-                                <template x-if="dataType === 'qty'">
-                                    <td class="px-3.5 py-3 font-mono text-right font-bold text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-800" rowspan="2" x-text="formatNumber(item.price_idr)"></td>
-                                </template>
+                            <td class="px-3 py-3 text-center font-sans font-bold text-gray-800 dark:text-gray-200 border-r border-gray-200 dark:border-gray-800" x-text="item.currency"></td>
 
-                                <td class="px-3 py-2.5 text-center font-sans font-medium border-r border-gray-200 dark:border-gray-800">
-                                    <span :class="dataType === 'qty' ? 'bg-blue-50 text-[#2F3185] dark:bg-blue-900/30 dark:text-blue-300' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'" class="px-2 py-0.5 rounded-md text-[10px] font-bold" x-text="dataType === 'qty' ? 'Vol (Box)' : 'Val (IDR)'"></span>
+                            <td class="px-3.5 py-3 font-mono text-right font-bold text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-800" x-text="formatNumber(item.price_idr)"></td>
+
+                            <template x-for="cell in metricCols" :key="cell.m + '-' + cell.k">
+                                <td class="px-2 py-2 text-right font-mono border-r border-gray-200 dark:border-gray-800">
+                                    <span x-show="cell.k === 'qty'" x-text="formatNumber(item.monthly[cell.m].qty)"></span>
+                                    <span x-show="cell.k === 'rev'" class="text-emerald-600 dark:text-emerald-400 font-semibold" x-text="formatNumber(item.monthly[cell.m].qty * item.price_idr)"></span>
+                                    <span x-show="cell.k === 'asp'" class="text-amber-600 dark:text-amber-400" x-text="formatNumber(item.monthly[cell.m].qty > 0 ? item.price_idr : 0)"></span>
                                 </td>
+                            </template>
 
-                                <template x-for="m in 12" :key="m">
-                                    <td class="px-3 py-2 text-right font-mono border-r border-gray-200 dark:border-gray-800">
-                                        <span x-show="dataType === 'qty'" x-text="formatNumber(item.monthly[m].qty)"></span>
-                                        <span x-show="dataType === 'val'" class="text-emerald-600 dark:text-emerald-400 font-semibold" x-text="formatNumber(item.monthly[m].qty * item.price_idr)"></span>
-                                    </td>
-                                </template>
-
-                                <td class="px-4 py-3 text-right font-bold font-mono bg-gray-50 dark:bg-gray-800 sticky right-0" :class="dataType === 'val' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white'">
-                                    <span x-text="dataType === 'qty' ? formatNumber(item.total_qty) : formatNumber(item.total_val)"></span>
-                                </td>
-                            </tr>
-                        </template>
+                            <td class="px-2 py-3 text-right font-bold font-mono bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-800" x-text="formatNumber(item.total_qty)"></td>
+                            <td class="px-2 py-3 text-right font-bold font-mono bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-800 text-emerald-600 dark:text-emerald-400" x-text="formatNumber(item.total_val)"></td>
+                            <td class="px-2 py-3 text-right font-bold font-mono bg-gray-50 dark:bg-gray-800 text-amber-600 dark:text-amber-400" x-text="formatNumber(item.total_qty > 0 ? item.total_val / item.total_qty : 0)"></td>
+                        </tr>
                     </template>
                 </tbody>
             </table>
@@ -111,6 +114,11 @@ function intlIdrSalesTab() {
         saving: false,
         processing: false,
         monthNames: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        metricCols: (() => {
+            const arr = [];
+            for (let m = 1; m <= 12; m++) arr.push({ m, k: 'qty' }, { m, k: 'rev' }, { m, k: 'asp' });
+            return arr;
+        })(),
         rateUsd: 16200,
         rateBaht: 450,
         rateRinggit: 3600,
@@ -124,6 +132,7 @@ function intlIdrSalesTab() {
                     product_code: 'EXP-USD-001',
                     product_name: 'Margarine Export Grade 15kg Box',
                     region: 'AMER',
+                    currency: 'USD',
                     price_idr: 396900,
                     total_qty: 6000,
                     total_val: 2381400000,

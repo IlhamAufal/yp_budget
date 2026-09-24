@@ -1,3 +1,6 @@
+<?= $this->extend('layouts/main') ?>
+
+<?= $this->section('content') ?>
 <div x-data="mppSummaryApp()" x-init="init()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
     <!-- HEADER -->

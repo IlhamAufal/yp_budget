@@ -33,6 +33,9 @@ $routes->setAutoRoute(false);
 $routes->post('set-year', 'PeriodController::setYear', ['filter' => 'auth']);
 $routes->get('api/active-years', 'PeriodController::getActiveYears');
 
+// Partial endpoints untuk global modal
+$routes->get('manual-book/view', 'PartialController::manualBook', ['filter' => 'auth']);
+
 // Login routes (public)
 $routes->get('login', 'LoginController::index');
 $routes->post('login/process', 'LoginController::process');
@@ -228,6 +231,7 @@ $routes->group('foh', ['filter' => 'auth'], function ($routes) {
     $routes->get('entry', 'FohController::entry');
     $routes->get('entry-budget', 'FohController::entry');
     $routes->get('entry-budget-detail', 'FohController::entryBudgetDetail');
+    $routes->get('detail-entry-modal', 'FohController::detailEntryModal');
     $routes->get('getEntryData', 'FohController::getEntryData');
     $routes->get('getConfigPeriod', 'FohController::getConfigPeriod');
     $routes->get('getHeaderAccounts', 'FohController::getHeaderAccounts');
@@ -264,6 +268,7 @@ $routes->group('foh', ['filter' => 'auth'], function ($routes) {
 // Alias tanpa dash (beberapa view memakai base_url('opexga/...'))
 $routes->group('opexga', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'OpexGaController::index');
+    $routes->get('upload-modal', 'OpexGaController::uploadModalForm');
     $routes->get('exportExcel', 'OpexGaController::exportExcel');
     // upload_modal.php (index.php) submit ke opexga/processUpload
     $routes->post('processUpload', 'OpexGaController::processUpload');
@@ -378,6 +383,7 @@ $routes->group('sales', ['filter' => 'auth'], function ($routes) {
 $routes->group('monitoring', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'PlController::index');
     $routes->get('cari_view_data', 'PlController::cariViewData');
+    $routes->get('export/(:segment)', 'PlController::exportMonitoring/$1');
 });
 $routes->group('pl', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'PlController::summary');

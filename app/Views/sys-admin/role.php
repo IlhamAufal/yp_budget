@@ -7,21 +7,21 @@
   <!-- ============================================================ -->
   <!-- BREADCRUMB & HEADER -->
   <!-- ============================================================ -->
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
     <div>
-      <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+      <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
         <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">
           Dashboard
         </a>
-        <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+        <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
         <span>System Administration</span>
-        <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+        <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
         <span class="text-[#2F3185] font-bold">Role Management</span>
       </div>
       <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
         Role Management
       </h1>
-      <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
         Kelola role pengguna dan permission akses menu (RBAC).
       </p>
     </div>
@@ -31,7 +31,7 @@
       <button
         type="button"
         @click="openCreateModal()"
-        class="bg-[#2F3185] hover:bg-[#25276d] text-white font-semibold rounded-xl px-5 py-2.5 shadow-xs transition-all inline-flex items-center gap-2 active:scale-[0.98] text-xs"
+        class="bg-[#2F3185] hover:bg-[#25276d] text-white font-semibold rounded-xl px-5 py-2.5 shadow-xs transition-all inline-flex items-center gap-2 active:scale-[0.98] text-xs cursor-pointer"
       >
         <i class="fa-solid fa-plus"></i>
         <span>Tambah Role</span>
@@ -42,56 +42,61 @@
   <!-- ============================================================ -->
   <!-- DATA TABLE & FILTER -->
   <!-- ============================================================ -->
+  <!-- Filter Bar -->
+  <div class="rounded-2xl border border-gray-200/80 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 shadow-xs">
+    <form method="GET" action="<?= base_url('sys-admin/role') ?>" class="flex flex-wrap items-end gap-3">
+      <div class="flex-1 min-w-[240px]">
+        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Pencarian Role</label>
+        <input
+          type="text"
+          name="search"
+          value="<?= esc($filters['search'] ?? '') ?>"
+          placeholder="Cari nama role..."
+          class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-2.5 px-3.5 text-xs text-gray-800 focus:bg-white dark:focus:bg-gray-900 focus:border-[#2F3185] focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-all shadow-xs"
+        />
+      </div>
+
+      <div class="min-w-[160px]">
+        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
+        <select
+          name="status"
+          class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-2.5 px-3.5 text-xs text-gray-800 focus:bg-white dark:focus:bg-gray-900 focus:border-[#2F3185] focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-colors"
+        >
+          <option value="">Semua Status</option>
+          <option value="Y" <?= ($filters['status'] ?? '') === 'Y' ? 'selected' : '' ?>>Aktif (Y)</option>
+          <option value="N" <?= ($filters['status'] ?? '') === 'N' ? 'selected' : '' ?>>Non-Aktif (N)</option>
+        </select>
+      </div>
+
+      <button
+        type="submit"
+        class="bg-[#2F3185] hover:bg-[#25276d] text-white font-semibold rounded-xl px-5 py-2.5 shadow-xs transition-all inline-flex items-center gap-2 active:scale-[0.98] text-xs cursor-pointer"
+        title="Terapkan Filter"
+      >
+        <i class="fa-solid fa-filter text-xs"></i>
+        <span>Filter</span>
+      </button>
+      <?php if (! empty($has_filter)): ?>
+      <a
+        href="<?= base_url('sys-admin/role') ?>"
+        class="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 py-2.5 px-4 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+        title="Reset Filter"
+      >
+        <i class="fa-solid fa-rotate-left text-xs"></i>
+      </a>
+      <?php endif; ?>
+    </form>
+  </div>
+
   <div class="space-y-4">
-    <!-- Filter Bar -->
-    <div class="p-5 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
-      <form method="GET" action="<?= base_url('sys-admin/role') ?>" class="flex flex-wrap items-end gap-3">
-        <div class="flex-1 min-w-[240px]">
-          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Pencarian Role</label>
-          <input
-            type="text"
-            name="search"
-            value="<?= esc($filters['search'] ?? '') ?>"
-            placeholder="Cari nama role..."
-            class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-2.5 px-3.5 text-xs text-gray-800 focus:bg-white dark:focus:bg-gray-900 focus:border-[#2F3185] focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-all shadow-xs"
-          />
-        </div>
-
-        <div class="min-w-[160px]">
-          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
-          <select
-            name="status"
-            class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-2.5 px-3.5 text-xs text-gray-800 focus:bg-white dark:focus:bg-gray-900 focus:border-[#2F3185] focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-colors"
-          >
-            <option value="">Semua Status</option>
-            <option value="Y" <?= ($filters['status'] ?? '') === 'Y' ? 'selected' : '' ?>>Aktif (Y)</option>
-            <option value="N" <?= ($filters['status'] ?? '') === 'N' ? 'selected' : '' ?>>Non-Aktif (N)</option>
-          </select>
-        </div>
-
-        <button
-          type="submit"
-          class="bg-[#2F3185] hover:bg-[#25276d] text-white font-semibold rounded-xl px-5 py-2.5 shadow-xs transition-all inline-flex items-center gap-2 active:scale-[0.98] text-xs"
-          title="Terapkan Filter"
-        >
-          <i class="fa-solid fa-filter text-xs"></i>
-          <span>Filter</span>
-        </button>
-        <?php if (! empty($has_filter)): ?>
-        <a
-          href="<?= base_url('sys-admin/role') ?>"
-          class="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 py-2.5 px-4 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          title="Reset Filter"
-        >
-          <i class="fa-solid fa-rotate-left text-xs"></i>
-        </a>
-        <?php endif; ?>
-      </form>
+    <div>
+      <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Daftar Role Pengguna (Role List)</h3>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Struktur peran otorisasi, hak akses menu, dan penugasan user.</p>
     </div>
 
     <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse text-xs">
+      <div class="overflow-x-auto scrollbar-thin">
+        <table class="w-full text-left border-collapse text-xs min-w-[700px]">
           <thead class="bg-[#2F3185] text-white font-semibold text-xs border-b border-white/20">
             <tr class="bg-[#2F3185] text-white font-semibold">
               <th class="py-3 px-5 w-12 text-center text-white font-semibold">No.</th>

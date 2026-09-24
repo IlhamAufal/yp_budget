@@ -22,7 +22,10 @@
         </div>
         
         <div class="flex items-center gap-3 shrink-0">
-            <button @click="$dispatch('open-upload-modal', { type: 'opex_summary' })" 
+            <button type="button" data-action="open-modal"
+                    data-modal-url="<?= base_url('opexga/upload-modal?type=opex_summary') ?>"
+                    data-modal-title="Upload OPEX GA"
+                    data-modal-size="sm"
                     class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 active:scale-[0.98] transition-all cursor-pointer">
                 <i class="fa-solid fa-file-arrow-up"></i>
                 <span>Upload Excel</span>
@@ -111,5 +114,4 @@
 
 </div>
 
-<?= $this->include('opex_ga/upload_modal') ?>
 <?= $this->endSection() ?>

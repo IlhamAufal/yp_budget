@@ -113,10 +113,10 @@
 
           <button
             type="submit"
-            class="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/50 active:scale-[0.99] dark:bg-brand-600 dark:hover:bg-brand-500"
+            class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2F3185] hover:bg-[#25276d] px-4 py-3 text-sm font-semibold text-white shadow-md shadow-[#2F3185]/20 transition-all focus:outline-none focus:ring-2 focus:ring-[#2F3185]/40 active:scale-[0.99] cursor-pointer"
           >
             <i class="fa-solid fa-right-to-bracket"></i>
-            Masuk
+            <span>Masuk</span>
           </button>
         </form>
 

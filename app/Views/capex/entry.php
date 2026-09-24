@@ -18,10 +18,20 @@
                 Pengisian dan peninjauan pengajuan belanja modal (Capital Expenditure).
             </p>
         </div>
+        <div class="shrink-0">
+            <button type="button" data-action="open-modal"
+                    data-modal-url="<?= base_url('manual-book/view') ?>?file=<?= rawurlencode('MANUAL BOOK - BUDGET SYSTEM - INPUT CAPEX.pdf') ?>&amp;title=<?= rawurlencode('Manual Book - Input CAPEX') ?>"
+                    data-modal-title="Manual Book - Input CAPEX"
+                    data-modal-size="xl"
+                    class="inline-flex items-center gap-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Manual Book</span>
+            </button>
+        </div>
     </div>
 
     <!-- Sub Tabs Navigation -->
-    <div class="nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+    <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
         <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="CAPEX Entry Tabs">
             <button type="button" @click="activeSubTab = 'entry'"
                 :class="activeSubTab === 'entry' ? 'active' : ''"
@@ -49,11 +59,6 @@
     </div>
 
     <?= $this->include('capex/partials/modal_form_capex') ?>
-    <?= $this->include('partials/manual_book_modal', [
-        'mbTitle' => 'Manual Book - Input CAPEX',
-        'mbPdfUrl' => base_url('assets/docs/manual_book/MANUAL BOOK - BUDGET SYSTEM - INPUT CAPEX.pdf'),
-        'mbPdfExists' => is_file(FCPATH . 'assets/docs/manual_book/MANUAL BOOK - BUDGET SYSTEM - INPUT CAPEX.pdf'),
-    ]) ?>
 </div>
 
 <script>
@@ -62,7 +67,6 @@ function capexEntryApp() {
         activeSubTab: 'entry',
         selectedCostCenter: <?= json_encode($cost_center_options[0]['id'] ?? '1000GP1100', JSON_HEX_TAG) ?>,
         viewCostCenter: <?= json_encode($cost_center_options[1]['id'] ?? ($cost_center_options[0]['id'] ?? '1000KA1004'), JSON_HEX_TAG) ?>,
-        manualBookOpen: false,
         formCapexOpen: false,
         activeCategory: { code: '', name: '' },
         saving: false,

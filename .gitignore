@@ -96,8 +96,7 @@ tmp_*.php
 cookies_*.txt
 *.sql
 manual_book_*.pdf
-PRD_SALES_DOMESTIC_ENTRY.md
-PRD_SALES_INTERNATIONAL_ENTRY.md
+docs
 
 
 # -----------------------------------------------------------------------

@@ -150,6 +150,36 @@
   </div>
 
   <!-- ============================================================ -->
+  <!-- FILTER CARD -->
+  <!-- ============================================================ -->
+  <div class="rounded-2xl border border-gray-200/80 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 shadow-xs">
+    <div class="flex flex-wrap items-center gap-3">
+      <div class="flex-1 min-w-[200px]">
+        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Pencarian Posisi</label>
+        <input type="text" x-model="filter.search" @input.debounce.400ms="fetchTableData()" placeholder="Cari nama jabatan, posisi..." class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-colors shadow-xs" />
+      </div>
+      <div class="min-w-[180px]">
+        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Cost Center</label>
+        <select x-model="filter.dept_id" @change="fetchTableData()" class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5 text-xs text-gray-800 focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-colors">
+          <option value="">Semua Cost Center</option>
+          <?php foreach (($costCenters ?? []) as $idx => $cc): ?>
+            <option value="<?= esc($cc['cost_center']) ?>">[<?= esc($cc['cost_center_sap']) ?>] <?= esc($cc['cost_desc']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="min-w-[140px]">
+        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Tipe Staff</label>
+        <select x-model="filter.type" @change="fetchTableData()" class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5 text-xs text-gray-800 focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-colors">
+          <option value="">Semua Tipe</option>
+          <?php foreach (($mppTypes ?? []) as $t): ?>
+            <option value="<?= esc($t['id_mpp']) ?>"><?= esc($t['desc_mpp']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
   <!-- ASYNC DATA TABLE -->
   <!-- ============================================================ -->
   <div class="space-y-4">
@@ -159,37 +189,9 @@
     </div>
 
     <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
-      <!-- Filter Bar -->
-      <div class="p-6 border-b border-gray-100 dark:border-gray-800">
-        <div class="flex flex-wrap items-center gap-3">
-          <div class="flex-1 min-w-[200px]">
-            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Pencarian Posisi</label>
-            <input type="text" x-model="filter.search" @input.debounce.400ms="fetchTableData()" placeholder="Cari nama jabatan, posisi..." class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-colors shadow-xs" />
-          </div>
-          <div class="min-w-[180px]">
-            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Cost Center</label>
-            <select x-model="filter.dept_id" @change="fetchTableData()" class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5 text-xs text-gray-800 focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-colors">
-              <option value="">Semua Cost Center</option>
-              <?php foreach (($costCenters ?? []) as $idx => $cc): ?>
-                <option value="<?= esc($cc['cost_center']) ?>">[<?= esc($cc['cost_center_sap']) ?>] <?= esc($cc['cost_desc']) ?></option>
-              <?php endforeach; ?>
-            </select>
-          </div>
-          <div class="min-w-[140px]">
-            <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Tipe Staff</label>
-            <select x-model="filter.type" @change="fetchTableData()" class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5 text-xs text-gray-800 focus:border-[#2F3185] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-colors">
-              <option value="">Semua Tipe</option>
-              <?php foreach (($mppTypes ?? []) as $t): ?>
-                <option value="<?= esc($t['id_mpp']) ?>"><?= esc($t['desc_mpp']) ?></option>
-              <?php endforeach; ?>
-            </select>
-          </div>
-        </div>
-      </div>
-
       <!-- Table -->
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse text-xs text-gray-600 dark:text-gray-300">
+      <div class="overflow-x-auto scrollbar-thin">
+        <table class="w-full text-left border-collapse text-xs text-gray-600 dark:text-gray-300 min-w-[700px]">
           <thead class="bg-[#2F3185] text-white text-xs font-semibold border-b border-white/20">
             <tr class="bg-[#2F3185] text-white font-semibold text-xs">
               <th class="py-3 px-4 text-white font-semibold">Nama Staff</th>

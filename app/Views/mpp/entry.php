@@ -23,7 +23,7 @@
     </div>
 
     <!-- TAB NAV -->
-    <div class="nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+    <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
         <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="MPP Tabs">
             <button
                 type="button"

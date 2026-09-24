@@ -7,23 +7,23 @@ $report = $report ?? ['groups' => [], 'grand_total' => ['actual' => ['months' =>
 $fmt = static fn($value): string => number_format((float) $value, 2, ',', '.');
 ?>
 <div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
-    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
         <div>
-            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
                 <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">Dashboard</a>
-                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
                 <span>Reports</span>
-                <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
                 <span class="text-[#2F3185] font-bold"><?= esc($module ?? 'OPEX') ?></span>
             </div>
             <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Department Report (<?= esc($module ?? 'OPEX') ?>)
             </h1>
-            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 Actual Januari–Agustus dan Budget Januari–Desember untuk working year <?= esc($workingYear ?? '') ?>.
             </p>
         </div>
-        <form method="get" class="flex flex-col sm:flex-row sm:items-end gap-3 bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
+        <form method="get" class="flex flex-col sm:flex-row sm:items-end gap-3">
             <div>
                 <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                     Cost Center
@@ -40,23 +40,22 @@ $fmt = static fn($value): string => number_format((float) $value, 2, ',', '.');
                     <?php endforeach; ?>
                 </select>
             </div>
-            <button class="bg-[#2F3185] hover:bg-[#25276d] text-white font-semibold rounded-xl px-5 py-2.5 shadow-xs transition-all inline-flex items-center justify-center gap-2 active:scale-[0.98] text-xs shrink-0" type="submit">
+            <button class="bg-[#2F3185] hover:bg-[#25276d] text-white font-semibold rounded-xl px-5 py-2.5 shadow-xs transition-all inline-flex items-center justify-center gap-2 active:scale-[0.98] text-xs shrink-0 cursor-pointer" type="submit">
                 <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                <span>Tampilkan Report</span>
+                <span>Tampilkan</span>
             </button>
         </form>
     </div>
 
-    <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
-        <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
-            <div>
-                <h2 class="font-bold text-sm text-gray-900 dark:text-white">Actual vs Budget</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Subtotal dihitung server-side per cost center header.</p>
-            </div>
-            <span class="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-600 dark:text-gray-300">26 kolom</span>
+    <div class="space-y-4">
+        <div>
+            <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Perbandingan Actual vs Budget Department</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Subtotal dihitung server-side per cost center header.</p>
         </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-[2200px] w-full border-collapse text-xs">
+
+        <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
+            <div class="overflow-x-auto scrollbar-thin">
+                <table class="min-w-[2200px] w-full border-collapse text-xs">
                 <thead class="text-center font-semibold text-xs bg-[#2F3185] text-white border-b border-white/20">
                     <tr class="bg-[#2F3185] text-white font-semibold">
                         <th rowspan="2" class="sticky left-0 z-10 border-r border-white/20 bg-[#2F3185] px-3.5 py-3 text-left text-white font-semibold">Account</th>
