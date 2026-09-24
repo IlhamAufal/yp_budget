@@ -2,34 +2,31 @@
 
 <?= $this->section('content') ?>
 
-<div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-4" x-data="costCenterPage()">
+<div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6" x-data="costCenterPage()">
 
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  <!-- HEADER -->
+  <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
     <div>
-      <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
-        <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors">
-          <i class="fa-solid fa-gauge-high"></i> Dashboard
-        </a>
-        <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-        <span>Master Data</span>
-        <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-        <span class="text-brand-500 font-bold">Cost Center</span>
+      <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+        <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">Dashboard</a>
+        <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+        <span class="hover:text-[#2F3185]">Master Data</span>
+        <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+        <span class="text-[#2F3185] font-bold">Cost Center</span>
       </div>
-      <h1 class="text-xl md:text-2xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
-        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 shadow-xs">
-          <i class="fa-solid fa-sitemap text-lg"></i>
-        </span>
+      <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
         Master Cost Center
       </h1>
-      <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
         Kelola daftar Cost Center, alokasi departemen, dan pusat pertanggungjawaban anggaran.
       </p>
     </div>
   </div>
 
-  <div class="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-gray-200/80 bg-white px-4 py-2.5 text-xs dark:border-gray-800 dark:bg-gray-900">
+  <!-- STATS -->
+  <div class="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-2xl border border-gray-200/80 bg-white p-4 text-xs dark:border-gray-800 dark:bg-gray-900 shadow-xs">
     <div class="flex items-center gap-2">
-      <span class="flex h-6 w-6 items-center justify-center rounded-md bg-purple-50 text-purple-500 dark:bg-purple-500/10 dark:text-purple-400">
+      <span class="flex h-6 w-6 items-center justify-center rounded-md bg-[#2F3185]/10 text-[#2F3185] dark:bg-[#2F3185]/20 dark:text-indigo-400">
         <i class="fa-solid fa-sitemap text-[10px]"></i>
       </span>
       <span class="text-gray-500 dark:text-gray-400">Total CC:</span>
@@ -41,7 +38,7 @@
         <i class="fa-solid fa-circle-check text-[10px]"></i>
       </span>
       <span class="text-gray-500 dark:text-gray-400">Aktif:</span>
-      <span class="font-bold text-gray-900 dark:text-white"><?= count(array_filter($costCenters ?? [], fn($c) => ($c['status'] ?? 'A') === 'A')) ?></span>
+      <span class="font-bold text-emerald-600 dark:text-emerald-400"><?= count(array_filter($costCenters ?? [], fn($c) => ($c['status'] ?? 'A') === 'A')) ?></span>
     </div>
     <span class="text-gray-300 dark:text-gray-700">|</span>
     <div class="flex items-center gap-2">
@@ -49,7 +46,7 @@
         <i class="fa-solid fa-circle-xmark text-[10px]"></i>
       </span>
       <span class="text-gray-500 dark:text-gray-400">Non-Aktif:</span>
-      <span class="font-bold text-gray-900 dark:text-white"><?= count(array_filter($costCenters ?? [], fn($c) => ($c['status'] ?? '') === 'N')) ?></span>
+      <span class="font-bold text-rose-600 dark:text-rose-400"><?= count(array_filter($costCenters ?? [], fn($c) => ($c['status'] ?? '') === 'N')) ?></span>
     </div>
     <span class="text-gray-300 dark:text-gray-700">|</span>
     <div class="flex items-center gap-2">
@@ -61,23 +58,25 @@
     </div>
   </div>
 
-  <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs overflow-hidden dark:border-gray-800 dark:bg-gray-900">
-    <div class="p-3 border-b border-gray-100 dark:border-gray-800">
-      <div class="flex flex-wrap items-center gap-2">
-        <div class="relative flex-1 min-w-[180px]">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400"></i>
-          <input
-            type="text"
-            x-model="searchQuery"
-            @input="currentPage = 1"
-            placeholder="Cari kode atau nama cost center..."
-            class="w-full rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 pl-9 pr-3 text-xs text-gray-900 placeholder:text-gray-400 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-all"
-          />
-        </div>
+  <!-- FILTER CARD -->
+  <div class="rounded-2xl border border-gray-200/80 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 shadow-xs">
+    <div class="flex flex-wrap items-center gap-3">
+      <div class="flex-1 min-w-[200px]">
+        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Pencarian Cost Center</label>
+        <input
+          type="text"
+          x-model="searchQuery"
+          @input="currentPage = 1"
+          placeholder="Cari kode atau nama cost center..."
+          class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5 text-xs text-gray-900 placeholder:text-gray-400 focus:border-[#2F3185] focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-all shadow-xs"
+        />
+      </div>
+      <div class="min-w-[160px]">
+        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Departemen</label>
         <select
           x-model="selectedDepartment"
           @change="currentPage = 1"
-          class="rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 px-2.5 text-xs text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white min-w-[120px] transition-all"
+          class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-2.5 px-3 text-xs text-gray-900 focus:border-[#2F3185] focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-all"
         >
           <option value="">Semua Departemen</option>
           <?php foreach ($departments ?? [] as $dept): ?>
@@ -86,107 +85,113 @@
             </option>
           <?php endforeach; ?>
         </select>
+      </div>
+      <div class="min-w-[130px]">
+        <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
         <select
           x-model="selectedStatus"
           @change="currentPage = 1"
-          class="rounded-lg border border-gray-200 bg-gray-50/50 py-1.5 px-2.5 text-xs text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white min-w-[120px] transition-all"
+          class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-2.5 px-3 text-xs text-gray-900 focus:border-[#2F3185] focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-all"
         >
           <option value="">Semua Status</option>
           <option value="A">Aktif</option>
           <option value="N">Non-Aktif</option>
         </select>
+      </div>
+      <div class="pt-5" x-show="searchQuery !== '' || selectedDepartment !== '' || selectedStatus !== ''" x-cloak>
         <button
-          x-show="searchQuery !== '' || selectedDepartment !== '' || selectedStatus !== ''"
-          x-cloak
           @click="resetFilters()"
-          class="rounded-lg border border-gray-200 py-1.5 px-2.5 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 transition-all"
+          class="px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
           title="Reset Filter"
         >
-          <i class="fa-solid fa-rotate-left text-[10px]"></i>
+          <i class="fa-solid fa-rotate-left text-[11px]"></i>
+          <span>Reset</span>
         </button>
       </div>
     </div>
+  </div>
     
-    <div class="overflow-x-auto">
-      <table class="w-full text-left text-xs text-gray-600 dark:text-gray-300">
-        <thead class="bg-gray-50/80 text-[11px] font-bold capitalize tracking-normal text-gray-500 dark:bg-gray-800/60 dark:text-gray-400 border-b border-gray-200/80 dark:border-gray-800">
-          <tr>
-            <th scope="col" class="px-5 py-3.5 w-12 text-center">No</th>
-            <th scope="col" class="px-5 py-3.5 w-36">Code</th>
-            <th scope="col" class="px-5 py-3.5">Cost Center Desc</th>
-            <th scope="col" class="px-5 py-3.5 w-28 text-center">Action</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-          <template x-for="(row, index) in paginatedCostCenters" :key="row.id || index">
-            <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
-              <td class="px-5 py-3.5 text-center font-medium text-gray-400" x-text="(currentPage - 1) * perPage + index + 1"></td>
-              
-              <td class="px-5 py-3.5 font-mono font-bold text-brand-600 dark:text-brand-400" x-text="row.cost_center_sap"></td>
-              
-              <td class="px-5 py-3.5 font-semibold text-gray-900 dark:text-white" x-text="row.cost_desc"></td>
+  <!-- TABLE SECTION -->
+  <div class="space-y-4">
+    <div>
+      <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Daftar Cost Center</h3>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Daftar seluruh unit cost center yang terdaftar pada sistem.</p>
+    </div>
 
-              <td class="px-5 py-3.5 text-center">
-                <div class="flex items-center justify-center gap-1.5">
-                  <button
-                    @click="openEditModal(row)"
-                    title="Edit Cost Center"
-                    class="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-brand-50 hover:text-brand-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-brand-900/30 dark:hover:text-brand-400 transition-colors"
-                  >
-                    <i class="fa-solid fa-pen-to-square text-xs"></i>
-                  </button>
+    <div class="rounded-2xl border border-gray-200/80 bg-white shadow-xs overflow-hidden dark:border-gray-800 dark:bg-gray-900">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs text-gray-600 dark:text-gray-300">
+          <thead class="bg-[#2F3185] text-white text-xs font-semibold border-b border-white/20">
+            <tr class="bg-[#2F3185] text-white font-semibold text-xs">
+              <th scope="col" class="px-5 py-3.5 w-12 text-center text-white font-semibold">No.</th>
+              <th scope="col" class="px-5 py-3.5 w-36 text-white font-semibold">Code</th>
+              <th scope="col" class="px-5 py-3.5 text-white font-semibold">Cost Center Desc</th>
+              <th scope="col" class="px-5 py-3.5 w-28 text-center text-white font-semibold">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
+            <template x-for="(row, index) in paginatedCostCenters" :key="row.id || index">
+              <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+                <td class="px-5 py-3.5 text-center font-medium text-gray-400" x-text="(currentPage - 1) * perPage + index + 1"></td>
+                
+                <td class="px-5 py-3.5 font-mono font-bold text-[#2F3185] dark:text-indigo-400" x-text="row.cost_center_sap"></td>
+                
+                <td class="px-5 py-3.5 font-medium text-gray-900 dark:text-white" x-text="row.cost_desc"></td>
 
-                  <button
-                    @click="toggleStatus(row.id, 'hapus')"
-                    title="Hapus Cost Center"
-                    class="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 transition-colors"
-                  >
-                    <i class="fa-solid fa-trash text-xs"></i>
-                  </button>
+                <td class="px-5 py-3.5 text-center">
+                  <div class="flex items-center justify-center gap-1.5">
+                    <button
+                      @click="openEditModal(row)"
+                      title="Edit Cost Center"
+                      class="h-7 w-7 rounded-lg inline-flex items-center justify-center bg-[#2F3185] hover:bg-[#25276d] text-white shadow-xs transition active:scale-[0.98]"
+                    >
+                      <i class="fa-solid fa-pen-to-square text-[11px]"></i>
+                    </button>
+
+                    <button
+                      @click="toggleStatus(row.id, 'hapus')"
+                      title="Hapus Cost Center"
+                      class="h-7 w-7 rounded-lg inline-flex items-center justify-center bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 transition-colors shadow-xs"
+                    >
+                      <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </template>
+
+            <tr x-show="filteredCostCenters.length === 0">
+              <td colspan="4" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500">
+                <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                  <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-[#2F3185]">
+                    <i class="fa-solid fa-sitemap text-xl"></i>
+                  </div>
+                  <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Tidak Ada Data Cost Center</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    Tidak ditemukan data yang sesuai dengan kriteria pencarian atau filter Anda.
+                  </p>
                 </div>
               </td>
             </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table Footer / Pagination -->
+      <div x-show="filteredCostCenters.length > 0" class="border-t border-gray-200 dark:border-gray-800 p-3.5 sm:p-4 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
+        <span>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200" x-text="((currentPage - 1) * perPage) + 1"></span> - <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(currentPage * perPage, filteredCostCenters.length)"></span> dari <span class="font-bold text-gray-800 dark:text-gray-200" x-text="filteredCostCenters.length"></span> Cost Center</span>
+        <div class="flex items-center gap-1">
+          <button type="button" @click="currentPage = Math.max(1, currentPage - 1)" :disabled="currentPage <= 1" class="h-8 px-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:pointer-events-none transition-colors text-xs font-semibold flex items-center gap-1"><i class="fa-solid fa-chevron-left text-[10px]"></i><span class="hidden sm:inline">Sebelumnya</span></button>
+          <template x-for="p in totalPages" :key="p">
+            <button type="button" @click="currentPage = p" :class="p === currentPage ? 'bg-[#2F3185] text-white font-bold shadow-xs' : 'border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'" class="h-8 min-w-[32px] px-2.5 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center" x-text="p"></button>
           </template>
-
-          <tr x-show="filteredCostCenters.length === 0">
-            <td colspan="4" class="px-5 py-12 text-center">
-              <div class="flex flex-col items-center justify-center gap-2">
-                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 text-gray-400 dark:bg-gray-800">
-                  <i class="fa-solid fa-folder-open text-xl"></i>
-                </div>
-                <p class="text-sm font-semibold text-gray-900 dark:text-white">Tidak Ada Data Cost Center</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 max-w-sm">
-                  Tidak ditemukan data yang sesuai dengan kriteria pencarian atau filter Anda.
-                </p>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Table Footer / Pagination -->
-    <?php
-      $pages   = max(1, (int) ceil(($total ?? 0) / max(1, $perPage ?? 10)));
-      $from    = ($total ?? 0) > 0 ? (($page - 1) * $perPage + 1) : 0;
-      $to      = min($page * $perPage, $total ?? 0);
-      $winStart = max(1, min($page - 2, max(1, $pages - 4)));
-      $winEnd   = min($pages, $winStart + 4);
-    ?>
-    <?php if (($total ?? 0) > 0): ?>
-    <div class="border-t border-gray-100 dark:border-gray-800 p-3.5 sm:p-4 bg-gray-50/50 dark:bg-gray-800/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
-      <span>Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200"><?= $from ?></span> - <span class="font-bold text-gray-800 dark:text-gray-200"><?= $to ?></span> dari <span class="font-bold text-gray-800 dark:text-gray-200"><?= number_format($total) ?></span> Cost Center</span>
-      <div class="flex items-center gap-1">
-        <a href="?page=<?= max(1, $page - 1) ?>" class="h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 <?= $page <= 1 ? 'opacity-40 pointer-events-none' : '' ?> transition-colors text-xs font-semibold flex items-center gap-1"><i class="fa-solid fa-chevron-left text-[10px]"></i><span class="hidden sm:inline">Sebelumnya</span></a>
-        <?php for ($p = $winStart; $p <= $winEnd; $p++): ?>
-          <a href="?page=<?= $p ?>" class="h-8 min-w-[32px] px-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center <?= $p === $page ? 'bg-brand-500 text-white font-bold shadow-xs' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' ?>"><?= $p ?></a>
-        <?php endfor; ?>
-        <a href="?page=<?= min($pages, $page + 1) ?>" class="h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 <?= $page >= $pages ? 'opacity-40 pointer-events-none' : '' ?> transition-colors text-xs font-semibold flex items-center gap-1"><span class="hidden sm:inline">Berikutnya</span><i class="fa-solid fa-chevron-right text-[10px]"></i></a>
+          <button type="button" @click="currentPage = Math.min(totalPages, currentPage + 1)" :disabled="currentPage >= totalPages" class="h-8 px-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:pointer-events-none transition-colors text-xs font-semibold flex items-center gap-1"><span class="hidden sm:inline">Berikutnya</span><i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+        </div>
       </div>
     </div>
-    <?php endif; ?>
   </div>
 
+  <template x-teleport="body">
   <div
     x-show="modalOpen"
     x-cloak
@@ -196,8 +201,8 @@
     x-transition:leave="transition ease-in duration-150"
     x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0"
-    class="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto"
-    style="z-index: 9999999; background-color: rgba(0,0,0,0.65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);"
+    class="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto z-[9999999]"
+    style="background-color: rgba(0,0,0,0.65); backdrop-filter: blur(4px);"
   >
     <div
       @click.away="modalOpen = false"
@@ -207,22 +212,19 @@
       x-transition:leave="transition ease-in duration-150"
       x-transition:leave-start="opacity-100 scale-100"
       x-transition:leave-end="opacity-0 scale-95"
-      class="w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 shadow-xl dark:border-gray-800 dark:bg-gray-900"
+      class="w-full max-w-lg rounded-2xl border border-gray-200/80 bg-white p-6 shadow-2xl dark:border-gray-800 dark:bg-gray-900"
     >
       <div class="flex items-center justify-between border-b border-gray-100 pb-4 dark:border-gray-800">
-        <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <i class="fa-solid text-brand-500" :class="isEdit ? 'fa-pen-to-square' : 'fa-plus'"></i>
-          <span x-text="isEdit ? 'Edit Cost Center' : 'Tambah Cost Center'"></span>
-        </h3>
-        <button @click="modalOpen = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
-          <i class="fa-solid fa-xmark text-lg"></i>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white" x-text="isEdit ? 'Edit Cost Center' : 'Tambah Cost Center'"></h3>
+        <button @click="modalOpen = false" class="h-8 w-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
 
       <form @submit.prevent="saveCostCenter()" class="mt-4 space-y-4">
         
         <div>
-          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
             Kode Cost Center <span class="text-rose-500">*</span>
           </label>
           <input
@@ -230,12 +232,12 @@
             x-model="form.cost_center_sap"
             required
             placeholder="Contoh: CC-101"
-            class="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3.5 py-2.5 text-xs text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-all font-mono"
+            class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5 text-xs text-gray-900 focus:border-[#2F3185] focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-all font-mono"
           />
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
             Nama Cost Center <span class="text-rose-500">*</span>
           </label>
           <input
@@ -243,53 +245,35 @@
             x-model="form.cost_desc"
             required
             placeholder="Contoh: Operational General & Admin"
-            class="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3.5 py-2.5 text-xs text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-all"
+            class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5 text-xs text-gray-900 focus:border-[#2F3185] focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-all"
           />
         </div>
 
-        <!-- <div>
-          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-            Departemen Terkait <span class="text-rose-500">*</span>
-          </label>
-          <select
-            x-model="form.department_id"
-            required
-            class="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3.5 py-2.5 text-xs text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-all"
-          >
-            <option value="">-- Pilih Departemen --</option>
-            <?php foreach ($departments ?? [] as $dept): ?>
-              <option value="<?= esc($dept['department_id'] ?? $dept['id'] ?? '') ?>">
-                <?= esc($dept['department_name'] ?? $dept['name'] ?? '') ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div> -->
-
         <div>
-          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+          <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
             Status
           </label>
           <select
             x-model="form.status"
-            class="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3.5 py-2.5 text-xs text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-brand-400 transition-all"
+            class="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5 text-xs text-gray-900 focus:border-[#2F3185] focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-[#2F3185]/20 dark:text-white transition-all"
           >
             <option value="A">Aktif</option>
             <option value="N">Non-Aktif</option>
           </select>
         </div>
 
-        <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-gray-100 dark:border-gray-800">
+        <div class="flex items-center justify-end gap-2 pt-4 border-t border-gray-100 dark:border-gray-800">
           <button
             type="button"
             @click="modalOpen = false"
-            class="rounded-xl border border-gray-200 px-4 py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 transition-all"
+            class="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-5 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
           >
             Batal
           </button>
           <button
             type="submit"
             :disabled="saving"
-            class="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-5 py-2.5 text-xs font-semibold text-white hover:bg-brand-600 focus:outline-hidden focus:ring-2 focus:ring-brand-500/20 disabled:opacity-50 transition-all cursor-pointer"
+            class="inline-flex items-center gap-2 rounded-xl bg-[#2F3185] hover:bg-[#25276d] px-5 py-2.5 text-xs font-semibold text-white shadow-xs focus:outline-hidden disabled:opacity-50 transition-all cursor-pointer active:scale-[0.98]"
           >
             <i class="fa-solid" :class="saving ? 'fa-spinner fa-spin' : 'fa-check'"></i>
             <span x-text="saving ? 'Menyimpan...' : 'Simpan Data'"></span>
@@ -299,6 +283,7 @@
       </form>
     </div>
   </div>
+  </template>
 
 </div>
 

@@ -38,14 +38,14 @@
   <template x-if="selectedDept">
     <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
       <table class="w-full text-left text-xs text-gray-600 dark:text-gray-300">
-        <thead class="bg-gray-50 uppercase text-gray-700 dark:bg-gray-800 dark:text-gray-300">
-          <tr>
-            <th class="px-3 py-3 border-b text-center w-12">ENTRY</th>
-            <th class="px-4 py-3 border-b">GENERAL ADMINISTRATIVE EXPENSE</th>
+        <thead class="bg-brand-500 text-white font-semibold text-xs border-b border-brand-600">
+          <tr class="bg-brand-500 text-white font-semibold">
+            <th class="px-3 py-3 border-r border-white/20 text-center w-12 text-white">Entry</th>
+            <th class="px-4 py-3 border-r border-white/20 text-white">Expense Account</th>
             <template x-for="m in actualMonths" :key="m">
-              <th class="px-3 py-3 border-b text-right" x-text="m"></th>
+              <th class="px-3 py-3 border-r border-white/20 text-right text-white" x-text="m"></th>
             </template>
-            <th class="px-4 py-3 border-b text-right font-bold">TOTAL</th>
+            <th class="px-4 py-3 text-right font-bold text-white bg-brand-600">Total</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">

@@ -1,53 +1,49 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div x-data="capexSummaryApp()" x-init="init()" class="space-y-6">
+<div x-data="capexSummaryApp()" x-init="init()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
         <div>
-            <div class="flex items-center gap-2">
-                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <i class="fas fa-chart-pie text-lg text-primary"></i>
-                </div>
-                <h2 class="text-title-md2 font-bold text-black dark:text-white">Summary Capex</h2>
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">Dashboard</a>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+                <span class="hover:text-[#2F3185]">CAPEX</span>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+                <span class="text-[#2F3185] font-bold">Summary</span>
             </div>
-            <nav class="mt-1">
-                <ol class="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400">
-                    <li><a class="hover:text-primary" href="<?= base_url('dashboard') ?>"><i class="fas fa-home mr-1"></i>Home</a></li>
-                    <li><i class="fas fa-chevron-right text-[10px]"></i></li>
-                    <li class="text-primary font-semibold">Summary Capex</li>
-                </ol>
-            </nav>
-        </div>
-        <div class="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-1 dark:bg-boxdark dark:text-gray-200">
-            <i class="fas fa-calendar-alt text-primary"></i>
-            <span>Budget Plan Year :</span>
-            <span class="text-red-500 font-bold"><?= esc($workingYear) ?></span>
+            <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                Summary CAPEX
+            </h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                Konsolidasi belanja modal (CAPEX), rincian akuisisi, dan depresiasi aset.
+            </p>
         </div>
     </div>
 
-    <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-        <div class="border-b border-stroke px-6 py-3 dark:border-strokedark">
-            <div class="flex items-center gap-4">
-                <button @click="activeSubTab = 'view_all'; fetchData()"
-                    :class="activeSubTab === 'view_all' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white'"
-                    class="border-b-2 px-2 py-2 text-sm font-medium transition-all duration-200">
-                    <i class="fas fa-list mr-1"></i>View Capex All
-                </button>
-                <button @click="activeSubTab = 'acquisition'; fetchData()"
-                    :class="activeSubTab === 'acquisition' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white'"
-                    class="border-b-2 px-2 py-2 text-sm font-medium transition-all duration-200">
-                    <i class="fas fa-arrow-up mr-1"></i>Summary Jenis Asset (Acquisition)
-                </button>
-                <button @click="activeSubTab = 'depreciation'; fetchData()"
-                    :class="activeSubTab === 'depreciation' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white'"
-                    class="border-b-2 px-2 py-2 text-sm font-medium transition-all duration-200">
-                    <i class="fas fa-arrow-down mr-1"></i>Summary Jenis Asset (Depreciation)
-                </button>
-            </div>
-        </div>
+    <!-- Sub Tabs Navigation -->
+    <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+        <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="CAPEX Summary Tabs">
+            <button type="button" @click="activeSubTab = 'view_all'; fetchData()"
+                :class="activeSubTab === 'view_all' ? 'active' : ''"
+                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>View CAPEX All</span>
+            </button>
+            <button type="button" @click="activeSubTab = 'acquisition'; fetchData()"
+                :class="activeSubTab === 'acquisition' ? 'active' : ''"
+                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Summary Jenis Asset (Acquisition)</span>
+            </button>
+            <button type="button" @click="activeSubTab = 'depreciation'; fetchData()"
+                :class="activeSubTab === 'depreciation' ? 'active' : ''"
+                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Summary Jenis Asset (Depreciation)</span>
+            </button>
+        </nav>
+    </div>
 
-        <div class="p-6">
+    <div>
+        <div class="space-y-6">
             <div x-show="activeSubTab === 'view_all'" x-cloak>
                 <?= $this->include('capex/partials/summary_tab_view_all') ?>
             </div>

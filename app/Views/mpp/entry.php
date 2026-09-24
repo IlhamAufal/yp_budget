@@ -1,54 +1,56 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div x-data="mppEntry()" x-init="init()" class="mx-auto max-w-7xl p-4 md:p-6 2xl:p-10">
+<div x-data="mppEntry()" x-init="init()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
-    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <!-- HEADER -->
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
         <div>
-            <h2 class="text-title-md2 font-bold text-black dark:text-white">
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">Dashboard</a>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+                <span class="hover:text-[#2F3185]">MPP</span>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+                <span class="text-[#2F3185] font-bold">Entry Form</span>
+            </div>
+            <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                 Man Power Planning
-            </h2>
-            <nav class="mt-1">
-                <ol class="flex items-center gap-2 text-sm font-medium text-gray-500">
-                    <li><a class="hover:text-primary" href="#">Home</a></li>
-                    <li>/</li>
-                    <li class="text-primary">Man Power Planning</li>
-                </ol>
-            </nav>
-        </div>
-        <div class="text-right">
-            <span class="text-sm font-semibold text-gray-600 dark:text-gray-400">Budget Plan Year : </span>
-            <span class="text-sm font-bold text-danger"><?= esc($workingYear) ?></span>
+            </h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                Perencanaan dan estimasi alokasi tenaga kerja departemen (Man Power Planning).
+            </p>
         </div>
     </div>
 
-    <div class="mb-6 border-b border-stroke dark:border-strokedark">
-        <ul class="-mb-px flex flex-wrap gap-6 text-sm font-medium">
-            <li>
-                <button @click="activeTab = 'entry'"
-                        :class="activeTab === 'entry' ? 'border-primary text-primary dark:border-primary dark:text-primary' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400'"
-                        class="inline-flex items-center gap-2 border-b-2 py-4 px-1 transition-all duration-200">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    7.1 Entry MPP
-                </button>
-            </li>
-            <li>
-                <button @click="activeTab = 'view'"
-                        :class="activeTab === 'view' ? 'border-primary text-primary dark:border-primary dark:text-primary' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400'"
-                        class="inline-flex items-center gap-2 border-b-2 py-4 px-1 transition-all duration-200">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                    7.3 View MPP Data
-                </button>
-            </li>
-        </ul>
+    <!-- TAB NAV -->
+    <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+        <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="MPP Tabs">
+            <button
+                type="button"
+                @click="activeTab = 'entry'"
+                :class="activeTab === 'entry' ? 'active' : ''"
+                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Entry MPP</span>
+            </button>
+            <button
+                type="button"
+                @click="activeTab = 'view'"
+                :class="activeTab === 'view' ? 'active' : ''"
+                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>View MPP Data</span>
+            </button>
+        </nav>
     </div>
 
-    <div x-show="activeTab === 'entry'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform translate-y-2" x-transition:enter-end="opacity-100 transform translate-y-0">
-        <?= $this->include('mpp/partials/entry_tab_mpp') ?>
-    </div>
+    <!-- TAB CONTENT -->
+    <div class="space-y-6">
+        <div x-show="activeTab === 'entry'" x-cloak>
+            <?= $this->include('mpp/partials/entry_tab_mpp') ?>
+        </div>
 
-    <div x-show="activeTab === 'view'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform translate-y-2" x-transition:enter-end="opacity-100 transform translate-y-0">
-        <?= $this->include('mpp/partials/entry_tab_view_data') ?>
+        <div x-show="activeTab === 'view'" x-cloak>
+            <?= $this->include('mpp/partials/entry_tab_view_data') ?>
+        </div>
     </div>
 
     <?= $this->include('mpp/partials/modal_mpp_form') ?>

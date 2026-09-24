@@ -1,0 +1,12 @@
+{
+  "name": "yp-budget-new",
+  "version": "1.0.0",
+  "private": true,
+  "description": "YP Budget System - CodeIgniter 4 + TailAdmin (live reload dev server)",
+  "scripts": {
+    "dev": "browser-sync start --proxy \"http://localhost/yp_budget_new\" --files \"app/**/*.php, public/assets/css/*.css, public/assets/js/*.js\""
+  },
+  "devDependencies": {
+    "browser-sync": "^3.0.4"
+  }
+}

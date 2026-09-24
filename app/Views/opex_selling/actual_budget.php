@@ -1,36 +1,58 @@
 <?= $this->extend('layouts/main') ?>
 <?= $this->section('content') ?>
-<div x-data="opexSellingActualApp()" x-init="init()" class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
-    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+<div x-data="opexSellingActualApp()" x-init="init()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
+
+    <!-- HEADER -->
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
         <div>
-            <h2 class="text-title-md2 font-bold text-black dark:text-white">Actual Data</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400">4.1 OPEX - Selling</p>
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">Dashboard</a>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+                <span class="hover:text-[#2F3185]">OPEX Selling</span>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+                <span class="text-[#2F3185] font-bold">Actual Data</span>
+            </div>
+            <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                Actual Data OPEX Selling
+            </h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                Monitoring dan perbandingan data realisasi aktual OPEX Selling.
+            </p>
         </div>
-        <nav>
-            <ol class="flex items-center gap-2 text-sm font-medium">
-                <li class="text-gray-600 dark:text-gray-400">Budget Plan Year : <span class="font-bold text-danger"><?= esc($workingYear ?? '') ?></span></li>
-                <li class="text-gray-400">|</li>
-                <li><a class="text-gray-600 hover:text-primary dark:text-gray-400" href="<?= base_url() ?>">Home</a></li>
-                <li class="text-gray-400">/</li>
-                <li class="text-primary">Actual Data</li>
-            </ol>
+    </div>
+
+    <!-- TAB NAV -->
+    <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+        <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="Actual OPEX Selling Tabs">
+            <button
+                type="button"
+                @click="activeTab = 'actual'"
+                :class="activeTab === 'actual' ? 'active' : ''"
+                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Actual Data</span>
+            </button>
+            <button
+                type="button"
+                @click="activeTab = 'download'"
+                :class="activeTab === 'download' ? 'active' : ''"
+                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Download Template</span>
+            </button>
+            <button
+                type="button"
+                @click="activeTab = 'upload'"
+                :class="activeTab === 'upload' ? 'active' : ''"
+                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Upload Data</span>
+            </button>
         </nav>
     </div>
 
-    <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-        <div class="border-b border-stroke px-6 dark:border-strokedark">
-            <div class="flex gap-8">
-                <button @click="activeTab = 'actual'" :class="activeTab === 'actual' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-600 hover:text-primary dark:text-gray-400'" class="border-b-2 py-4 text-sm font-medium transition-colors focus:outline-none">Actual Data</button>
-                <button @click="activeTab = 'download'" :class="activeTab === 'download' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-600 hover:text-primary dark:text-gray-400'" class="border-b-2 py-4 text-sm font-medium transition-colors focus:outline-none">Download Template</button>
-                <button @click="activeTab = 'upload'" :class="activeTab === 'upload' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-600 hover:text-primary dark:text-gray-400'" class="border-b-2 py-4 text-sm font-medium transition-colors focus:outline-none">Upload Data</button>
-            </div>
-        </div>
-
-        <div class="p-6">
-            <div x-show="activeTab === 'actual'" x-cloak><?= $this->include('opex_selling/partials/actual_tab_data') ?></div>
-            <div x-show="activeTab === 'download'" x-cloak><?= $this->include('opex_selling/partials/actual_tab_download') ?></div>
-            <div x-show="activeTab === 'upload'" x-cloak><?= $this->include('opex_selling/partials/actual_tab_upload') ?></div>
-        </div>
+    <!-- TAB CONTENT -->
+    <div class="space-y-6">
+        <div x-show="activeTab === 'actual'" x-cloak><?= $this->include('opex_selling/partials/actual_tab_data') ?></div>
+        <div x-show="activeTab === 'download'" x-cloak><?= $this->include('opex_selling/partials/actual_tab_download') ?></div>
+        <div x-show="activeTab === 'upload'" x-cloak><?= $this->include('opex_selling/partials/actual_tab_upload') ?></div>
     </div>
 
     <?= $this->include('opex_selling/partials/actual_modal_upload') ?>

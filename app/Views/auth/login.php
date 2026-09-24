@@ -9,8 +9,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   
   <link href="<?= base_url('assets/css/style.css') ?>" rel="stylesheet">
-  
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
   <div class="flex min-h-screen items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -65,7 +63,7 @@
             </div>
           </div>
 
-          <div x-data="{ showPassword: false }">
+          <div>
             <label
               for="password"
               class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -81,7 +79,7 @@
               </span>
 
               <input
-                :type="showPassword ? 'text' : 'password'"
+                type="password"
                 id="password"
                 name="password"
                 placeholder="Masukkan password"
@@ -91,15 +89,11 @@
 
               <button
                 type="button"
-                @click="showPassword = !showPassword"
+                id="toggle-password"
                 class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                 tabindex="-1"
               >
-                <i
-                  :class="showPassword
-                    ? 'fa-solid fa-eye-slash'
-                    : 'fa-solid fa-eye'"
-                ></i>
+                <i id="toggle-password-icon" class="fa-solid fa-eye"></i>
               </button>
             </div>
           </div>
@@ -119,10 +113,10 @@
 
           <button
             type="submit"
-            class="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500/50 active:scale-[0.99] dark:bg-brand-600 dark:hover:bg-brand-500"
+            class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2F3185] hover:bg-[#25276d] px-4 py-3 text-sm font-semibold text-white shadow-md shadow-[#2F3185]/20 transition-all focus:outline-none focus:ring-2 focus:ring-[#2F3185]/40 active:scale-[0.99] cursor-pointer"
           >
             <i class="fa-solid fa-right-to-bracket"></i>
-            Masuk
+            <span>Masuk</span>
           </button>
         </form>
 
@@ -145,5 +139,20 @@
 
     </div>
   </div>
+
+  <script>
+    (function () {
+      var btn = document.getElementById('toggle-password');
+      var input = document.getElementById('password');
+      var icon = document.getElementById('toggle-password-icon');
+      if (!btn || !input || !icon) return;
+
+      btn.addEventListener('click', function () {
+        var show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        icon.className = show ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+      });
+    })();
+  </script>
 </body>
 </html>

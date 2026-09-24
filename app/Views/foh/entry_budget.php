@@ -2,104 +2,61 @@
 
 <?= $this->section('content') ?>
 
-<div x-data="fohEntryPage()" x-init="init()" class="p-4 md:p-8 mx-auto max-w-(--breakpoint-2xl) space-y-6 md:space-y-8">
+<div x-data="fohEntryPage()" x-init="init()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
   <!-- HEADER -->
-  <div>
-    <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-3">
-      <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-      <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-      <span>FOH</span>
-      <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-      <span class="text-brand-500 font-bold">Entry Budget</span>
+  <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
+    <div>
+      <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+        <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">Dashboard</a>
+        <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+        <span class="hover:text-[#2F3185]">FOH</span>
+        <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+        <span class="text-[#2F3185] font-bold">Entry Budget</span>
+      </div>
+      <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+        FOH Entry Budget
+      </h1>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+        Pengisian dan peninjauan anggaran Factory Overhead per Cost Center.
+      </p>
     </div>
-    <h1 class="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-4">
-      <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-400">
-        <i class="fa-solid fa-pen-to-square text-xl"></i>
-      </span>
-      FOH Entry Budget
-    </h1>
-    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-      Pengisian dan peninjauan anggaran Factory Overhead per Cost Center — Tahun Anggaran <span class="font-bold text-brand-500"><?= esc($workingYear) ?></span>
-    </p>
   </div>
 
-  <!-- MAIN CARD -->
-  <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs overflow-visible">
+  <!-- TAB NAV -->
+  <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+    <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="FOH Entry Tabs">
+      <button
+        type="button"
+        @click="activeTab = 'entry'"
+        :class="activeTab === 'entry' ? 'active' : ''"
+        class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+        <span>Entry Budget</span>
+      </button>
+      <button
+        type="button"
+        @click="activeTab = 'view'"
+        :class="activeTab === 'view' ? 'active' : ''"
+        class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+        <span>View Data</span>
+      </button>
+    </nav>
+  </div>
 
-    <!-- TAB NAV -->
-    <div class="border-b border-gray-200/80 dark:border-gray-800 px-6 pt-4">
-      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-        <button
-          @click="activeTab = 'entry'"
-          :class="activeTab === 'entry' ? 'border-brand-600 text-brand-600 dark:border-brand-400 dark:text-brand-400 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 mr-5'"
-          class="flex items-center gap-2 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors">
-          <i class="fa-solid text-xs"></i>
-          Entry Budget
-        </button>
-        <button
-          @click="activeTab = 'view'"
-          :class="activeTab === 'view' ? 'border-brand-600 text-brand-600 dark:border-brand-400 dark:text-brand-400 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400'"
-          class="flex items-center gap-2 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors">
-          <i class="fa-solid text-xs"></i>
-           View Data
-        </button>
-      </nav>
-    </div>
-
-    <!-- TAB CONTENT -->
-    <div class="p-6">
+  <!-- TAB CONTENT -->
+  <div>
 
       <!-- TAB: ENTRY BUDGET -->
       <div x-show="activeTab === 'entry'" x-cloak class="space-y-6">
 
-        <!-- Workflow Approval -->
-        <!-- <div class="rounded-xl border p-4 text-sm"
-             :class="workflowBadge.bg"
-             x-show="selectedDept">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-              <i :class="workflowBadge.icon" class="shrink-0"></i>
-              <div>
-                <span class="font-bold" x-text="workflowStatus ? 'Status: ' + workflowBadge.label : 'Workflow Approval'"></span>
-                <p class="text-xs mt-0.5" x-text="workflow && workflow.notes ? workflow.notes : 'Status budget FOH untuk Cost Center terpilih.'"></p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <button
-                x-show="workflowStatus !== 'W' && workflowStatus !== 'A'"
-                @click="runWorkflow('submit')"
-                type="button"
-                :disabled="workflowBusy"
-                class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 shadow-xs disabled:opacity-50">
-                <i class="fa-solid fa-paper-plane"></i> Submit
-              </button>
-              <button
-                x-show="workflowStatus === 'W'"
-                @click="runWorkflow('approve')"
-                type="button" :disabled="workflowBusy"
-                class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 shadow-xs disabled:opacity-50">
-                <i class="fa-solid fa-check"></i> Approve
-              </button>
-              <button
-                x-show="workflowStatus === 'W'"
-                @click="runWorkflow('reject')"
-                type="button" :disabled="workflowBusy"
-                class="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-700 shadow-xs disabled:opacity-50">
-                <i class="fa-solid fa-xmark"></i> Reject
-              </button>
-            </div>
-          </div>
-        </div> -->
-
         <!-- Info Periode Submit -->
-        <div class="flex items-center justify-between rounded-xl border p-4 text-sm"
-             :class="configPeriod ? 'border-blue-200 bg-blue-50/70 text-blue-800 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-300' : 'border-gray-200 bg-gray-50 text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400'">
+        <div class="flex items-center justify-between rounded-2xl border p-4 text-xs font-medium shadow-xs"
+             :class="configPeriod ? 'border-blue-200 bg-blue-50/70 text-blue-800 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-300' : 'border-gray-200 bg-gray-50/70 text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400'">
           <div class="flex items-center gap-3">
-            <i class="fa-solid fa-circle-info text-blue-600 shrink-0" x-show="configPeriod"></i>
-            <i class="fa-solid fa-clock text-gray-400 shrink-0" x-show="!configPeriod"></i>
+            <i class="fa-solid fa-circle-info text-blue-600 text-sm shrink-0" x-show="configPeriod"></i>
+            <i class="fa-solid fa-clock text-gray-400 text-sm shrink-0" x-show="!configPeriod"></i>
             <div>
-              <span class="font-bold" x-text="configPeriod ? 'Information !' : 'Periode Submit'"></span>
+              <span class="font-bold" x-text="configPeriod ? 'Information:' : 'Periode Submit'"></span>
               <p class="text-xs mt-0.5" x-show="configPeriod && configPeriod.start_date">
                 Periode submit data FOH dimulai pada <strong x-text="formatDate(configPeriod.start_date) + ' s/d ' + formatDate(configPeriod.end_date)"></strong>
               </p>
@@ -109,25 +66,25 @@
         </div>
 
         <!-- Filter: Cost Center -->
-        <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs p-5">
+        <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs p-6">
           <div class="flex flex-wrap items-end gap-4">
-            <div class="flex-1 min-w-[260px]">
-              <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 mb-2">Cost Center (FOH)</label>
-              <div class="relative" x-data="{ openCC: false, searchCC: '' }" style="z-index: 40;">
-                <button @click="openCC = !openCC" type="button" class="w-full flex items-center justify-between rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-colors">
+            <div class="w-full max-w-xl">
+              <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Cost Center (FOH)</label>
+              <div class="relative" x-data="{ openCC: false, searchCC: '' }">
+                <button @click="openCC = !openCC" type="button" class="w-full flex items-center justify-between rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3.5 py-2.5 text-left text-xs font-medium text-gray-900 dark:text-white hover:bg-white dark:hover:bg-gray-900 focus:border-[#2F3185] focus:ring-2 focus:ring-[#2F3185]/20 outline-none transition-colors">
                   <span x-text="selectedDept ? (selectedDept === 'ALL' ? '[ALL] Semua Cost Center' : costCenters.find(c => c.cost_center == selectedDept)?.cc_code + ' — ' + costCenters.find(c => c.cost_center == selectedDept)?.cost_desc) : '— Pilih Cost Center —'"></span>
-                  <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+                  <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
                 </button>
-                <div x-show="openCC" @click.outside="openCC = false" x-transition class="absolute z-30 mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg">
-                  <div class="p-2">
-                    <input type="text" x-model="searchCC" placeholder="Cari Cost Center..." class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:text-white">
+                <div x-show="openCC" @click.outside="openCC = false" x-transition class="absolute z-30 mt-1 w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg overflow-hidden">
+                  <div class="p-2 border-b border-gray-100 dark:border-gray-700">
+                    <input type="text" x-model="searchCC" placeholder="Cari Cost Center..." class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700 px-3.5 py-2 text-xs focus:border-[#2F3185] focus:outline-none dark:text-white">
                   </div>
-                  <ul class="max-h-60 overflow-auto py-1 text-sm text-gray-700 dark:text-gray-200">
-                    <li @click="selectedDept = ''; openCC = false; loadHeaderData()" class="cursor-pointer px-4 py-2.5 hover:bg-brand-50 dark:hover:bg-gray-700 hover:text-brand-600 transition-colors">
+                  <ul class="max-h-60 overflow-auto py-1 text-xs text-gray-700 dark:text-gray-200 p-1">
+                    <li @click="selectedDept = ''; openCC = false; loadHeaderData()" class="cursor-pointer px-3.5 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-[#2F3185] transition-colors">
                       <span class="font-semibold">— Semua Cost Center —</span>
                     </li>
                     <template x-for="cc in costCenters" :key="cc.cost_center">
-                      <li @click="selectedDept = cc.cost_center; openCC = false; loadHeaderData()" class="cursor-pointer px-4 py-2.5 hover:bg-brand-50 dark:hover:bg-gray-700 hover:text-brand-600 transition-colors">
+                      <li @click="selectedDept = cc.cost_center; openCC = false; loadHeaderData()" class="cursor-pointer px-3.5 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-[#2F3185] transition-colors">
                         <span x-text="cc.cc_code + ' — ' + cc.cost_desc"></span>
                       </li>
                     </template>
@@ -140,90 +97,114 @@
 
         <!-- TABLE: Header Accounts -->
         <template x-if="selectedDept">
-  <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs">
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs border-collapse min-w-[1000px]">
-                <thead>
-                  <tr class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200/80 dark:border-gray-800 text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    <th class="py-4 px-4 text-center w-12">ENTRY</th>
-                    <th class="py-4 px-4">GENERAL ADMINISTRATIVE EXPENSE</th>
-                    <template x-for="m in actualMonths" :key="m">
-                      <th class="py-4 px-2 text-right" x-text="m"></th>
-                    </template>
-                    <th class="py-4 px-4 text-right bg-gray-100/70 dark:bg-gray-800">TOTAL</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                  <template x-if="headerRows.length === 0 && !loading">
-                    <tr>
-                      <td :colspan="actualMonths.length + 3" class="py-16 text-center text-gray-400 dark:text-gray-500">
-                        <i class="fa-solid fa-file-circle-question text-2xl mb-3"></i>
-                        <p class="font-semibold text-gray-600 dark:text-gray-300">Belum ada data header account</p>
-                        <p class="text-sm">Data akan muncul setelah upload actual atau jika ada data di database.</p>
-                      </td>
+          <div class="space-y-4">
+            <!-- Table Section Label (Separated from table container) -->
+            <div>
+              <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Daftar Akun Header FOH (Actual)</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Ringkasan actual biaya per akun sebelum pengisian rincian budget.</p>
+            </div>
+
+            <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs overflow-hidden">
+              <div class="overflow-x-auto scrollbar-thin">
+                <table class="w-full text-left text-xs border-collapse min-w-[1000px] whitespace-nowrap">
+                  <thead class="bg-[#2F3185] text-white font-semibold text-xs border-b border-white/20">
+                    <tr class="bg-[#2F3185] text-white font-semibold">
+                      <th rowspan="2" class="border-r border-white/20 py-3 px-4 text-center w-20 text-white font-semibold">Entry</th>
+                      <th rowspan="2" class="border-r border-white/20 py-3 px-4 min-w-[260px] text-white font-semibold">Expense Account</th>
+                      <th colspan="8" class="border-r border-white/20 py-2 px-2 text-center text-white bg-[#25276d] font-semibold">Actual</th>
+                      <th rowspan="2" class="py-3 px-4 text-right text-white bg-[#25276d] font-bold">Total</th>
                     </tr>
-                  </template>
-                  <template x-if="loading">
-                    <tr>
-                      <td :colspan="actualMonths.length + 3" class="py-16 text-center text-gray-400 dark:text-gray-500">
-                        <i class="fa-solid fa-spinner fa-spin text-2xl mb-3"></i>
-                        <p class="font-semibold text-gray-600 dark:text-gray-300">Memuat data...</p>
-                      </td>
-                    </tr>
-                  </template>
-                  <template x-for="(row, idx) in paginatedRows" :key="(currentPage - 1) * perPage + idx">
-                    <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
-                      <td class="py-3 px-4 text-center">
-                        <a :href="`<?= base_url('foh/entry-budget-detail') ?>?header=${row.main_account}&dept=${selectedDept}&idx=${idx+1}`"
-                           class="inline-flex items-center justify-center rounded-lg bg-blue-600 p-1.5 text-white shadow hover:bg-blue-700 active:scale-[0.98] transition-all">
-                          <i class="fa-solid fa-pen-to-square text-[11px]"></i>
-                        </a>
-                      </td>
-                      <td class="py-3 px-4 font-semibold text-gray-900 dark:text-white" x-text="row.coa_name || row.acct_code"></td>
-                      <template x-for="(m, mIdx) in ['jan','feb','mar','apr','may','jun','jul','aug']" :key="m">
-                        <td class="py-3 px-2 text-right font-mono" x-text="formatNumber(row[m] || 0)"></td>
+                    <tr class="bg-[#25276d] text-white text-xs font-semibold border-b border-white/20">
+                      <template x-for="m in actualMonths" :key="m">
+                        <th class="border-r border-white/20 py-2 px-2.5 text-right text-white" x-text="m"></th>
                       </template>
-                      <td class="py-3 px-4 text-right font-mono font-bold text-brand-500 dark:text-brand-400 bg-gray-50/70 dark:bg-gray-800/50" x-text="formatNumber(row.total_actual || 0)"></td>
                     </tr>
-                  </template>
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody class="divide-y divide-gray-200 dark:divide-gray-800 font-mono text-xs">
+                    <template x-if="headerRows.length === 0 && !loading">
+                      <tr>
+                        <td :colspan="actualMonths.length + 3" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500 font-sans">
+                          <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                              <i class="fa-solid fa-industry text-xl"></i>
+                            </div>
+                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Belum Ada Data Header Account</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Data akan muncul setelah upload actual atau jika ada data di database.</p>
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
+                    <template x-if="loading">
+                      <tr>
+                        <td :colspan="actualMonths.length + 3" class="py-12 px-4 text-center text-gray-400 dark:text-gray-500 font-sans">
+                          <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-[#2F3185]">
+                              <i class="fa-solid fa-spinner fa-spin text-xl"></i>
+                            </div>
+                            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Memuat Data...</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Mohon tunggu sebentar, sistem sedang memproses data header FOH.</p>
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
+                    <template x-for="(row, idx) in paginatedRows" :key="(currentPage - 1) * perPage + idx">
+                      <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+                        <td class="border-r border-gray-200 dark:border-gray-800 py-2.5 px-4 text-center font-sans">
+                          <a :href="`<?= base_url('foh/entry-budget-detail') ?>?header=${row.main_account}&dept=${selectedDept}&idx=${idx+1}`"
+                             class="h-7 w-7 rounded-lg inline-flex items-center justify-center bg-[#2F3185] hover:bg-[#25276d] text-white shadow-xs active:scale-[0.98] transition-all">
+                            <i class="fa-solid fa-pen-to-square text-[11px]"></i>
+                          </a>
+                        </td>
+                        <td class="border-r border-gray-200 dark:border-gray-800 py-2.5 px-4 font-sans font-medium text-gray-900 dark:text-white" x-text="row.coa_name || row.acct_code"></td>
+                        <template x-for="(m, mIdx) in ['jan','feb','mar','apr','may','jun','jul','aug']" :key="m">
+                          <td class="border-r border-gray-200 dark:border-gray-800 py-2.5 px-2.5 text-right" x-text="formatNumber(row[m] || 0)"></td>
+                        </template>
+                        <td class="py-2.5 px-4 text-right font-bold text-gray-900 dark:text-white bg-gray-50/70 dark:bg-gray-800/50" x-text="formatNumber(row.total_actual || 0)"></td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Pagination Footer -->
+              <template x-if="selectedDept && headerRows.length > perPage">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 dark:border-gray-800 p-3.5 sm:p-4 bg-gray-50/50 dark:bg-gray-800/30 text-xs text-gray-500 dark:text-gray-400">
+                  <span>
+                    Menampilkan <span class="font-bold text-gray-800 dark:text-gray-200" x-text="((currentPage - 1) * perPage) + 1"></span> - <span class="font-bold text-gray-800 dark:text-gray-200" x-text="Math.min(currentPage * perPage, totalRows)"></span> dari <span class="font-bold text-gray-800 dark:text-gray-200" x-text="totalRows"></span> data
+                  </span>
+                  <div class="flex items-center gap-1">
+                    <button @click="goPage(currentPage - 1)" :disabled="currentPage <= 1"
+                      class="h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                      <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                    </button>
+                    <template x-for="(p, pi) in pageNumbers()" :key="'pg_'+pi">
+                      <button x-show="p !== '...'" @click="goPage(p)"
+                        :class="currentPage === p ? 'bg-[#2F3185] text-white font-bold shadow-xs' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
+                        class="h-8 min-w-[32px] px-2 rounded-lg text-xs font-semibold transition flex items-center justify-center"
+                        x-text="p"></button>
+                      <span x-show="p === '...'" class="px-1 text-gray-400">&hellip;</span>
+                    </template>
+                    <button @click="goPage(currentPage + 1)" :disabled="currentPage >= totalPages"
+                      class="h-8 px-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                      <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                  </div>
+                </div>
+              </template>
             </div>
           </div>
-
-          <!-- Pagination Footer -->
-          <template x-if="selectedDept && headerRows.length > perPage">
-            <div class="flex items-center justify-between border-t border-gray-200/80 dark:border-gray-800 px-6 py-4">
-              <span class="text-xs text-gray-500 dark:text-gray-400">
-                Menampilkan <span x-text="((currentPage - 1) * perPage) + 1"></span> - <span x-text="Math.min(currentPage * perPage, totalRows)"></span> dari <span x-text="totalRows"></span> data
-              </span>
-              <div class="flex items-center gap-1">
-                <button @click="goPage(currentPage - 1)" :disabled="currentPage <= 1"
-                  class="inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                  <i class="fa-solid fa-chevron-left text-[10px]"></i>
-                </button>
-                <template x-for="(p, pi) in pageNumbers()" :key="'pg_'+pi">
-                  <button x-show="p !== '...'" @click="goPage(p)"
-                    :class="currentPage === p ? 'bg-brand-600 text-white border-brand-600 dark:bg-brand-500 dark:border-brand-500' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
-                    class="inline-flex items-center justify-center rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors min-w-[32px]"
-                    x-text="p"></button>
-                  <span x-show="p === '...'" class="px-1.5 py-1.5 text-xs text-gray-400">&hellip;</span>
-                </template>
-                <button @click="goPage(currentPage + 1)" :disabled="currentPage >= totalPages"
-                  class="inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                  <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                </button>
-              </div>
-            </div>
-          </template>
-
         </template>
 
         <!-- Empty state -->
         <template x-if="!selectedDept">
-          <div class="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed border-gray-200 rounded-2xl dark:border-gray-800">
-            <i class="fa-solid fa-building text-4xl text-gray-300 dark:text-gray-600 mb-4"></i>
-            <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">Silakan pilih Cost Center untuk menampilkan data entry FOH.</p>
+          <div class="rounded-2xl border border-gray-200/80 bg-white p-12 dark:border-gray-800 dark:bg-gray-900 text-center shadow-xs">
+            <div class="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
+              <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                <i class="fa-solid fa-building text-xl"></i>
+              </div>
+              <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Pilih Cost Center Terlebih Dahulu</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Silakan pilih Cost Center pada dropdown di atas untuk menampilkan data entry FOH.</p>
+            </div>
           </div>
         </template>
 

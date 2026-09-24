@@ -1,50 +1,60 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div x-data="salesMainContainer()" x-init="initData()" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+<div x-data="salesMainContainer()" x-init="initData()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">2. Sales</h1>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Pusat simulasi, alokasi target volume & revenue, serta penyesuaian diskon sales.</p>
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">Dashboard</a>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+                <span class="text-[#2F3185] font-bold">Sales Overview</span>
+            </div>
+            <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                Sales Budget Overview
+            </h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                Pusat simulasi, alokasi target volume & revenue, serta penyesuaian diskon sales.
+            </p>
         </div>
-        <nav class="flex text-xs font-medium text-gray-500 dark:text-gray-400" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-2">
-                <li><a href="<?= base_url('dashboard') ?>" class="hover:text-primary">Home</a></li>
-                <li>/</li>
-                <li class="text-gray-700 dark:text-gray-200 font-semibold">2. Sales</li>
-            </ol>
+    </div>
+
+    <!-- Sub Tabs Navigation -->
+    <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+        <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="Sales Overview Tabs">
+            <button type="button" @click="activeTab = 'summary'" :class="activeTab === 'summary' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Summary</span>
+            </button>
+            <button type="button" @click="activeTab = 'domestic'" :class="activeTab === 'domestic' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Domestic</span>
+            </button>
+            <button type="button" @click="activeTab = 'intl_valas'" :class="activeTab === 'intl_valas' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>INTL (Valas)</span>
+            </button>
+            <button type="button" @click="activeTab = 'intl_idr'" :class="activeTab === 'intl_idr' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>INTL (IDR)</span>
+            </button>
+            <button type="button" @click="activeTab = 'delivery_claim'" :class="activeTab === 'delivery_claim' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Delivery & Claim</span>
+            </button>
+            <button type="button" @click="activeTab = 'key_product'" :class="activeTab === 'key_product' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Key Product</span>
+            </button>
+            <button type="button" @click="activeTab = 'reclass'" :class="activeTab === 'reclass' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Reclass A&P</span>
+            </button>
         </nav>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-        <div class="border-b border-gray-200 dark:border-gray-700 overflow-x-auto scrollbar-thin">
-            <nav class="flex space-x-1 p-2 min-w-max" aria-label="Tabs">
-                <button @click="activeTab = 'summary'" :class="activeTab === 'summary' ? 'bg-primary/10 text-primary border-primary font-bold' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'" class="px-4 py-2 text-xs rounded-lg border-b-2 border-transparent transition-all">Summary</button>
-                <button @click="activeTab = 'domestic'" :class="activeTab === 'domestic' ? 'bg-primary/10 text-primary border-primary font-bold' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'" class="px-4 py-2 text-xs rounded-lg border-b-2 border-transparent transition-all">Domestic</button>
-                <button @click="activeTab = 'intl_valas'" :class="activeTab === 'intl_valas' ? 'bg-primary/10 text-primary border-primary font-bold' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'" class="px-4 py-2 text-xs rounded-lg border-b-2 border-transparent transition-all">INTL (VALAS)</button>
-                <button @click="activeTab = 'intl_idr'" :class="activeTab === 'intl_idr' ? 'bg-primary/10 text-primary border-primary font-bold' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'" class="px-4 py-2 text-xs rounded-lg border-b-2 border-transparent transition-all">INTL (IDR)</button>
-                <button @click="activeTab = 'delivery_claim'" :class="activeTab === 'delivery_claim' ? 'bg-primary/10 text-primary border-primary font-bold' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'" class="px-4 py-2 text-xs rounded-lg border-b-2 border-transparent transition-all">Delivery Exp & Customer Claim</button>
-                <button @click="activeTab = 'key_product'" :class="activeTab === 'key_product' ? 'bg-primary/10 text-primary border-primary font-bold' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'" class="px-4 py-2 text-xs rounded-lg border-b-2 border-transparent transition-all">Report Key Product</button>
-                <button @click="activeTab = 'reclass'" :class="activeTab === 'reclass' ? 'bg-primary/10 text-primary border-primary font-bold' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'" class="px-4 py-2 text-xs rounded-lg border-b-2 border-transparent transition-all">Reclass A&P</button>
-            </nav>
-        </div>
-    </div>
-
-    <?php /* COMMENTED OUT: Key Product & Channel form — currently GET only
-    <div x-show="activeTab === 'domestic' || activeTab === 'intl_valas'" class="bg-sky-50/70 dark:bg-gray-800 p-5 rounded-xl border border-sky-100 dark:border-gray-700 shadow-sm space-y-4">
-        ... Key Product grid 4x2 + Channel grid 3x2 + Process button ...
-    </div>
-    */ ?>
-
-    <div>
-        <div x-show="activeTab === 'domestic'"><?= $this->include('sales/partials/summary/tab_domestic') ?></div>
-        <div x-show="activeTab === 'intl_valas'"><?= $this->include('sales/partials/summary/tab_intl_valas') ?></div>
-        <div x-show="activeTab === 'intl_idr'"><?= $this->include('sales/partials/summary/tab_intl_idr') ?></div>
-        <div x-show="activeTab === 'delivery_claim'"><?= $this->include('sales/partials/summary/tab_delivery_claim') ?></div>
-        <div x-show="activeTab === 'key_product'"><?= $this->include('sales/partials/summary/tab_key_product') ?></div>
-        <div x-show="activeTab === 'summary'"><?= $this->include('sales/partials/summary/tab_summary') ?></div>
-        <div x-show="activeTab === 'reclass'"><?= $this->include('sales/partials/summary/tab_reclass') ?></div>
+    <!-- Tab Content -->
+    <div class="space-y-6">
+        <div x-show="activeTab === 'summary'" x-cloak><?= $this->include('sales/partials/summary/tab_summary') ?></div>
+        <div x-show="activeTab === 'domestic'" x-cloak><?= $this->include('sales/partials/summary/tab_domestic') ?></div>
+        <div x-show="activeTab === 'intl_valas'" x-cloak><?= $this->include('sales/partials/summary/tab_intl_valas') ?></div>
+        <div x-show="activeTab === 'intl_idr'" x-cloak><?= $this->include('sales/partials/summary/tab_intl_idr') ?></div>
+        <div x-show="activeTab === 'delivery_claim'" x-cloak><?= $this->include('sales/partials/summary/tab_delivery_claim') ?></div>
+        <div x-show="activeTab === 'key_product'" x-cloak><?= $this->include('sales/partials/summary/tab_key_product') ?></div>
+        <div x-show="activeTab === 'reclass'" x-cloak><?= $this->include('sales/partials/summary/tab_reclass') ?></div>
     </div>
 
 </div>

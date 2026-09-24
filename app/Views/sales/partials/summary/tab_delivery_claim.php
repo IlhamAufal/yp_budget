@@ -1,61 +1,71 @@
 <div x-data="deliveryClaimTab()" x-init="initData()" class="space-y-6">
 
-    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-4">
+    <div class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-end gap-5 flex-1">
             <div>
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Pengaturan Rate Delivery & Claim (%)</h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Persentase pengurang revenue dan beban alokasi pengiriman bulanan.</p>
+                <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Pengaturan Rate Delivery & Claim (%)</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Persentase pengurang revenue dan beban alokasi pengiriman bulanan.</p>
             </div>
-            <div class="w-48">
-                <label class="block text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">Channel</label>
-                <select x-model="selectedChannel" @change="filterByChannel()" class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary font-semibold">
+            <div class="w-full sm:w-56">
+                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Channel</label>
+                <select x-model="selectedChannel" @change="filterByChannel()" class="w-full text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-900 focus:border-[#2F3185] focus:ring-2 focus:ring-[#2F3185]/20 py-2.5 px-3.5 font-semibold transition-all">
                     <option value="domestic">Domestic (YTI)</option>
                     <option value="international">International</option>
                 </select>
             </div>
         </div>
 
-        <button type="button" @click="saveData()" :disabled="saving" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50">
-            <svg x-show="!saving" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-            <span x-text="saving ? 'Menyimpan...' : 'Simpan Rate'"></span>
-        </button>
+        <div class="shrink-0">
+            <button type="button" @click="saveData()" :disabled="saving" class="px-5 py-2.5 bg-[#2F3185] hover:bg-[#25276d] text-white text-xs font-semibold rounded-xl shadow-xs transition-all inline-flex items-center gap-2 disabled:opacity-50 active:scale-[0.98]">
+                <i x-show="!saving" class="fa-solid fa-floppy-disk"></i>
+                <i x-show="saving" class="fa-solid fa-spinner fa-spin"></i>
+                <span x-text="saving ? 'Menyimpan...' : 'Simpan Rate'"></span>
+            </button>
+        </div>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <!-- Table Section Label (Separated from table container) -->
+    <div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Matriks Rate Delivery & Claim Bulanan (12 Bulan)</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Alokasi persentase rate bulanan per segmen kanal.</p>
+    </div>
+
+    <!-- Table Container (Round corner starts directly from thead) -->
+    <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs overflow-hidden bg-white dark:bg-gray-900">
         <div class="overflow-x-auto scrollbar-thin">
-            <table class="w-full text-left text-xs border-collapse min-w-[1200px]">
-                <thead class="bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold border-b border-gray-200 dark:border-gray-700">
-                    <tr>
-                        <th class="p-3 sticky left-0 z-10 bg-gray-50 dark:bg-gray-700 min-w-[180px]">Parameter Segment</th>
-                        <th class="p-3 w-28 text-center">Rate Type</th>
+            <table class="w-full text-left text-xs border-collapse min-w-[1200px] whitespace-nowrap">
+                <thead class="bg-[#2F3185] text-white font-semibold border-b border-white/20 text-xs">
+                    <tr class="bg-[#2F3185] text-white font-semibold">
+                        <th class="px-4 py-3.5 sticky left-0 z-10 bg-[#2F3185] text-white font-semibold min-w-[240px] border-r border-white/20">Parameter Segment</th>
+                        <th class="px-3.5 py-3.5 w-32 text-center text-white font-semibold border-r border-white/20">Rate Type</th>
                         <template x-for="(month, idx) in monthNames" :key="idx">
-                            <th class="p-2 text-center w-20" x-text="month"></th>
+                            <th class="px-3.5 py-3.5 text-center text-white font-semibold w-20 border-r border-white/20" x-text="month"></th>
                         </template>
-                        <th class="p-3 text-center w-24 bg-gray-100 dark:bg-gray-700/80 sticky right-0">Avg Rate</th>
+                        <th class="px-4 py-3.5 text-center w-28 bg-[#2F3185] text-white font-bold sticky right-0">Avg Rate</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-800 font-mono text-xs">
                     <template x-for="item in filteredSegments" :key="item.id">
                         <template x-for="rateType in ['delivery', 'claim']">
-                            <tr :class="rateType === 'claim' ? 'bg-gray-50/50 dark:bg-gray-800/50' : ''">
+                            <tr :class="rateType === 'claim' ? 'bg-gray-50/50 dark:bg-gray-800/50' : 'hover:bg-gray-50/30 dark:hover:bg-gray-800/30'">
                                 <template x-if="rateType === 'delivery'">
-                                    <td class="p-3 font-semibold text-gray-900 dark:text-white sticky left-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700" rowspan="2" x-text="item.segment_name"></td>
+                                    <td class="px-4 py-3 font-sans font-semibold text-gray-900 dark:text-white sticky left-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800" rowspan="2" x-text="item.segment_name"></td>
                                 </template>
 
-                                <td class="p-2 text-center">
-                                    <span :class="rateType === 'delivery' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'" class="px-2 py-0.5 rounded text-[10px] font-bold" x-text="rateType === 'delivery' ? 'Delivery (%)' : 'Claim (%)'"></span>
+                                <td class="px-3 py-2 text-center font-sans border-r border-gray-200 dark:border-gray-800">
+                                    <span :class="rateType === 'delivery' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' : 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'" class="px-2.5 py-0.5 rounded-md text-[10px] font-bold" x-text="rateType === 'delivery' ? 'Delivery (%)' : 'Claim (%)'"></span>
                                 </td>
 
                                 <template x-for="m in 12" :key="m">
-                                    <td class="p-1">
+                                    <td class="px-2 py-1 border-r border-gray-200 dark:border-gray-800">
                                         <input type="number" step="0.01" min="0" max="100" 
                                             x-model.number="item.monthly[rateType][m]" 
                                             @input="calculateAvg(item, rateType)"
-                                            class="w-full text-right text-xs p-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary focus:border-primary">
+                                            class="w-full text-right text-xs py-1 px-2 border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-900 focus:border-[#2F3185] focus:ring-1 focus:ring-[#2F3185]/20 outline-none">
                                     </td>
                                 </template>
 
-                                <td class="p-3 text-right font-bold font-mono bg-gray-50 dark:bg-gray-700/50 sticky right-0 text-gray-900 dark:text-white" x-text="(rateType === 'delivery' ? item.avg_delivery : item.avg_claim).toFixed(2) + '%'"></td>
+                                <td class="px-4 py-3 text-center font-bold font-mono bg-gray-50 dark:bg-gray-800 sticky right-0 text-gray-900 dark:text-white" x-text="(rateType === 'delivery' ? item.avg_delivery : item.avg_claim).toFixed(2) + '%'"></td>
                             </tr>
                         </template>
                     </template>

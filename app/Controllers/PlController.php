@@ -212,4 +212,114 @@ class PlController extends BaseController
 
         return ExcelExporter::export($headers, $rows, 'PL_Report_' . $year, 'P&L Report');
     }
+
+    /**
+     * Export tabel Monitoring Progress Entry per sub-tab ke .xlsx.
+     *
+     * $type: opex_ga | foh | mpp_opex | mpp_foh | capex
+     * Data identik dengan yang dirender di masing-masing tabel tab.
+     */
+    public function exportMonitoring(string $type = 'opex_ga'): ResponseInterface
+    {
+        $workingYear = session()->get('year_code') ?? session()->get('working_year') ?? date('Y');
+        $idDept      = session()->get('id_dept');
+        $userLevel   = session()->get('user_level');
+
+        $months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        $type   = strtolower($type);
+
+        switch ($type) {
+            case 'opex_ga':
+            case 'foh':
+                $budgetType = $type === 'foh' ? 'FOH' : 'OPEX';
+                $data       = $this->modelPl->get_curr_summary($workingYear, $idDept, $userLevel, $budgetType);
+
+                $headers = array_merge(['Cost Center', 'Entry By'], $months, ['Total']);
+                $rows    = [];
+                foreach ($data as $r) {
+                    $line = [($r['cc_sap'] ?? $r['id_dept'] ?? '') . ' - ' . ($r['cost_desc'] ?? '')];
+                    $line[] = $r['tags'] ?? '-';
+                    foreach (range(1, 12) as $m) {
+                        $line[] = (float) ($r[strtoupper(date('M', mktime(0, 0, 0, $m, 1)))] ?? 0);
+                    }
+                    $line[] = (float) ($r['TOT'] ?? 0);
+                    $rows[] = $line;
+                }
+
+                $label      = $type === 'foh' ? 'Budget_FOH' : 'Budget_OPEX_GA';
+                $sheetTitle = $type === 'foh' ? 'Budget FOH' : 'Budget OPEX GA';
+                break;
+
+            case 'mpp_opex':
+            case 'mpp_foh':
+                $mppType = $type === 'mpp_foh' ? 'FOH' : 'OPEX';
+                $data    = $this->modelPl->get_mpp_summary($workingYear, $idDept, $userLevel, $mppType);
+
+                $headers = array_merge(
+                    ['Cost Center', 'Tipe', 'Jabatan'],
+                    array_map(fn($m) => 'HC ' . $m, $months),
+                    ['HC Total', 'Notes', 'Salary'],
+                    array_map(fn($m) => 'Amount ' . $m, $months),
+                    ['Amount Total']
+                );
+                $rows = [];
+                foreach ($data as $r) {
+                    $line = [($r['cc_sap'] ?? $r['cost_center'] ?? '') . ' - ' . ($r['cost_desc'] ?? '')];
+                    $line[] = $r['desc_mpp'] ?? '-';
+                    $line[] = $r['staff_name'] ?? '-';
+                    foreach (range(1, 12) as $m) {
+                        $line[] = (float) ($r[strtoupper(date('M', mktime(0, 0, 0, $m, 1)))] ?? 0);
+                    }
+                    $line[] = (float) ($r['TOT'] ?? 0);
+                    $line[] = $r['notes'] ?? '-';
+                    $line[] = is_numeric($r['salary'] ?? null) ? (float) $r['salary'] : ($r['salary'] ?? '-');
+                    foreach (range(1, 12) as $m) {
+                        $line[] = (float) ($r[strtoupper(date('M', mktime(0, 0, 0, $m, 1))) . '_AMT'] ?? 0);
+                    }
+                    $line[] = (float) ($r['TOT_AMT'] ?? 0);
+                    $rows[] = $line;
+                }
+
+                $label      = $type === 'mpp_foh' ? 'Budget_MPP_FOH' : 'Budget_MPP_OPEX';
+                $sheetTitle = $type === 'mpp_foh' ? 'Budget MPP FOH' : 'Budget MPP OPEX';
+                break;
+
+            case 'capex':
+                $data = $this->modelPl->get_capex_monitoring($workingYear);
+
+                $headers = array_merge(
+                    ['Cost Center', 'Item Description', 'Account', 'CC Code', 'Unit', 'Unit Price', 'Remarks'],
+                    $months,
+                    ['Total']
+                );
+                $rows = [];
+                foreach ($data as $r) {
+                    $line = [
+                        $r['cost_center_desc'] ?? '',
+                        $r['item_desc'] ?? '',
+                        $r['main_account'] ?? '',
+                        $r['cost_center'] ?? '',
+                        (float) ($r['unit'] ?? 0),
+                        (float) ($r['unit_price'] ?? 0),
+                        $r['remarks'] ?? '-',
+                    ];
+                    foreach (range(1, 12) as $m) {
+                        $line[] = (float) ($r[strtoupper(date('M', mktime(0, 0, 0, $m, 1)))] ?? 0);
+                    }
+                    $line[] = (float) ($r['total'] ?? 0);
+                    $rows[] = $line;
+                }
+
+                $label      = 'Budget_CAPEX';
+                $sheetTitle = 'Budget CAPEX';
+                break;
+
+            default:
+                return $this->response->setStatusCode(404)->setBody('Tipe export tidak dikenal.');
+        }
+
+        AuditLog::log('EXPORT', 'monitoring/export/' . $type, "Export monitoring {$label} {$workingYear} ke Excel");
+
+        return ExcelExporter::export($headers, $rows, 'Monitoring_' . $label . '_' . $workingYear, $sheetTitle);
+    }
 }

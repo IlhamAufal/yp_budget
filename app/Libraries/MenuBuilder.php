@@ -109,10 +109,9 @@ class MenuBuilder
             $grouped[$group][] = $id;
         }
 
-        $selected = $this->findActiveRoot($roots, $childrenByParent, $visibleIds, $allById, $path, []);
-        $html = '<nav x-data="' . esc(json_encode(['selected' => $selected]), 'attr') . '">';
+        $html = '<nav>';
         foreach ($grouped as $groupName => $groupRoots) {
-            $html .= '<div class="mb-6"><h3 class="mb-4 text-xs font-semibold leading-[20px] text-gray-400"><span class="menu-group-title" :class="sidebarToggle ? \'lg:hidden\' : \'\'">' . esc($groupName) . '</span></h3><ul class="flex flex-col gap-1.5">';
+            $html .= '<div class="mb-6"><h3 class="mb-4 text-xs font-semibold leading-[20px] text-gray-400"><span class="menu-group-title">' . esc($groupName) . '</span></h3><ul class="flex flex-col gap-1.5">';
             foreach ($groupRoots as $id) {
                 $html .= $this->renderNode(
                     $id,
@@ -148,10 +147,13 @@ class MenuBuilder
         }
 
         $key = 'menu_' . $id;
-        $jsKey = "'{$key}'";
         $active = $this->containsActive($id, $childrenByParent, $visibleIds, $allById, $path, [$id]);
-        $icon = ($menu['menu_icon'] ?? '') !== '' ? $menu['menu_icon'] : 'fa-regular fa-circle';
-        $html = '<li><a href="#" @click.prevent="selected = (selected === ' . $jsKey . ' ? \'\' : ' . $jsKey . ')" class="menu-item group ' . ($active ? 'menu-item-active' : 'menu-item-inactive') . '" :class="selected === ' . $jsKey . ' ? \'menu-item-active\' : \'\'"><i class="' . esc($icon) . ' text-lg min-w-[24px] text-center"></i><span class="menu-item-text" :class="sidebarToggle ? \'lg:hidden\' : \'\'">' . esc($menu['menu_name_idn'] ?? '') . '</span><i class="fa-solid fa-chevron-down menu-item-arrow text-xs transition-transform duration-200" :class="[(selected === ' . $jsKey . ') ? \'menu-item-arrow-active rotate-180\' : \'menu-item-arrow-inactive\', sidebarToggle ? \'lg:hidden\' : \'\' ]"></i></a><div class="overflow-hidden transition-all duration-300" :class="(selected === ' . $jsKey . ') ? \'block\' : \'hidden\'"><ul :class="sidebarToggle ? \'lg:hidden\' : \'flex\'" class="flex flex-col gap-1 mt-2 menu-dropdown pl-9">';
+        $html = '<li class="submenu-item' . ($active ? ' submenu-open' : '') . '">'
+            . '<a href="#" data-submenu-target="' . esc($key) . '" class="menu-item group ' . ($active ? 'menu-item-active' : 'menu-item-inactive') . '">'
+            . '<span class="menu-item-text">' . esc($menu['menu_name_idn'] ?? '') . '</span>'
+            . '<span class="menu-item-arrow"></span>'
+            . '</a>'
+            . '<div class="submenu-container overflow-hidden"><ul class="flex flex-col gap-1 mt-2 menu-dropdown pl-9">';
         foreach ($children as $childId) {
             $html .= $this->renderNode($childId, $allById, $childrenByParent, $visibleIds, $path, array_merge($ancestors, [$id]));
         }
@@ -163,8 +165,7 @@ class MenuBuilder
         $link = (string) ($menu['menu_link'] ?? '#');
         $active = $this->isActive($link, $path);
         $href = ($link === '' || $link === '#') ? '#' : base_url(ltrim($link, '/'));
-        $icon = ($menu['menu_icon'] ?? '') !== '' ? $menu['menu_icon'] : 'fa-regular fa-circle';
-        return '<li><a href="' . esc($href) . '" class="menu-item group ' . ($active ? 'menu-item-active' : 'menu-item-inactive') . '"><i class="' . esc($icon) . ' text-lg min-w-[24px] text-center"></i><span class="menu-item-text" :class="sidebarToggle ? \'lg:hidden\' : \'\'">' . esc($menu['menu_name_idn'] ?? '') . '</span></a></li>';
+        return '<li><a href="' . esc($href) . '" class="menu-item group ' . ($active ? 'menu-item-active' : 'menu-item-inactive') . '"><span class="menu-item-text">' . esc($menu['menu_name_idn'] ?? '') . '</span></a></li>';
     }
 
     private function containsActive(int $id, array $childrenByParent, array $visibleIds, array $allById, string $path, array $visited): bool

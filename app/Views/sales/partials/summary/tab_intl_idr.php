@@ -1,101 +1,106 @@
 <div x-data="intlIdrSalesTab()" x-init="initData()" class="space-y-6">
 
-    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 space-y-4">
-        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs space-y-4">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1">
                 <div>
-                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Rate US$ (IDR)</label>
-                    <input type="number" step="1" x-model.number="rateUsd" class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary font-mono font-semibold" placeholder="16200">
+                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Rate US$ (IDR)</label>
+                    <input type="number" step="1" x-model.number="rateUsd" class="w-full text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-900 focus:border-[#2F3185] focus:ring-2 focus:ring-[#2F3185]/20 py-2.5 px-3.5 font-mono font-semibold" placeholder="16200">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Rate Baht Thailand (IDR)</label>
-                    <input type="number" step="1" x-model.number="rateBaht" class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary font-mono font-semibold" placeholder="450">
+                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Rate Baht Thailand (IDR)</label>
+                    <input type="number" step="1" x-model.number="rateBaht" class="w-full text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-900 focus:border-[#2F3185] focus:ring-2 focus:ring-[#2F3185]/20 py-2.5 px-3.5 font-mono font-semibold" placeholder="450">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Rate Ringgit Malaysia (IDR)</label>
-                    <input type="number" step="1" x-model.number="rateRinggit" class="w-full text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary focus:border-primary font-mono font-semibold" placeholder="3600">
+                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Rate Ringgit Malaysia (IDR)</label>
+                    <input type="number" step="1" x-model.number="rateRinggit" class="w-full text-xs rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-900 focus:border-[#2F3185] focus:ring-2 focus:ring-[#2F3185]/20 py-2.5 px-3.5 font-mono font-semibold" placeholder="3600">
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <button type="button" @click="processRates()" :disabled="processing" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors disabled:opacity-50 shadow-sm">
+                <button type="button" @click="processRates()" :disabled="processing" class="px-5 py-2.5 bg-[#2F3185] hover:bg-[#25276d] text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.98]">
                     <i x-show="!processing" class="fa-solid fa-gear"></i>
                     <i x-show="processing" class="fa-solid fa-spinner fa-spin"></i>
-                    <span x-text="processing ? 'Processing...' : 'Process'"></span>
+                    <span x-text="processing ? 'Memproses...' : 'Proses Kurs'"></span>
                 </button>
             </div>
         </div>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total International Volume</p>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mt-1" x-text="formatNumber(calculateGrandTotalVolume()) + ' Box'">0 Box</h3>
-            <p class="text-[11px] text-blue-600 dark:text-blue-400 mt-1">International Total Shipment</p>
+        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
+            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Total International Volume</p>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mt-1.5" x-text="formatNumber(calculateGrandTotalVolume()) + ' Box'">0 Box</h3>
+            <p class="text-[11px] text-[#2F3185] dark:text-indigo-400 mt-1 font-medium">International Total Shipment</p>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total Revenue Equivalent (IDR)</p>
-            <h3 class="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1" x-text="'Rp ' + formatNumber(calculateGrandTotalRevenue())">Rp 0</h3>
+        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
+            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Total Revenue Equivalent (IDR)</p>
+            <h3 class="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1.5" x-text="'Rp ' + formatNumber(calculateGrandTotalRevenue())">Rp 0</h3>
             <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Export Sales Value in Local Currency</p>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Average Price / Box (IDR)</p>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mt-1" x-text="'Rp ' + formatNumber(calculateAveragePrice())">Rp 0</h3>
+        <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
+            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Average Price / Box (IDR)</p>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mt-1.5" x-text="'Rp ' + formatNumber(calculateAveragePrice())">Rp 0</h3>
             <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Weighted Converted Price</p>
         </div>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Matriks International Sales dalam IDR (12 Bulan)</h2>
-            <span class="text-xs text-gray-500 dark:text-gray-400">Konversi Otomatis dari Tab Valas</span>
-        </div>
+    <!-- Table Section Label (Separated from table container) -->
+    <div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Matriks International Sales dalam IDR (12 Bulan)</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Konversi otomatis dari estimasi nilai valas ke IDR per bulan (QTY, Revenue, ASP).</p>
+    </div>
 
+    <!-- Table Container (Round corner starts directly from thead) -->
+    <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs overflow-hidden bg-white dark:bg-gray-900">
         <div class="overflow-x-auto scrollbar-thin">
-            <table class="w-full text-left text-xs border-collapse min-w-[1500px]">
-                <thead class="bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 font-semibold border-b border-gray-200 dark:border-gray-700">
-                    <tr>
-                        <th class="p-3 sticky left-0 z-10 bg-gray-50 dark:bg-gray-700 min-w-[200px]">Product SKU</th>
-                        <th class="p-3 w-28 text-right">Price Equivalent (IDR)</th>
-                        <th class="p-3 w-20 text-center">Type</th>
-                        <template x-for="(month, idx) in monthNames" :key="idx">
-                            <th class="p-2 text-center w-24" x-text="month"></th>
+            <table class="w-full text-left text-xs border-collapse min-w-[4600px] whitespace-nowrap">
+                <thead class="bg-[#2F3185] text-white font-semibold border-b border-white/20 text-xs sticky top-0 z-20">
+                    <tr class="bg-[#2F3185] text-white font-semibold">
+                        <th rowspan="2" class="px-4 py-3 sticky left-0 z-30 bg-[#2F3185] text-white font-semibold min-w-[240px] border-r border-white/20">Product SKU</th>
+                        <th rowspan="2" class="px-3 py-3 w-24 text-center text-white font-semibold border-r border-white/20">Currency</th>
+                        <th rowspan="2" class="px-3.5 py-3 w-36 text-right text-white font-semibold border-r border-white/20">Price Eq (IDR)</th>
+                        <template x-for="month in monthNames" :key="month">
+                            <th colspan="3" class="px-3 py-2.5 text-center text-white font-semibold border-r border-white/20" x-text="month"></th>
                         </template>
-                        <th class="p-3 text-right w-32 bg-gray-100 dark:bg-gray-700/80 sticky right-0">Total Year</th>
+                        <th colspan="3" class="px-3 py-2.5 text-center text-white font-bold bg-[#25276d] border-l border-white/20">Annual Total</th>
+                    </tr>
+                    <tr class="bg-[#25276d] text-white text-xs font-semibold">
+                        <?php for ($i = 0; $i < 12; $i++): ?>
+                            <th class="px-2 py-2 border-r border-white/20 w-20 text-center text-white font-semibold text-xs bg-[#25276d]">Qty (Box)</th>
+                            <th class="px-2 py-2 border-r border-white/20 w-32 text-center text-white font-semibold text-xs bg-[#25276d]">Revenue</th>
+                            <th class="px-2 py-2 border-r border-white/20 w-24 text-center text-white font-semibold text-xs bg-[#25276d]">ASP/kg</th>
+                        <?php endfor; ?>
+                        <th class="px-2 py-2 border-r border-white/20 w-24 text-center text-white bg-[#25276d] font-semibold text-xs">Tot Qty</th>
+                        <th class="px-2 py-2 border-r border-white/20 w-36 text-center text-white bg-[#25276d] font-semibold text-xs">Tot Rev</th>
+                        <th class="px-2 py-2 text-center text-white bg-[#25276d] font-semibold text-xs">Avg ASP</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-800 font-mono text-xs">
                     <template x-for="item in filteredItems" :key="item.id">
-                        <template x-for="dataType in ['qty', 'val']">
-                            <tr :class="dataType === 'val' ? 'bg-gray-50/50 dark:bg-gray-800/50' : ''">
-                                <template x-if="dataType === 'qty'">
-                                    <td class="p-3 font-medium text-gray-900 dark:text-white sticky left-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700" rowspan="2">
-                                        <div class="font-semibold" x-text="item.product_name"></div>
-                                        <div class="text-[10px] text-gray-400" x-text="item.product_code + ' | Region: ' + item.region"></div>
-                                    </td>
-                                </template>
+                        <tr class="hover:bg-gray-50/30 dark:hover:bg-gray-800/30">
+                            <td class="px-4 py-3 font-sans font-medium text-gray-900 dark:text-white sticky left-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
+                                <div class="font-semibold text-gray-900 dark:text-white" x-text="item.product_name"></div>
+                                <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5" x-text="item.product_code + ' | Region: ' + item.region"></div>
+                            </td>
 
-                                <template x-if="dataType === 'qty'">
-                                    <td class="p-3 font-mono text-right" rowspan="2" x-text="formatNumber(item.price_idr)"></td>
-                                </template>
+                            <td class="px-3 py-3 text-center font-sans font-bold text-gray-800 dark:text-gray-200 border-r border-gray-200 dark:border-gray-800" x-text="item.currency"></td>
 
-                                <td class="p-2 text-center font-medium">
-                                    <span :class="dataType === 'qty' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'" class="px-2 py-0.5 rounded text-[10px] font-bold" x-text="dataType === 'qty' ? 'Vol (Box)' : 'Val (IDR)'"></span>
+                            <td class="px-3.5 py-3 font-mono text-right font-bold text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-800" x-text="formatNumber(item.price_idr)"></td>
+
+                            <template x-for="cell in metricCols" :key="cell.m + '-' + cell.k">
+                                <td class="px-2 py-2 text-right font-mono border-r border-gray-200 dark:border-gray-800">
+                                    <span x-show="cell.k === 'qty'" x-text="formatNumber(item.monthly[cell.m].qty)"></span>
+                                    <span x-show="cell.k === 'rev'" class="text-emerald-600 dark:text-emerald-400 font-semibold" x-text="formatNumber(item.monthly[cell.m].qty * item.price_idr)"></span>
+                                    <span x-show="cell.k === 'asp'" class="text-amber-600 dark:text-amber-400" x-text="formatNumber(item.monthly[cell.m].qty > 0 ? item.price_idr : 0)"></span>
                                 </td>
+                            </template>
 
-                                <template x-for="m in 12" :key="m">
-                                    <td class="p-2 text-right font-mono">
-                                        <span x-show="dataType === 'qty'" x-text="formatNumber(item.monthly[m].qty)"></span>
-                                        <span x-show="dataType === 'val'" class="text-emerald-600 dark:text-emerald-400 font-semibold" x-text="formatNumber(item.monthly[m].qty * item.price_idr)"></span>
-                                    </td>
-                                </template>
-
-                                <td class="p-3 text-right font-bold font-mono bg-gray-50 dark:bg-gray-700/50 sticky right-0" :class="dataType === 'val' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white'">
-                                    <span x-text="dataType === 'qty' ? formatNumber(item.total_qty) : formatNumber(item.total_val)"></span>
-                                </td>
-                            </tr>
-                        </template>
+                            <td class="px-2 py-3 text-right font-bold font-mono bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-800" x-text="formatNumber(item.total_qty)"></td>
+                            <td class="px-2 py-3 text-right font-bold font-mono bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-800 text-emerald-600 dark:text-emerald-400" x-text="formatNumber(item.total_val)"></td>
+                            <td class="px-2 py-3 text-right font-bold font-mono bg-gray-50 dark:bg-gray-800 text-amber-600 dark:text-amber-400" x-text="formatNumber(item.total_qty > 0 ? item.total_val / item.total_qty : 0)"></td>
+                        </tr>
                     </template>
                 </tbody>
             </table>
@@ -109,6 +114,11 @@ function intlIdrSalesTab() {
         saving: false,
         processing: false,
         monthNames: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        metricCols: (() => {
+            const arr = [];
+            for (let m = 1; m <= 12; m++) arr.push({ m, k: 'qty' }, { m, k: 'rev' }, { m, k: 'asp' });
+            return arr;
+        })(),
         rateUsd: 16200,
         rateBaht: 450,
         rateRinggit: 3600,
@@ -122,6 +132,7 @@ function intlIdrSalesTab() {
                     product_code: 'EXP-USD-001',
                     product_name: 'Margarine Export Grade 15kg Box',
                     region: 'AMER',
+                    currency: 'USD',
                     price_idr: 396900,
                     total_qty: 6000,
                     total_val: 2381400000,

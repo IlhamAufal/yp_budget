@@ -522,6 +522,30 @@ class FohController extends BaseController
      * ------------------------------------------------------------------ */
 
     /**
+     * GET foh/detail-entry-modal — konten form detail item sub-account
+     * untuk global modal. Data existing di-embed server-side agar tidak
+     * perlu roundtrip tambahan.
+     */
+    public function detailEntryModal(): string
+    {
+        $entryDataId = (int) ($this->request->getGet('entry_data_id') ?? 0);
+        $idCoa       = (string) ($this->request->getGet('id_coa') ?? '');
+        $dept        = (string) ($this->request->getGet('dept') ?? '');
+
+        $items = $entryDataId > 0 ? $this->fohModel->getDetailItems($entryDataId) : [];
+
+        return view('foh/partials/detail_entry_modal_content', [
+            'entryDataId' => $entryDataId,
+            'idCoa'       => $idCoa,
+            'dept'        => $dept,
+            'itemsJson'   => json_encode(
+                array_values($items),
+                JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+            ),
+        ]);
+    }
+
+    /**
      * AJAX: daftar item breakdown sebuah entry budget.
      */
     public function getDetailItems(): ResponseInterface

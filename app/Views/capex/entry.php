@@ -1,51 +1,64 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div x-data="capexEntryApp()" x-init="loadEntryData()" class="mx-auto max-w-7xl p-4 md:p-6 2xl:p-10">
-    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+<div x-data="capexEntryApp()" x-init="loadEntryData()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
         <div>
-            <h2 class="text-title-md2 font-bold text-black dark:text-white">Entry Form Capex</h2>
-            <p class="text-sm text-gray-500">Budget Plan Year : <span class="font-semibold text-brand-600">2027</span></p>
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">Dashboard</a>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+                <span class="hover:text-[#2F3185]">CAPEX</span>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+                <span class="text-[#2F3185] font-bold">Entry Form</span>
+            </div>
+            <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                Entry Form CAPEX
+            </h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                Pengisian dan peninjauan pengajuan belanja modal (Capital Expenditure).
+            </p>
         </div>
-        <nav>
-            <ol class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <li><a class="hover:text-primary" href="<?= base_url('dashboard') ?>">Home</a></li>
-                <li class="before:content-['/'] before:mr-2">Entry Form Capex</li>
-            </ol>
+        <div class="shrink-0">
+            <button type="button" data-action="open-modal"
+                    data-modal-url="<?= base_url('manual-book/view') ?>?file=<?= rawurlencode('MANUAL BOOK - BUDGET SYSTEM - INPUT CAPEX.pdf') ?>&amp;title=<?= rawurlencode('Manual Book - Input CAPEX') ?>"
+                    data-modal-title="Manual Book - Input CAPEX"
+                    data-modal-size="xl"
+                    class="inline-flex items-center gap-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Manual Book</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sub Tabs Navigation -->
+    <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+        <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="CAPEX Entry Tabs">
+            <button type="button" @click="activeSubTab = 'entry'"
+                :class="activeSubTab === 'entry' ? 'active' : ''"
+                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>6.1 Entry CAPEX</span>
+            </button>
+            <button type="button" @click="activeSubTab = 'view_cost_center'"
+                :class="activeSubTab === 'view_cost_center' ? 'active' : ''"
+                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>6.2 View By Cost Center</span>
+            </button>
         </nav>
     </div>
 
-    <div class="mb-6 border-b border-gray-200 dark:border-gray-800">
-        <div class="flex flex-wrap -mb-px text-sm font-medium text-center">
-            <button @click="activeSubTab = 'entry'"
-                :class="activeSubTab === 'entry' ? 'border-brand-600 text-brand-600 dark:text-brand-400 dark:border-brand-400' : 'border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300'"
-                class="inline-flex items-center gap-2 p-4 border-b-2 rounded-t-lg transition-colors font-semibold">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                6.1 Entry Capex
-            </button>
-            <button @click="activeSubTab = 'view_cost_center'"
-                :class="activeSubTab === 'view_cost_center' ? 'border-brand-600 text-brand-600 dark:text-brand-400 dark:border-brand-400' : 'border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300'"
-                class="inline-flex items-center gap-2 p-4 border-b-2 rounded-t-lg transition-colors font-semibold">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                6.2 View By Cost Center
-            </button>
+    <div>
+        <div class="space-y-6">
+            <div x-show="activeSubTab === 'entry'" x-transition:enter.opacity.duration.300ms>
+                <?= $this->include('capex/partials/tab_entry_capex') ?>
+            </div>
+
+            <div x-show="activeSubTab === 'view_cost_center'" x-transition:enter.opacity.duration.300ms>
+                <?= $this->include('capex/partials/tab_view_by_cost_center') ?>
+            </div>
         </div>
     </div>
 
-    <div x-show="activeSubTab === 'entry'" x-transition:enter.opacity.duration.300ms>
-        <?= $this->include('capex/partials/tab_entry_capex') ?>
-    </div>
-
-    <div x-show="activeSubTab === 'view_cost_center'" x-transition:enter.opacity.duration.300ms>
-        <?= $this->include('capex/partials/tab_view_by_cost_center') ?>
-    </div>
-
     <?= $this->include('capex/partials/modal_form_capex') ?>
-    <?= $this->include('partials/manual_book_modal', [
-        'mbTitle' => 'Manual Book - Input CAPEX',
-        'mbPdfUrl' => base_url('assets/docs/manual_book/MANUAL BOOK - BUDGET SYSTEM - INPUT CAPEX.pdf'),
-        'mbPdfExists' => is_file(FCPATH . 'assets/docs/manual_book/MANUAL BOOK - BUDGET SYSTEM - INPUT CAPEX.pdf'),
-    ]) ?>
 </div>
 
 <script>
@@ -54,7 +67,6 @@ function capexEntryApp() {
         activeSubTab: 'entry',
         selectedCostCenter: <?= json_encode($cost_center_options[0]['id'] ?? '1000GP1100', JSON_HEX_TAG) ?>,
         viewCostCenter: <?= json_encode($cost_center_options[1]['id'] ?? ($cost_center_options[0]['id'] ?? '1000KA1004'), JSON_HEX_TAG) ?>,
-        manualBookOpen: false,
         formCapexOpen: false,
         activeCategory: { code: '', name: '' },
         saving: false,

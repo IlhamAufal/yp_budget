@@ -32,7 +32,10 @@ $routes->setAutoRoute(false);
 // Working Year Context Route
 $routes->post('set-year', 'PeriodController::setYear', ['filter' => 'auth']);
 $routes->get('api/active-years', 'PeriodController::getActiveYears');
-`
+
+// Partial endpoints untuk global modal
+$routes->get('manual-book/view', 'PartialController::manualBook', ['filter' => 'auth']);
+
 // Login routes (public)
 $routes->get('login', 'LoginController::index');
 $routes->post('login/process', 'LoginController::process');
@@ -53,6 +56,19 @@ $routes->get('master/mpp', 'MasterController::salaryMpp', ['filter' => 'auth']);
 $routes->get('report-grand-opex', 'OpexReportController::grand', ['filter' => 'auth']);
 $routes->match(['GET', 'POST'], 'report-grand-opex/data', 'OpexReportController::grandData', ['filter' => 'auth']);
 $routes->get('report-profit-loss', 'PlController::summary', ['filter' => 'auth']);
+
+// Legacy top-level menu links dari gw_sm__menu — alias langsung ke sys-admin.
+$routes->get('menu', 'MenuController::index', ['filter' => 'auth']);
+$routes->get('role', 'RoleController::index', ['filter' => 'auth']);
+$routes->get('user', 'UserController::index', ['filter' => 'auth']);
+
+// Legacy "insert" menu links — form tambah kini berupa modal di halaman index masing-masing.
+$routes->get('menu/add-menu', 'MenuController::index', ['filter' => 'auth']);
+$routes->get('role/add-role', 'RoleController::index', ['filter' => 'auth']);
+$routes->get('user/add-user', 'UserController::index', ['filter' => 'auth']);
+
+// Parent "2. Sales" (menu_link: sales-data)
+$routes->get('sales-data', 'SalesController::index', ['filter' => 'auth']);
 
 // Master Data (COA, Cost Center, Departemen, Periode)
 $routes->group('master', ['filter' => 'auth'], function ($routes) {
@@ -175,6 +191,10 @@ $routes->group('opex-ga', ['filter' => 'auth'], function ($routes) {
     $routes->get('entry-budget', 'OpexGaController::entryBudget');
     $routes->get('entry-budget-detail', 'OpexGaController::entryBudgetDetail');
 
+    // Actual Data page (menu_link: opex-ga/actual-budget) — sama dengan alias underscore opex_ga/actual_budget
+    $routes->get('actual-budget', 'OpexGaController::actualBudget');
+    $routes->get('actual', 'OpexGaController::actual');
+
     // AJAX Entry Data
     $routes->get('getEntryData', 'OpexGaController::getEntryData');
     $routes->get('getHeaderAccounts', 'OpexGaController::getHeaderAccounts');
@@ -211,6 +231,7 @@ $routes->group('foh', ['filter' => 'auth'], function ($routes) {
     $routes->get('entry', 'FohController::entry');
     $routes->get('entry-budget', 'FohController::entry');
     $routes->get('entry-budget-detail', 'FohController::entryBudgetDetail');
+    $routes->get('detail-entry-modal', 'FohController::detailEntryModal');
     $routes->get('getEntryData', 'FohController::getEntryData');
     $routes->get('getConfigPeriod', 'FohController::getConfigPeriod');
     $routes->get('getHeaderAccounts', 'FohController::getHeaderAccounts');
@@ -247,6 +268,7 @@ $routes->group('foh', ['filter' => 'auth'], function ($routes) {
 // Alias tanpa dash (beberapa view memakai base_url('opexga/...'))
 $routes->group('opexga', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'OpexGaController::index');
+    $routes->get('upload-modal', 'OpexGaController::uploadModalForm');
     $routes->get('exportExcel', 'OpexGaController::exportExcel');
     // upload_modal.php (index.php) submit ke opexga/processUpload
     $routes->post('processUpload', 'OpexGaController::processUpload');
@@ -361,6 +383,7 @@ $routes->group('sales', ['filter' => 'auth'], function ($routes) {
 $routes->group('monitoring', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'PlController::index');
     $routes->get('cari_view_data', 'PlController::cariViewData');
+    $routes->get('export/(:segment)', 'PlController::exportMonitoring/$1');
 });
 $routes->group('pl', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'PlController::summary');
@@ -371,6 +394,3 @@ $routes->group('pl', ['filter' => 'auth'], function ($routes) {
     $routes->get('export_excel', 'PlController::exportExcel');
 });
 
-if (file_exists(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php')) {
-    require APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php';
-}

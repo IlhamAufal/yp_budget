@@ -10,38 +10,47 @@
 <!-- Highcharts CDN for trend visualization -->
 <script src="https://cdn.jsdelivr.net/npm/highcharts@10.3.3/highcharts.js"></script>
 
-<div x-data="domesticSalesEntry(<?= htmlspecialchars($dbProductsJson, ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars($dbRegionalJson, ENT_QUOTES, 'UTF-8') ?>)" x-init="initData()" class="p-4 md:p-6 lg:p-8 space-y-6 pb-16">
+<div x-data="domesticSalesEntry(<?= htmlspecialchars($dbProductsJson, ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars($dbRegionalJson, ENT_QUOTES, 'UTF-8') ?>)" x-init="initData()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
         <div>
-            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
-                <a href="<?= base_url('dashboard') ?>" class="hover:text-primary transition-colors flex items-center gap-1"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
-                <a href="<?= base_url('sales') ?>" class="hover:text-primary transition-colors">Sales</a>
-                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
-                <span class="text-primary font-bold">Sales Domestic Entry</span>
+            <div class="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">Dashboard</a>
+                <span class="text-gray-400">/</span>
+                <a href="<?= base_url('sales') ?>" class="hover:text-[#2F3185] transition-colors">Sales</a>
+                <span class="text-gray-400">/</span>
+                <span class="text-[#2F3185] dark:text-indigo-400 font-semibold">Sales Domestic Entry</span>
             </div>
-            <div class="flex items-center gap-3">
-                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 shadow-xs"><i class="fa-solid fa-boxes-packing text-lg"></i></span>
-                <div>
-                    <h1 class="text-xl md:text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">2.1 Sales Domestic Entry <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800">FY <?= esc($workingYear) ?></span></h1>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Pengelolaan target dan laporan Sales Domestic 12 Bulan (Budget, Key Product, Regional, Download & Upload).</p>
-                </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">2.1 Sales Domestic Entry</h1>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pengelolaan target dan laporan Sales Domestic 12 Bulan (Budget, Key Product, Regional, Download & Upload).</p>
             </div>
         </div>
         <div class="flex flex-wrap items-center gap-3">
-            <div class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 text-xs"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span><span class="text-gray-500 dark:text-gray-400 font-medium">Tot QTY:</span><span class="font-mono font-bold text-gray-900 dark:text-white" x-text="formatNumber(kpi.totalQty)">0</span><span class="text-[10px] text-gray-400 font-mono">Kg</span></div>
-            <div class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 text-xs"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span><span class="text-gray-500 dark:text-gray-400 font-medium">Tot REV:</span><span class="font-mono font-bold text-emerald-600 dark:text-emerald-400" x-text="formatCurrency(kpi.totalRev)">Rp 0</span></div>
-            <div class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 text-xs"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span><span class="text-gray-500 dark:text-gray-400 font-medium">Avg ASP:</span><span class="font-mono font-bold text-amber-600 dark:text-amber-400" x-text="formatNumber(kpi.avgAsp)">0</span><span class="text-[10px] text-gray-400 font-mono">Rp/kg</span></div>
+            <div class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 text-xs"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span><span class="text-gray-500 dark:text-gray-400 font-medium">Tot Qty:</span><span class="font-mono font-bold text-xs text-gray-900 dark:text-white" x-text="formatNumber(kpi.totalQty)">0</span><span class="text-xs text-gray-400 font-mono">Kg</span></div>
+            <div class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 text-xs"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span><span class="text-gray-500 dark:text-gray-400 font-medium">Tot Rev:</span><span class="font-mono font-bold text-xs text-emerald-600 dark:text-emerald-400" x-text="formatCurrency(kpi.totalRev)">Rp 0</span></div>
+            <div class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 text-xs"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span><span class="text-gray-500 dark:text-gray-400 font-medium">Avg ASP:</span><span class="font-mono font-bold text-xs text-amber-600 dark:text-amber-400" x-text="formatNumber(kpi.avgAsp)">0</span><span class="text-xs text-gray-400 font-mono">Rp/kg</span></div>
         </div>
     </div>
 
-    <div class="bg-gray-100/80 dark:bg-gray-800/60 p-1.5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs">
+    <!-- Sub Tabs Navigation -->
+    <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
         <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="Domestic Sub Tabs">
-            <button type="button" @click="setSubTab('budget')" :class="subTab === 'budget' ? 'bg-white dark:bg-gray-900 text-primary dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'" class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2"><i class="fa-solid fa-table-cells text-sm"></i><span>Sales Domestic - Budget</span><span class="px-2 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary font-bold" x-text="filteredItems.length">0</span></button>
-            <button type="button" @click="setSubTab('key_product')" :class="subTab === 'key_product' ? 'bg-white dark:bg-gray-900 text-primary dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'" class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2"><i class="fa-solid fa-award text-sm"></i><span>Report Key Product</span></button>
-            <button type="button" @click="setSubTab('regional')" :class="subTab === 'regional' ? 'bg-white dark:bg-gray-900 text-primary dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'" class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2"><i class="fa-solid fa-earth-asia text-sm"></i><span>Report Regional</span></button>
-            <button type="button" @click="setSubTab('download')" :class="subTab === 'download' ? 'bg-white dark:bg-gray-900 text-primary dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'" class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2"><i class="fa-solid fa-file-excel text-sm text-emerald-600 dark:text-emerald-400"></i><span>Download Template</span></button>
-            <button type="button" @click="setSubTab('upload')" :class="subTab === 'upload' ? 'bg-white dark:bg-gray-900 text-primary dark:text-white shadow-xs font-bold border border-gray-200/80 dark:border-gray-700' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'" class="px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-2"><i class="fa-solid fa-cloud-arrow-up text-sm text-sky-600 dark:text-sky-400"></i><span>Upload Data</span></button>
+            <button type="button" @click="setSubTab('budget')" :class="subTab === 'budget' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Sales Domestic - Budget</span>
+                <span class="tab-badge px-2 py-0.5 rounded-full text-[10px] font-bold" x-text="filteredItems.length">0</span>
+            </button>
+            <button type="button" @click="setSubTab('key_product')" :class="subTab === 'key_product' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Report Key Product</span>
+            </button>
+            <button type="button" @click="setSubTab('regional')" :class="subTab === 'regional' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Report Regional</span>
+            </button>
+            <button type="button" @click="setSubTab('download')" :class="subTab === 'download' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Download Template</span>
+            </button>
+            <button type="button" @click="setSubTab('upload')" :class="subTab === 'upload' ? 'active' : ''" class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Upload Data</span>
+            </button>
         </nav>
     </div>
 
@@ -74,6 +83,10 @@ function domesticSalesEntry(initialProducts = [], initialRegional = []) {
         filteredItems: [],
         groupedItems: [],
         groupedFlatRows: [],
+        currentPage: 1,
+        perPage: 10,
+        pageGroups: [],
+        pageFlatRows: [],
         keyProductsSummary: [],
         regionalData: [],
         kpi: { totalQty: 0, totalRev: 0, avgAsp: 0 },
@@ -164,9 +177,87 @@ function domesticSalesEntry(initialProducts = [], initialRegional = []) {
                 return matchCh && matchSearch;
             });
             this.groupItemsByChannel();
+            const maxPage = this.totalPages();
+            if (this.currentPage > maxPage) this.currentPage = maxPage;
+            this.buildPageRows();
             this.calculateKeyProducts();
             this.calculateTotals();
             if (this.showChart) this.renderChart();
+        },
+
+        // ============================================================
+        // PAGINATION (client-side) — tabel Budget hanya menampilkan
+        // sebagian item per halaman. KPI, Grand Total, chart, dan
+        // Key Product tetap dihitung dari SELURUH filteredItems.
+        // ============================================================
+        totalPages() {
+            return Math.max(1, Math.ceil((this.filteredItems.length || 0) / this.perPage));
+        },
+
+        buildPageRows() {
+            const start = (this.currentPage - 1) * this.perPage;
+            const pageItems = this.filteredItems.slice(start, start + this.perPage);
+
+            const groupsMap = {};
+            pageItems.forEach(item => {
+                const ch = item.id_channel || 'OTHER';
+                if (!groupsMap[ch]) {
+                    const initMonthly = {};
+                    for (let m = 1; m <= 12; m++) initMonthly[m] = { qty: 0, revenue: 0 };
+                    groupsMap[ch] = { channel: ch, items: [], subtotal: { monthly: initMonthly, total_qty: 0, total_revenue: 0 } };
+                }
+                groupsMap[ch].items.push(item);
+                for (let m = 1; m <= 12; m++) {
+                    groupsMap[ch].subtotal.monthly[m].qty += Number(item.monthly[m]?.qty || 0);
+                    groupsMap[ch].subtotal.monthly[m].revenue += Number(item.monthly[m]?.revenue || 0);
+                }
+                groupsMap[ch].subtotal.total_qty += Number(item.total_qty || 0);
+                groupsMap[ch].subtotal.total_revenue += Number(item.total_revenue || 0);
+            });
+
+            this.pageGroups = Object.values(groupsMap);
+            this.pageFlatRows = [];
+            this.pageGroups.forEach(g => {
+                g.items.forEach((item, idx) => this.pageFlatRows.push({ kind: 'item', group: g, item, idx }));
+            });
+        },
+
+        setPage(p) {
+            const total = this.totalPages();
+            p = parseInt(p, 10);
+            if (isNaN(p) || p < 1 || p > total || p === this.currentPage) return;
+            this.currentPage = p;
+            this.buildPageRows();
+            const wrap = document.getElementById('domesticBudgetTableWrap');
+            if (wrap) wrap.scrollTop = 0;
+        },
+
+        setPerPage(n) {
+            this.perPage = parseInt(n, 10) || 10;
+            this.currentPage = 1;
+            this.buildPageRows();
+        },
+
+        pageInfo() {
+            const total = this.filteredItems.length;
+            if (total === 0) return { from: 0, to: 0, total: 0 };
+            const from = (this.currentPage - 1) * this.perPage + 1;
+            const to = Math.min(this.currentPage * this.perPage, total);
+            return { from, to, total };
+        },
+
+        getPageList() {
+            const total = this.totalPages();
+            const cur = this.currentPage;
+            if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+            const pages = [1];
+            const start = Math.max(2, cur - 1);
+            const end = Math.min(total - 1, cur + 1);
+            if (start > 2) pages.push('...');
+            for (let p = start; p <= end; p++) pages.push(p);
+            if (end < total - 1) pages.push('...');
+            pages.push(total);
+            return pages;
         },
 
         groupItemsByChannel() {

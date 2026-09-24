@@ -1,50 +1,60 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div x-data="opexGaEntryApp()" x-init="init()" class="space-y-6">
+<div x-data="opexGaEntryApp()" x-init="init()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <!-- HEADER -->
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
         <div>
-            <div class="flex items-center gap-2">
-                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <i class="fas fa-coins text-lg text-primary"></i>
-                </div>
-                <h2 class="text-title-md2 font-bold text-black dark:text-white">Entry / Update Budget OPEX GA</h2>
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">Dashboard</a>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+                <span class="hover:text-[#2F3185]">OPEX GA</span>
+                <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+                <span class="text-[#2F3185] font-bold">Entry Budget</span>
             </div>
-            <nav class="mt-1">
-                <ol class="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400">
-                    <li><a class="hover:text-primary" href="<?= base_url('dashboard') ?>"><i class="fas fa-home mr-1"></i>Home</a></li>
-                    <li><i class="fas fa-chevron-right text-[10px]"></i></li>
-                    <li>4.1 OPEX - GA</li>
-                    <li><i class="fas fa-chevron-right text-[10px]"></i></li>
-                    <li class="text-primary font-semibold">Entry Budget</li>
-                </ol>
-            </nav>
+            <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                Entry / Update Budget OPEX GA
+            </h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                Pengelolaan dan perincian input anggaran OPEX General &amp; Administrative.
+            </p>
         </div>
-        <div class="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-1 dark:bg-boxdark dark:text-gray-200">
-            <i class="fas fa-calendar-alt text-primary"></i>
-            <span>Budget Plan Year :</span>
-            <span class="text-red-500 font-bold"><?= esc($workingYear ?? '') ?></span>
+        <div class="shrink-0">
+            <button type="button" data-action="open-modal"
+                    data-modal-url="<?= base_url('manual-book/view') ?>?file=<?= rawurlencode('MANUAL BOOK - BUDGET SYSTEM - INPUT OPEX GA.pdf') ?>&amp;title=<?= rawurlencode('Manual Book - Input OPEX GA') ?>"
+                    data-modal-title="Manual Book - Input OPEX GA"
+                    data-modal-size="xl"
+                    class="inline-flex items-center gap-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Manual Book</span>
+            </button>
         </div>
     </div>
 
-    <div class="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-        <div class="border-b border-stroke px-6 py-3 dark:border-strokedark">
-            <div class="flex items-center gap-4">
-                <button @click="activeTab = 'entry'"
-                    :class="activeTab === 'entry' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white'"
-                    class="border-b-2 px-2 py-2 text-sm font-medium transition-all duration-200">
-                    <i class="fas fa-edit mr-1"></i>Entry / Update Budget
-                </button>
-                <button @click="activeTab = 'view'"
-                    :class="activeTab === 'view' ? 'border-primary text-primary font-bold' : 'border-transparent text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white'"
-                    class="border-b-2 px-2 py-2 text-sm font-medium transition-all duration-200">
-                    <i class="fas fa-eye mr-1"></i>View Data
-                </button>
-            </div>
-        </div>
+    <!-- TAB NAV -->
+    <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+        <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="OPEX GA Entry Tabs">
+            <button
+                type="button"
+                @click="activeTab = 'entry'"
+                :class="activeTab === 'entry' ? 'active' : ''"
+                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>Entry / Update Budget</span>
+            </button>
+            <button
+                type="button"
+                @click="activeTab = 'view'"
+                :class="activeTab === 'view' ? 'active' : ''"
+                class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+                <span>View Data</span>
+            </button>
+        </nav>
+    </div>
 
-        <div class="p-6">
+    <!-- TAB CONTENT -->
+    <div>
+        <div class="space-y-6">
             <div x-show="activeTab === 'entry'" x-cloak>
                 <?= $this->include('opex_ga/partials/entry_tab_form') ?>
             </div>
@@ -55,19 +65,12 @@
         </div>
     </div>
 
-    <?= $this->include('partials/manual_book_modal', [
-        'mbTitle' => 'Manual Book - Input OPEX GA',
-        'mbPdfUrl' => base_url('assets/docs/manual_book/MANUAL BOOK - BUDGET SYSTEM - INPUT OPEX GA.pdf'),
-        'mbPdfExists' => is_file(FCPATH . 'assets/docs/manual_book/MANUAL BOOK - BUDGET SYSTEM - INPUT OPEX GA.pdf'),
-    ]) ?>
-
 </div>
 
 <script>
 function opexGaEntryApp() {
     return {
         activeTab: 'entry',
-        manualBookModalOpen: false,
         costCenters: <?= json_encode(array_map(fn($cc) => [
             'id'   => $cc['cost_center_sap'] ?? $cc['cost_center'],
             'text' => ($cc['cc_code'] ?? $cc['cost_center']) . ' - ' . $cc['cost_desc'],

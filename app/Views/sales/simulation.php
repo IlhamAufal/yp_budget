@@ -6,7 +6,7 @@
   $kursEur = (float) ($kurs['EUR'] ?? 0);
   $hasKurs = $kursUsd > 0 || $kursEur > 0;
 ?>
-<div x-data="salesSimulation()" class="p-4 md:p-6 lg:p-8 space-y-8 pb-12">
+<div x-data="salesSimulation()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
   <!-- ============================================================ -->
   <!-- HEADER -->
@@ -14,165 +14,157 @@
   <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
     <div>
       <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
-        <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-        <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-        <span>Sales</span>
-        <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-        <span class="text-brand-500 font-bold">Simulation</span>
+        <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">Dashboard</a>
+        <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+        <a href="<?= base_url('sales') ?>" class="hover:text-[#2F3185] transition-colors">Sales</a>
+        <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+        <span class="text-[#2F3185] font-bold">Simulation</span>
       </div>
-      <h2 class="text-xl md:text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center gap-2.5">
-        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400">
-          <i class="fa-solid fa-chart-line text-base"></i>
-        </span>
+      <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
         Sales Simulation
-      </h2>
-      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+      </h1>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
         Simulasi revenue & volume berbasis asumsi Master Assumption (KURS, Volume, ASP).
       </p>
     </div>
 
-    <!-- KURS badges -->
+    <!-- KURS controls -->
     <div class="flex flex-wrap items-center gap-2">
-      <div class="rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50 dark:bg-indigo-950/40 px-3.5 py-2 text-xs">
+      <div class="rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50 dark:bg-indigo-950/40 px-3.5 py-2 text-xs flex items-center">
         <span class="font-bold text-indigo-700 dark:text-indigo-300">KURS USD</span>
         <input type="number" step="any" x-model.number="kursUsd" class="ml-2 w-24 rounded-lg border border-indigo-200 dark:border-indigo-700/60 bg-white dark:bg-gray-900 px-2 py-1 text-right font-mono font-bold text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/40" placeholder="0" />
       </div>
-      <div class="rounded-xl border border-violet-200 dark:border-violet-700/50 bg-violet-50 dark:bg-violet-950/40 px-3.5 py-2 text-xs">
+      <div class="rounded-xl border border-violet-200 dark:border-violet-700/50 bg-violet-50 dark:bg-violet-950/40 px-3.5 py-2 text-xs flex items-center">
         <span class="font-bold text-violet-700 dark:text-violet-300">KURS EUR</span>
         <input type="number" step="any" x-model.number="kursEur" class="ml-2 w-24 rounded-lg border border-violet-200 dark:border-violet-700/60 bg-white dark:bg-gray-900 px-2 py-1 text-right font-mono font-bold text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-violet-500/40" placeholder="0" />
       </div>
-      <?php if (! $hasKurs): ?>
-        <span class="inline-flex items-center gap-1 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 px-2.5 py-1.5 text-[11px] font-semibold text-amber-700 dark:text-amber-300">
-          <i class="fa-solid fa-triangle-exclamation"></i> KURS belum di-set — isi di Master Assumption → Ekonomi
-        </span>
-      <?php endif; ?>
     </div>
   </div>
 
   <!-- ============================================================ -->
   <!-- TABS -->
   <!-- ============================================================ -->
-  <div class="inline-flex p-1 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 gap-1">
-    <button @click="tab = 'revenue'" :class="tab === 'revenue' ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-xs' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
-            class="px-3.5 py-2 rounded-lg text-xs font-bold transition-all">
-      <i class="fa-solid fa-money-bill-trend-up mr-1"></i>Revenue Simulation
-    </button>
-    <button @click="tab = 'volume'" :class="tab === 'volume' ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-xs' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
-            class="px-3.5 py-2 rounded-lg text-xs font-bold transition-all">
-      <i class="fa-solid fa-boxes-stacked mr-1"></i>Volume Simulation
-    </button>
+  <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+    <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="Simulation Tabs">
+      <button type="button" @click="tab = 'revenue'" :class="tab === 'revenue' ? 'active' : ''"
+              class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+        <span>Revenue Simulation</span>
+      </button>
+      <button type="button" @click="tab = 'volume'" :class="tab === 'volume' ? 'active' : ''"
+              class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+        <span>Volume Simulation</span>
+      </button>
+    </nav>
   </div>
 
   <!-- ============================================================ -->
   <!-- TAB: REVENUE -->
   <!-- ============================================================ -->
-  <div x-show="tab === 'revenue'" x-cloak class="space-y-5">
+  <div x-show="tab === 'revenue'" x-cloak class="space-y-6">
 
     <!-- Domestic -->
-    <div class="rounded-2xl border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-xs overflow-hidden">
-      <div class="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
-        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400"><i class="fa-solid fa-store text-sm"></i></span>
-        <div>
-          <h3 class="text-sm font-bold text-gray-800 dark:text-white">Revenue Domestic</h3>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Volume × ASP per channel (IDR). Angka bisa diedit untuk simulasi what-if.</p>
-        </div>
+    <div class="space-y-3">
+      <div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Revenue Domestic</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Volume × ASP per channel (IDR). Angka dapat disesuaikan untuk simulasi what-if.</p>
       </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b border-gray-200/80 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-800/50 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              <th class="py-3 px-4">Channel</th>
-              <th class="py-3 px-4 text-right">Volume</th>
-              <th class="py-3 px-4 text-right">ASP (Rp)</th>
-              <th class="py-3 px-4 text-right">Revenue (Rp)</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
-            <template x-for="(row, idx) in domesticMatrix" :key="idx">
-              <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
-                <td class="py-3 px-4 font-bold text-gray-800 dark:text-gray-200" x-text="row.channel"></td>
-                <td class="py-3 px-4"><input type="number" step="any" x-model.number="row.volume" class="w-32 ml-auto block rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2.5 py-1.5 text-right text-xs font-mono text-gray-800 dark:text-white focus:border-blue-500 focus:outline-none" /></td>
-                <td class="py-3 px-4"><input type="number" step="any" x-model.number="row.asp" class="w-36 ml-auto block rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2.5 py-1.5 text-right text-xs font-mono text-gray-800 dark:text-white focus:border-blue-500 focus:outline-none" /></td>
-                <td class="py-3 px-4 text-right font-mono font-bold text-gray-900 dark:text-white" x-text="fmtRp(row.volume * row.asp)"></td>
+      <div class="rounded-2xl border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-xs overflow-hidden">
+        <div class="overflow-x-auto scrollbar-thin">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-[#2F3185] text-white text-xs font-semibold border-b border-white/20">
+              <tr class="bg-[#2F3185] text-white font-semibold">
+                <th class="py-3 px-4 text-white border-r border-white/20">Channel</th>
+                <th class="py-3 px-4 text-right text-white border-r border-white/20">Volume (Kg)</th>
+                <th class="py-3 px-4 text-right text-white border-r border-white/20">ASP (Rp/kg)</th>
+                <th class="py-3 px-4 text-right text-white">Revenue</th>
               </tr>
-            </template>
-            <tr x-show="domesticMatrix.length === 0">
-              <td colspan="4" class="py-10 text-center text-gray-400 dark:text-gray-500">
-                <i class="fa-solid fa-circle-info mr-1"></i>Belum ada asumsi domestic — silakan input data asumsi pada entry sales domestic.
-              </td>
-            </tr>
-            <tr class="bg-gray-50/75 dark:bg-gray-800/50 font-bold">
-              <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Total Domestic</td>
-              <td colspan="2"></td>
-              <td class="py-3 px-4 text-right font-mono font-bold text-blue-700 dark:text-blue-400" x-text="fmtRp(domesticTotal)"></td>
-            </tr>
-          </tbody>
-        </table>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
+              <template x-for="(row, idx) in domesticMatrix" :key="idx">
+                <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+                  <td class="py-3 px-4 font-bold text-gray-800 dark:text-gray-200 border-r border-gray-200 dark:border-gray-800" x-text="row.channel"></td>
+                  <td class="py-2.5 px-4 border-r border-gray-200 dark:border-gray-800"><input type="number" step="any" x-model.number="row.volume" class="w-36 ml-auto block rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 text-right text-xs font-mono text-gray-800 dark:text-white focus:bg-white dark:focus:bg-gray-900 focus:border-[#2F3185] focus:ring-2 focus:ring-[#2F3185]/20 outline-none transition-all" /></td>
+                  <td class="py-2.5 px-4 border-r border-gray-200 dark:border-gray-800"><input type="number" step="any" x-model.number="row.asp" class="w-36 ml-auto block rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 text-right text-xs font-mono text-gray-800 dark:text-white focus:bg-white dark:focus:bg-gray-900 focus:border-[#2F3185] focus:ring-2 focus:ring-[#2F3185]/20 outline-none transition-all" /></td>
+                  <td class="py-3 px-4 text-right font-mono font-bold text-gray-900 dark:text-white" x-text="fmtRp(row.volume * row.asp)"></td>
+                </tr>
+              </template>
+              <tr x-show="domesticMatrix.length === 0">
+                <td colspan="4" class="py-10 text-center text-gray-400 dark:text-gray-500">
+                  Belum ada asumsi domestic — silakan input data asumsi pada entry sales domestic.
+                </td>
+              </tr>
+              <tr class="bg-[#2F3185]/10 dark:bg-[#2F3185]/20 font-bold border-t-2 border-[#2F3185]/30">
+                <td class="py-3 px-4 text-gray-900 dark:text-white">Total Domestic</td>
+                <td colspan="2"></td>
+                <td class="py-3 px-4 text-right font-mono font-bold text-[#2F3185] dark:text-indigo-400" x-text="fmtRp(domesticTotal)"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
     <!-- Export -->
-    <div class="rounded-2xl border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-xs overflow-hidden">
-      <div class="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
-        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400"><i class="fa-solid fa-ship text-sm"></i></span>
-        <div>
-          <h3 class="text-sm font-bold text-gray-800 dark:text-white">Revenue Export</h3>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Volume × ASP (USD) × KURS USD = Revenue (IDR) per produk.</p>
-        </div>
+    <div class="space-y-3">
+      <div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Revenue Export (International)</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Volume × ASP (USD) × KURS USD = Revenue (IDR) per produk.</p>
       </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b border-gray-200/80 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-800/50 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              <th class="py-3 px-4">Produk</th>
-              <th class="py-3 px-4 text-right">Volume</th>
-              <th class="py-3 px-4 text-right">ASP (USD)</th>
-              <th class="py-3 px-4 text-right">Revenue (USD)</th>
-              <th class="py-3 px-4 text-right">Revenue (IDR)</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
-            <template x-for="(row, idx) in exportMatrix" :key="idx">
-              <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
-                <td class="py-3 px-4 font-bold text-gray-800 dark:text-gray-200" x-text="row.product"></td>
-                <td class="py-3 px-4"><input type="number" step="any" x-model.number="row.volume" class="w-32 ml-auto block rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2.5 py-1.5 text-right text-xs font-mono text-gray-800 dark:text-white focus:border-teal-500 focus:outline-none" /></td>
-                <td class="py-3 px-4"><input type="number" step="any" x-model.number="row.asp" class="w-32 ml-auto block rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-2.5 py-1.5 text-right text-xs font-mono text-gray-800 dark:text-white focus:border-teal-500 focus:outline-none" /></td>
-                <td class="py-3 px-4 text-right font-mono font-bold text-gray-900 dark:text-white" x-text="fmtUsd(row.volume * row.asp)"></td>
-                <td class="py-3 px-4 text-right font-mono font-bold text-teal-700 dark:text-teal-400" x-text="fmtRp(row.volume * row.asp * kursUsd)"></td>
+      <div class="rounded-2xl border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-xs overflow-hidden">
+        <div class="overflow-x-auto scrollbar-thin">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-[#2F3185] text-white text-xs font-semibold border-b border-white/20">
+              <tr class="bg-[#2F3185] text-white font-semibold">
+                <th class="py-3 px-4 text-white border-r border-white/20">Produk</th>
+                <th class="py-3 px-4 text-right text-white border-r border-white/20">Volume (Kg)</th>
+                <th class="py-3 px-4 text-right text-white border-r border-white/20">ASP (USD)</th>
+                <th class="py-3 px-4 text-right text-white border-r border-white/20">Revenue (USD)</th>
+                <th class="py-3 px-4 text-right text-white">Revenue (IDR)</th>
               </tr>
-            </template>
-            <tr x-show="exportMatrix.length === 0">
-              <td colspan="5" class="py-10 text-center text-gray-400 dark:text-gray-500">
-                <i class="fa-solid fa-circle-info mr-1"></i>Belum ada asumsi export — silakan input data asumsi pada entry sales international.
-              </td>
-            </tr>
-            <tr class="bg-gray-50/75 dark:bg-gray-800/50 font-bold">
-              <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Total Export</td>
-              <td colspan="3"></td>
-              <td class="py-3 px-4 text-right font-mono font-bold text-teal-700 dark:text-teal-400" x-text="fmtRp(exportTotal)"></td>
-            </tr>
-          </tbody>
-        </table>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
+              <template x-for="(row, idx) in exportMatrix" :key="idx">
+                <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+                  <td class="py-3 px-4 font-bold text-gray-800 dark:text-gray-200 border-r border-gray-200 dark:border-gray-800" x-text="row.product"></td>
+                  <td class="py-2.5 px-4 border-r border-gray-200 dark:border-gray-800"><input type="number" step="any" x-model.number="row.volume" class="w-32 ml-auto block rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 text-right text-xs font-mono text-gray-800 dark:text-white focus:bg-white dark:focus:bg-gray-900 focus:border-[#2F3185] focus:ring-2 focus:ring-[#2F3185]/20 outline-none transition-all" /></td>
+                  <td class="py-2.5 px-4 border-r border-gray-200 dark:border-gray-800"><input type="number" step="any" x-model.number="row.asp" class="w-32 ml-auto block rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 text-right text-xs font-mono text-gray-800 dark:text-white focus:bg-white dark:focus:bg-gray-900 focus:border-[#2F3185] focus:ring-2 focus:ring-[#2F3185]/20 outline-none transition-all" /></td>
+                  <td class="py-3 px-4 text-right font-mono font-bold text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-800" x-text="fmtUsd(row.volume * row.asp)"></td>
+                  <td class="py-3 px-4 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400" x-text="fmtRp(row.volume * row.asp * kursUsd)"></td>
+                </tr>
+              </template>
+              <tr x-show="exportMatrix.length === 0">
+                <td colspan="5" class="py-10 text-center text-gray-400 dark:text-gray-500">
+                  Belum ada asumsi export — silakan input data asumsi pada entry sales international.
+                </td>
+              </tr>
+              <tr class="bg-[#2F3185]/10 dark:bg-[#2F3185]/20 font-bold border-t-2 border-[#2F3185]/30">
+                <td class="py-3 px-4 text-gray-900 dark:text-white">Total Export</td>
+                <td colspan="3"></td>
+                <td class="py-3 px-4 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400" x-text="fmtRp(exportTotal)"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- Grand total -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-5 text-white shadow-lg">
+    <!-- Grand total Card -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl bg-[#2F3185] px-6 py-5 text-white shadow-md">
       <div>
-        <p class="text-[11px] font-bold uppercase tracking-widest text-emerald-100">Total Revenue Simulasi (IDR)</p>
+        <p class="text-xs font-semibold text-white/80">Total Revenue Simulasi (IDR)</p>
         <p class="text-2xl md:text-3xl font-black font-mono mt-1" x-text="fmtRp(grandTotal)"></p>
       </div>
       <div class="flex flex-wrap gap-3 text-xs">
-        <div class="rounded-xl bg-white/15 px-3.5 py-2 backdrop-blur">
-          <span class="text-emerald-100">Domestic</span><br />
+        <div class="rounded-xl bg-white/10 px-4 py-2.5 backdrop-blur">
+          <span class="text-white/70">Domestic</span><br />
           <span class="font-mono font-bold" x-text="fmtRp(domesticTotal)"></span>
         </div>
-        <div class="rounded-xl bg-white/15 px-3.5 py-2 backdrop-blur">
-          <span class="text-emerald-100">Export</span><br />
+        <div class="rounded-xl bg-white/10 px-4 py-2.5 backdrop-blur">
+          <span class="text-white/70">Export</span><br />
           <span class="font-mono font-bold" x-text="fmtRp(exportTotal)"></span>
         </div>
-        <div class="rounded-xl bg-white/15 px-3.5 py-2 backdrop-blur">
-          <span class="text-emerald-100">KURS USD</span><br />
+        <div class="rounded-xl bg-white/10 px-4 py-2.5 backdrop-blur">
+          <span class="text-white/70">KURS USD</span><br />
           <span class="font-mono font-bold" x-text="kursUsd ? kursUsd.toLocaleString('id-ID') : '-'"></span>
         </div>
       </div>
@@ -182,66 +174,64 @@
   <!-- ============================================================ -->
   <!-- TAB: VOLUME -->
   <!-- ============================================================ -->
-  <div x-show="tab === 'volume'" x-cloak class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-    <div class="rounded-2xl border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-xs overflow-hidden">
-      <div class="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
-        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400"><i class="fa-solid fa-store text-sm"></i></span>
-        <div>
-          <h3 class="text-sm font-bold text-gray-800 dark:text-white">Volume Matrix Domestic</h3>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Unit per channel.</p>
-        </div>
+  <div x-show="tab === 'volume'" x-cloak class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="space-y-3">
+      <div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Volume Matrix Domestic</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Unit per channel.</p>
       </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b border-gray-200/80 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-800/50 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              <th class="py-3 px-4">Channel</th>
-              <th class="py-3 px-4 text-right">Volume</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
-            <template x-for="(row, idx) in domesticMatrix" :key="idx">
-              <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
-                <td class="py-3 px-4 font-bold text-gray-800 dark:text-gray-200" x-text="row.channel"></td>
-                <td class="py-3 px-4 text-right font-mono font-bold text-gray-900 dark:text-white" x-text="fmtNum(row.volume)"></td>
+      <div class="rounded-2xl border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-xs overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-[#2F3185] text-white text-xs font-semibold border-b border-white/20">
+              <tr class="bg-[#2F3185] text-white font-semibold">
+                <th class="py-3 px-4 text-white border-r border-white/20">Channel</th>
+                <th class="py-3 px-4 text-right text-white">Volume (Kg)</th>
               </tr>
-            </template>
-            <tr x-show="domesticMatrix.length === 0">
-              <td colspan="2" class="py-10 text-center text-gray-400 dark:text-gray-500">Belum ada data volume domestic.</td>
-            </tr>
-          </tbody>
-        </table>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
+              <template x-for="(row, idx) in domesticMatrix" :key="idx">
+                <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+                  <td class="py-3 px-4 font-bold text-gray-800 dark:text-gray-200 border-r border-gray-200 dark:border-gray-800" x-text="row.channel"></td>
+                  <td class="py-3 px-4 text-right font-mono font-bold text-gray-900 dark:text-white" x-text="fmtNum(row.volume)"></td>
+                </tr>
+              </template>
+              <tr x-show="domesticMatrix.length === 0">
+                <td colspan="2" class="py-10 text-center text-gray-400 dark:text-gray-500">Belum ada data volume domestic.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <div class="rounded-2xl border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-xs overflow-hidden">
-      <div class="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
-        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400"><i class="fa-solid fa-ship text-sm"></i></span>
-        <div>
-          <h3 class="text-sm font-bold text-gray-800 dark:text-white">Volume Matrix Export</h3>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Unit per produk ekspor.</p>
-        </div>
+    <div class="space-y-3">
+      <div>
+        <h3 class="text-base font-bold text-gray-900 dark:text-white tracking-tight">Volume Matrix Export</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Unit per produk ekspor.</p>
       </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b border-gray-200/80 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-800/50 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              <th class="py-3 px-4">Produk</th>
-              <th class="py-3 px-4 text-right">Volume</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
-            <template x-for="(row, idx) in exportMatrix" :key="idx">
-              <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
-                <td class="py-3 px-4 font-bold text-gray-800 dark:text-gray-200" x-text="row.product"></td>
-                <td class="py-3 px-4 text-right font-mono font-bold text-gray-900 dark:text-white" x-text="fmtNum(row.volume)"></td>
+      <div class="rounded-2xl border border-gray-200/80 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-xs overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-[#2F3185] text-white text-xs font-semibold border-b border-white/20">
+              <tr class="bg-[#2F3185] text-white font-semibold">
+                <th class="py-3 px-4 text-white border-r border-white/20">Produk</th>
+                <th class="py-3 px-4 text-right text-white">Volume (Kg)</th>
               </tr>
-            </template>
-            <tr x-show="exportMatrix.length === 0">
-              <td colspan="2" class="py-10 text-center text-gray-400 dark:text-gray-500">Belum ada data volume export.</td>
-            </tr>
-          </tbody>
-        </table>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-xs">
+              <template x-for="(row, idx) in exportMatrix" :key="idx">
+                <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+                  <td class="py-3 px-4 font-bold text-gray-800 dark:text-gray-200 border-r border-gray-200 dark:border-gray-800" x-text="row.product"></td>
+                  <td class="py-3 px-4 text-right font-mono font-bold text-gray-900 dark:text-white" x-text="fmtNum(row.volume)"></td>
+                </tr>
+              </template>
+              <tr x-show="exportMatrix.length === 0">
+                <td colspan="2" class="py-10 text-center text-gray-400 dark:text-gray-500">Belum ada data volume export.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

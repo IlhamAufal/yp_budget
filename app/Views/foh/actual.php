@@ -2,62 +2,59 @@
 
 <?= $this->section('content') ?>
 
-<div x-data="fohActualPage()" class="p-4 md:p-8 mx-auto max-w-(--breakpoint-2xl) space-y-6 md:space-y-8">
+<div x-data="fohActualPage()" class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6 space-y-6">
 
   <!-- HEADER -->
-  <div>
-    <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-3">
-      <a href="<?= base_url('dashboard') ?>" class="hover:text-brand-500 transition-colors"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-      <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-      <span>FOH</span>
-      <i class="fa-solid fa-chevron-right text-[10px] text-gray-400"></i>
-      <span class="text-brand-500 font-bold">Actual (Realisasi)</span>
+  <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs">
+    <div>
+      <div class="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+        <a href="<?= base_url('dashboard') ?>" class="hover:text-[#2F3185] transition-colors">Dashboard</a>
+        <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+        <span class="hover:text-[#2F3185]">FOH</span>
+        <i class="fa-solid fa-chevron-right text-[9px] text-gray-400"></i>
+        <span class="text-[#2F3185] font-bold">Actual Data</span>
+      </div>
+      <h1 class="text-xl md:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+        Actual Data FOH
+      </h1>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+        Pengelolaan data aktual Factory Overhead per Cost Center.
+      </p>
     </div>
-    <h1 class="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-white flex items-center gap-4">
-      <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10 dark:text-emerald-400">
-        <i class="fa-solid fa-chart-column text-xl"></i>
-      </span>
-      Actual Data FOH
-    </h1>
-    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-      Pengelolaan data aktual Factory Overhead per Cost Center — Tahun Anggaran <span class="font-bold text-brand-500"><?= esc($workingYear) ?></span>
-    </p>
   </div>
 
-  <!-- MAIN CARD -->
-  <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs overflow-hidden">
+  <!-- TAB NAV -->
+  <div class="inline-flex max-w-full nav-tab-container bg-[#2F3185] p-1.5 rounded-2xl shadow-xs">
+    <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" aria-label="FOH Actual Tabs">
+      <button
+        type="button"
+        @click="activeTab = 'actual'"
+        :class="activeTab === 'actual' ? 'active' : ''"
+        class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+        <span>Actual Data</span>
+      </button>
 
-    <!-- TAB NAV -->
-    <div class="border-b border-gray-200/80 dark:border-gray-800 px-6 pt-4">
-      <nav class="-mb-px flex space-x-8 gap-6" aria-label="Tabs">
-        <button
-          @click="activeTab = 'actual'"
-          :class="activeTab === 'actual' ? 'border-brand-600 text-brand-600 dark:border-brand-400 dark:text-brand-400 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400'"
-          class="flex items-center gap-2 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors">
-          <i class="fa-solid fa-table-cells-large text-xs"></i>
-          Actual Data
-        </button>
+      <button
+        type="button"
+        @click="activeTab = 'download'"
+        :class="activeTab === 'download' ? 'active' : ''"
+        class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+        <span>Download Template</span>
+      </button>
 
-        <button
-          @click="activeTab = 'download'"
-          :class="activeTab === 'download' ? 'border-brand-600 text-brand-600 dark:border-brand-400 dark:text-brand-400 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400'"
-          class="flex items-center gap-2 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors">
-          <i class="fa-solid fa-cloud-arrow-down text-xs"></i>
-          Download Template
-        </button>
+      <button
+        type="button"
+        @click="activeTab = 'upload'"
+        :class="activeTab === 'upload' ? 'active' : ''"
+        class="tab-btn px-4 py-2.5 rounded-xl text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-2">
+        <span>Upload Data</span>
+      </button>
+    </nav>
+  </div>
 
-        <button
-          @click="activeTab = 'upload'"
-          :class="activeTab === 'upload' ? 'border-brand-600 text-brand-600 dark:border-brand-400 dark:text-brand-400 font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400'"
-          class="flex items-center gap-2 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors">
-          <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
-          Upload Data
-        </button>
-      </nav>
-    </div>
-
-    <!-- TAB CONTENT -->
-    <div class="p-6">
+  <!-- TAB CONTENT -->
+  <div>
+    <div class="space-y-6">
       <div x-show="activeTab === 'actual'" x-cloak>
         <?= $this->include('foh/partials/tab_actual_data') ?>
       </div>
